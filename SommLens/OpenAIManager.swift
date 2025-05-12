@@ -35,6 +35,12 @@ class OpenAIManager: ObservableObject {
           "tastingNotes":    "<string>",           // 1–2 elegant sentences
           "pairings":        ["<string>", "<string>", "<string>"], // exactly 3
           "vibeTag":         "<≤8 words>"          // e.g. “Great for Cozy night in”
+          "vineyard":         "<string|null>",         // e.g. “Clos Saint-Jacques”
+          "soilType":         "<string|null>",         // e.g. “Granite, clay-limestone”
+          "climate":          "<string|null>",         // e.g. “Cool continental”
+          "drinkingWindow":   "<string|null>",         // e.g. “2025–2035”
+          "abv":              "<string|null>",         // e.g. “13.5%”
+          "winemakingStyle":  "<string|null>"          // e.g. “12 months in neutral oak”
         }
 
         RULES
@@ -43,6 +49,7 @@ class OpenAIManager: ObservableObject {
         3. Preserve key order exactly as above.
         4. Arrays must be valid JSON arrays even if only one element.
         5. Keep vibeTag to eight words or fewer.
+        6. Use the region and/or vineyard location to determine the soil type and climate.
 
         """
         let userMessage = ocrText

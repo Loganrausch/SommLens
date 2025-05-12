@@ -17,10 +17,17 @@ struct WineData: Codable {
     let tastingNotes: String?
     let pairings: [String]?
     let vibeTag: String?
+    let vineyard: String?
+    let soilType: String?
+    let climate: String?
+    let drinkingWindow: String?
+    let abv: String?
+    let winemakingStyle: String?
 
     enum CodingKeys: String, CodingKey {
         case producer, region, country, grapes, vintage,
-             classification, tastingNotes, pairings, vibeTag
+             classification, tastingNotes, pairings, vibeTag,
+             vineyard, soilType, climate, drinkingWindow, abv, winemakingStyle
     }
 
     init(from decoder: Decoder) throws {
@@ -37,10 +44,16 @@ struct WineData: Codable {
             vintage = try container.decodeIfPresent(String.self, forKey: .vintage)
         }
 
-        classification = try container.decodeIfPresent(String.self,   forKey: .classification)
-        tastingNotes   = try container.decodeIfPresent(String.self,   forKey: .tastingNotes)
-        pairings       = try container.decodeIfPresent([String].self, forKey: .pairings)
-        vibeTag        = try container.decodeIfPresent(String.self,   forKey: .vibeTag)
+        classification   = try container.decodeIfPresent(String.self,   forKey: .classification)
+        tastingNotes     = try container.decodeIfPresent(String.self,   forKey: .tastingNotes)
+        pairings         = try container.decodeIfPresent([String].self, forKey: .pairings)
+        vibeTag          = try container.decodeIfPresent(String.self,   forKey: .vibeTag)
+        vineyard         = try container.decodeIfPresent(String.self,   forKey: .vineyard)
+        soilType         = try container.decodeIfPresent(String.self,   forKey: .soilType)
+        climate          = try container.decodeIfPresent(String.self,   forKey: .climate)
+        drinkingWindow   = try container.decodeIfPresent(String.self,   forKey: .drinkingWindow)
+        abv              = try container.decodeIfPresent(String.self,   forKey: .abv)
+        winemakingStyle  = try container.decodeIfPresent(String.self,   forKey: .winemakingStyle)
     }
 }
 

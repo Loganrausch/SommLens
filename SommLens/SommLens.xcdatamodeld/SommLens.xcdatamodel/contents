@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23507" systemVersion="24D5034f" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
     <entity name="BottleScan" representedClassName="BottleScan" syncable="YES" codeGenerationType="class">
+        <attribute name="abv" optional="YES" attributeType="String"/>
         <attribute name="classification" optional="YES" attributeType="String"/>
+        <attribute name="climate" optional="YES" attributeType="String"/>
         <attribute name="country" optional="YES" attributeType="String"/>
+        <attribute name="drinkingWindow" optional="YES" attributeType="String"/>
         <attribute name="grapes" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="pairings" optional="YES" attributeType="String"/>
@@ -11,9 +14,12 @@
         <attribute name="rawOCR" optional="YES" attributeType="String"/>
         <attribute name="region" optional="YES" attributeType="String"/>
         <attribute name="screenshot" optional="YES" attributeType="Binary"/>
+        <attribute name="soilType" optional="YES" attributeType="String"/>
         <attribute name="tastingNotes" optional="YES" attributeType="String"/>
         <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="vibeTag" optional="YES" attributeType="String"/>
+        <attribute name="vineyard" optional="YES" attributeType="String"/>
         <attribute name="vintage" optional="YES" attributeType="String"/>
+        <attribute name="winemakingStyle" optional="YES" attributeType="String"/>
     </entity>
 </model>

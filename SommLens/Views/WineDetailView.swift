@@ -72,16 +72,25 @@ struct WineDetailView: View {
                         VStack(spacing: 16) {
                             DetailSection(title: "Overview") {
                                 DetailRow(title: "Grapes", value: (wineData.grapes ?? []).joined(separator: ", "))
+                                DetailRow(title: "Vineyard", value: wineData.vineyard ?? "-")
                                 DetailRow(title: "Classification", value: wineData.classification ?? "-")
                             }
 
                             DetailSection(title: "Tasting Notes") {
                                 DetailRow(title: "Notes", value: wineData.tastingNotes ?? "-")
                             }
-
+                            
+                            DetailSection(title: "Terroir") {
+                                DetailRow(title: "Climate", value: wineData.climate ?? "-")
+                                DetailRow(title: "Soil Type", value: wineData.soilType ?? "-")
+                            }
+                            
                             DetailSection(title: "Extras") {
                                 DetailRow(title: "Pairings", value: (wineData.pairings ?? []).joined(separator: ", "))
                                 DetailRow(title: "Vibe", value: wineData.vibeTag ?? "-")
+                                DetailRow(title: "Alcohol Level", value: wineData.abv ?? "-")
+                                DetailRow(title: "When to drink", value: wineData.drinkingWindow ?? "-")
+                                DetailRow(title: "Winemaking Style", value: wineData.winemakingStyle ?? "-")
                             }
                         }
                         .padding()

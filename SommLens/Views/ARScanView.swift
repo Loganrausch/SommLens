@@ -172,24 +172,32 @@ struct ARScanView: View {
     }
 
     private func saveScan(wineData: WineData,
-                          rawJSON:    String,
+                          rawJSON: String,
                           screenshot: UIImage) {
         let scan = BottleScan(context: viewContext)
-        scan.id             = UUID()
-        scan.timestamp      = Date()
-        scan.producer       = wineData.producer
-        scan.region         = wineData.region
-        scan.country        = wineData.country
-        scan.grapes         = wineData.grapes?.joined(separator: ", ")
-        scan.vintage        = wineData.vintage
-        scan.classification = wineData.classification
-        scan.tastingNotes   = wineData.tastingNotes
-        scan.pairings       = wineData.pairings?.joined(separator: ", ")
-        scan.vibeTag        = wineData.vibeTag
-        scan.rawJSON        = rawJSON
+        scan.id               = UUID()
+        scan.timestamp        = Date()
+        scan.producer         = wineData.producer
+        scan.region           = wineData.region
+        scan.country          = wineData.country
+        scan.grapes           = wineData.grapes?.joined(separator: ", ")
+        scan.vintage          = wineData.vintage
+        scan.classification   = wineData.classification
+        scan.tastingNotes     = wineData.tastingNotes
+        scan.pairings         = wineData.pairings?.joined(separator: ", ")
+        scan.vibeTag          = wineData.vibeTag
+        scan.vineyard         = wineData.vineyard
+        scan.soilType         = wineData.soilType
+        scan.climate          = wineData.climate
+        scan.drinkingWindow   = wineData.drinkingWindow
+        scan.abv              = wineData.abv
+        scan.winemakingStyle  = wineData.winemakingStyle
+
+        scan.rawJSON          = rawJSON
         if let data = screenshot.jpegData(compressionQuality: 0.8) {
-            scan.screenshot = data
+            scan.screenshot   = data
         }
+
         do {
             try viewContext.save()
         } catch {
