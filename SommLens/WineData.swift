@@ -77,3 +77,13 @@ struct OpenAIResponse: Codable {
     }
     let choices: [Choice]
 }
+
+extension WineData {
+    /// Something like “Produttori del Barbaresco 2019”
+    var displayName: String {
+        var parts: [String] = []
+        if let producer = producer { parts.append(producer) }
+        if let vintage  = vintage  { parts.append(vintage) }
+        return parts.isEmpty ? "Unknown Wine" : parts.joined(separator: " ")
+    }
+}

@@ -2,118 +2,237 @@
 //  OpenAIManager.swift
 //  SommLens
 //
-//  Created by Logan Rausch on 4/17/25.
+//  Created by ChatGPT on 11 May 2025
 //
 
 import Foundation
 import Combine
 
-class OpenAIManager: ObservableObject {
-    /// Point this at your existing Vinobytes proxy
-    private let endpoint = "https://vinobytes-afe480cea091.herokuapp.com/api/chat"
-
-    /// Sends raw OCR text to your proxy, reads back the GPT JSON blob, then decodes WineData.
+// MARK: - Top‑level API manager
+@MainActor
+final class OpenAIManager: ObservableObject {
+    
+    // ---------- CONFIG ----------
+    
+    /// Your existing Vinobytes proxy (change if you talk to OpenAI directly)
+    private let endpoint = URL(string: "https://vinobytes-afe480cea091.herokuapp.com/api/chat")!
+    
+    /// If you call OpenAI directly, store your key in the environment and read it here
+    private let openAIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+    
+    // ---------- PUBLIC  OCR → WineData ----------
+    
+    /// Sends raw OCR text → GPT JSON → decodes into `WineData`
     func extractWineInfo(from ocrText: String,
                          completion: @escaping (Result<WineData, Error>) -> Void)
     {
-        let systemPrompt = """
+        let systemPrompt = ocrSystemPrompt
+        let userMessage  = ocrText
+        
+        let body = chatBody(
+            model:  "gpt-4o",
+            system: systemPrompt,
+            user:   userMessage,
+            temp:   0
+        )
+        
+        postJSON(body, to: endpoint) { [weak self] result in
+            switch result {
+            case .success(let content):
+                self?.decodeJSON(content, as: WineData.self, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // ---------- NEW  WineData → AITastingProfile (async) ----------
+    
+    /// Builds a concise prompt from `WineData`, returns a classic profile in JSON.
+    func tastingProfile(for wine: WineData) async throws -> AITastingProfile {
+        let system = """
+        You are a sommelier AI that returns ONLY valid JSON, no prose.
+        """
+        
+        let userPrompt = """
+        Provide a concise CLASSIC tasting profile JSON for this wine:
+
+        Producer: \(wine.producer ?? "Unknown")
+        Region:   \(wine.region   ?? "Unknown")
+        Grapes:   \(wine.grapes?.joined(separator: ", ") ?? "N/A")
+        Vintage:  \(wine.vintage  ?? "NV")
+
+        Respond with exactly:
+        {
+          "acidity":"Low|Medium-|Medium|Medium+|High",
+          "alcohol":"Low|Medium-|Medium|Medium+|High",
+          "body":"Light|Medium-|Medium|Medium+|Full",
+          "tannin":"Low|Medium-|Medium|Medium+|High",
+          "sweetness":"Bone-Dry|Dry|Off-Dry|Sweet|Very Sweet",
+          "aromas":["Cherry","Rose", "..."],
+          "tips":["One short palate‑training tip"]
+        }
+        """
+        
+        let body = chatBody(
+            model: "gpt-4o",
+            system: system,
+            user:   userPrompt,
+            temp:   0.3
+        )
+        
+        // Use async/await variant of `postJSON`
+        let content = try await postJSON(body, to: endpoint)
+        return try decodeJSON(content, as: AITastingProfile.self)
+    }
+    
+    // MARK: - PRIVATE helpers ---------------------------------------------------
+    
+    private var ocrSystemPrompt: String {
+        """
         You are an expert sommelier and spell‑checker.
 
-        TASK A — PRE‑CLEAN TEXT
+        TASK A — PRE‑CLEAN TEXT
         • Correct obvious OCR typos in well‑known winery / region names
           (e.g. “Gacomo Conterno” → “Giacomo Conterno”).
-        • Normalise accents (Chateau → Château) and capitalisation (all Title‑Case).
+        • Normalise accents (Chateau → Château) and capitalisation.
 
-        TASK B — RETURN EXACTLY THIS JSON SCHEMA
+        TASK B — RETURN EXACTLY THIS JSON SCHEMA
         {
-          "producer":        "<string>",
-          "region":          "<string>",
-          "country":         "<string>",
-          "grapes":          ["<string>", …],      // always an array
-          "vintage":         "<string|null>",      // “NV” or null if non‑vintage
-          "classification":  "<string|null>",      // DOCG, Premier Cru, etc.
-          "tastingNotes":    "<string>",           // 1–2 elegant sentences
-          "pairings":        ["<string>", "<string>", "<string>"], // exactly 3
-          "vibeTag":         "<≤8 words>"          // e.g. “Great for Cozy night in”
-          "vineyard":         "<string|null>",         // e.g. “Clos Saint-Jacques”
-          "soilType":         "<string|null>",         // e.g. “Granite, clay-limestone”
-          "climate":          "<string|null>",         // e.g. “Cool continental”
-          "drinkingWindow":   "<string|null>",         // e.g. “2025–2035”
-          "abv":              "<string|null>",         // e.g. “13.5%”
-          "winemakingStyle":  "<string|null>"          // e.g. “12 months in neutral oak”
+          "producer":"<string>",
+          "region":"<string>",
+          "country":"<string>",
+          "grapes":["<string>", …],
+          "vintage":"<string|null>",
+          "classification":"<string|null>",
+          "tastingNotes":"<string>",
+          "pairings":["<string>", "<string>", "<string>"],
+          "vibeTag":"<≤8 words>",
+          "vineyard":"<string|null>",
+          "soilType":"<string|null>",
+          "climate":"<string|null>",
+          "drinkingWindow":"<string|null>",
+          "abv":"<string|null>",
+          "winemakingStyle":"<string|null>"
         }
 
         RULES
-        1. Do not guess grapes based on region/producer context. Return grapes if positive they are correct for the vintage and producer. If really unsure, return "Red Blend" or "White Blend".
-        2. Use **double‑quoted JSON** only — no markdown, no code fences, no comments.
-        3. Preserve key order exactly as above.
+        1. "Do not hallucinate grapes. If unsure, use ‘Red Blend’ or 'White Blend', but if typical grapes are clearly implied (e.g., Barolo = Nebbiolo), fill them in confidently."
+        2. Output ONLY double‑quoted JSON, no markdown.
+        3. Preserve key order exactly.
         4. Arrays must be valid JSON arrays even if only one element.
         5. Keep vibeTag to eight words or fewer.
-        6. Use the region and/or vineyard location to determine the soil type and climate.
-
+        6. Use the region or vineyard to infer soil type & climate.
+        7. Leave fields blank ONLY if truly no information is available.
+        8. Infer drinking window from vintage and typical aging potential of the region if needed.
+        9. Use producer information to determine winemaking style if needed.
         """
-        let userMessage = ocrText
-        
-        // Build the same chat‑style body you’d send to OpenAI
-        let body: [String: Any] = [
-            "model": "gpt-4o",
+    }
+    
+    // Build the standard chat body
+    private func chatBody(model: String,
+                          system: String,
+                          user: String,
+                          temp: Double) -> [String: Any]
+    {
+        [
+            "model": model,
             "messages": [
-                ["role": "system", "content": systemPrompt],
-                ["role": "user",   "content": userMessage]
+                ["role": "system", "content": system],
+                ["role": "user",   "content": user]
             ],
-            "temperature": 0
+            "temperature": temp
         ]
-        
-        // 1) Serialize
-        guard let url = URL(string: endpoint),
-              let httpBody = try? JSONSerialization.data(withJSONObject: body)
-        else {
-            completion(.failure(NSError(domain: "", code: -1, userInfo: nil)))
+    }
+    
+    // MARK: – Networking
+    
+    /// *Completion‑handler* POST (used by OCR call)
+    private func postJSON(_ json: [String: Any],
+                          to url: URL,
+                          completion: @escaping (Result<String, Error>) -> Void)
+    {
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: json) else {
+            completion(.failure(NSError(domain: "", code: -11, userInfo: [NSLocalizedDescriptionKey: "Bad JSON body"])))
             return
         }
         
-        // 2) Make the request
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
+        req.httpBody   = httpBody
         req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = httpBody
+        if let key = openAIKey { req.addValue("Bearer \(key)", forHTTPHeaderField: "Authorization") }
         
-        // 3) Fire
-        URLSession.shared.dataTask(with: req) { data, response, error in
-            // 1) Transport error
-            if let error = error {
-                DispatchQueue.main.async { completion(.failure(error)) }
+        URLSession.shared.dataTask(with: req) { data, resp, err in
+            if let err = err { completion(.failure(err)); return }
+            guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode),
+                  let data = data, let top = try? JSONDecoder().decode(OpenAIResponse.self, from: data),
+                  let content = top.choices.first?.message.content
+            else {
+                completion(.failure(NSError(domain: "", code: -12, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
                 return
             }
-            // 2) HTTP status check
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
-                let code = (response as? HTTPURLResponse)?.statusCode ?? -1
-                let err = NSError(domain: "", code: code, userInfo: [NSLocalizedDescriptionKey: "Bad status \(code)"])
-                DispatchQueue.main.async { completion(.failure(err)) }
-                return
-            }
-            // 3) Data presence
-            guard let data = data else {
-                let err = NSError(domain: "", code: -3, userInfo: [NSLocalizedDescriptionKey: "No data"])
-                DispatchQueue.main.async { completion(.failure(err)) }
-                return
-            }
-            // 4) Decode proxy wrapper
-            do {
-                let topLevel = try JSONDecoder().decode(OpenAIResponse.self, from: data)
-                let content = topLevel.choices.first?.message.content ?? ""
-                #if DEBUG
-                print("OpenAI raw content:", content)
-                #endif
-                guard let jsonData = content.data(using: .utf8) else {
-                    throw NSError(domain: "", code: -4, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON string"])
-                }
-                let wine = try JSONDecoder().decode(WineData.self, from: jsonData)
-                DispatchQueue.main.async { completion(.success(wine)) }
-            } catch {
-                DispatchQueue.main.async { completion(.failure(error)) }
-            }
+            completion(.success(content))
         }
         .resume()
     }
+    
+    /// *Async/await* POST (used by tastingProfile)
+    private func postJSON(_ json: [String: Any], to url: URL) async throws -> String {
+        let data = try JSONSerialization.data(withJSONObject: json)
+        var req  = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.httpBody   = data
+        req.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let key = openAIKey { req.addValue("Bearer \(key)", forHTTPHeaderField: "Authorization") }
+        
+        let (respData, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        let top = try JSONDecoder().decode(OpenAIResponse.self, from: respData)
+        guard let content = top.choices.first?.message.content else {
+            throw URLError(.cannotParseResponse)
+        }
+        return content
+    }
+    
+    // sync variant
+    private func decodeJSON<T: Decodable>(_ jsonString: String,
+                                          as type: T.Type,
+                                          completion: @escaping (Result<T, Error>) -> Void)
+    {
+        let trimmed = cleanJSON(jsonString)
+        
+        #if DEBUG
+        print("── AI raw jsonString ──\n\(jsonString)\n── trimmed ──\n\(trimmed)")
+        #endif
+        
+        do {
+            let data = Data(trimmed.utf8)
+            let obj  = try JSONDecoder().decode(T.self, from: data)
+            completion(.success(obj))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    // async variant
+    private func decodeJSON<T: Decodable>(_ jsonString: String, as type: T.Type) throws -> T {
+        let trimmed = cleanJSON(jsonString)
+        
+        #if DEBUG
+        print("── AI raw jsonString ──\n\(jsonString)\n── trimmed ──\n\(trimmed)")
+        #endif
+        
+        let data = Data(trimmed.utf8)
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+}
+
+/// Remove ```json fences / extra back‑ticks & trim whitespace.
+private func cleanJSON(_ raw: String) -> String {
+    raw.replacingOccurrences(of: "```json", with: "")
+       .replacingOccurrences(of: "```",     with: "")
+       .trimmingCharacters(in: .whitespacesAndNewlines)
 }
