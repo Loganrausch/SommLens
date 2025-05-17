@@ -14,6 +14,7 @@ struct TastingInput: Identifiable, Codable {
     var tannin:   Intensity5      = .unknown
     var body:     BodyLevel       = .unknown
     var sweetness:SweetnessLevel  = .unknown
+    var aromas:  [String]         = []
     var flavors:  [String]        = []
     var notes:    String          = ""
 }

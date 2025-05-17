@@ -27,7 +27,7 @@ enum BodyLevel: String, Codable, CaseIterable {
 }
 
 enum SweetnessLevel: String, Codable, CaseIterable {
-    case boneDry = "bone-dry", dry, offDry = "off-dry", sweet, verySweet, unknown
+    case boneDry = "bone-dry", dry, offDry = "off-dry", sweet, verySweet = "very sweet", unknown
     init(from decoder: Decoder) throws {
         self = SweetnessLevel(rawValue:
             try decoder.singleValueContainer().decode(String.self).lowercased()

@@ -14,5 +14,7 @@ struct AITastingProfile: Codable {
     var body:      BodyLevel
     var sweetness: SweetnessLevel
     var aromas:    [String]
+    var flavors:   [String]
     var tips:      [String]
+    let hasTannin: Bool
 }

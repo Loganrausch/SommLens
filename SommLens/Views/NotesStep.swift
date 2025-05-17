@@ -7,21 +7,40 @@
 
 import SwiftUI
 
+// MARK: - NotesStep with focus‑aware placeholder
 struct NotesStep: View {
     @Binding var notes: String
-
+    @FocusState private var isEditing: Bool
+    private let placeholder = "Drank this with a ribeye…"
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Anything else you noticed?")
-                .font(.title2)
-
-            TextEditor(text: $notes)
-                .frame(height: 160)
-                .padding(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.secondary.opacity(0.4))
-                )
+            Text("Any other thoughts?")
+                .font(.body)
+            
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $notes)
+                    .padding(8)
+                    .background(Color.clear)
+                    .focused($isEditing)
+                   
+                
+                // Placeholder disappears as soon as field gains focus
+                if notes.isEmpty && !isEditing {
+                    Text(placeholder)
+                        .foregroundColor(.secondary.opacity(0.6))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .allowsHitTesting(false)
+                
+                }
+            }
+            .frame(height: 100)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.secondary.opacity(0.4))
+            )
         }
+        .tint(.burgundy)
     }
 }

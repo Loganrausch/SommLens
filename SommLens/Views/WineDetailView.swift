@@ -66,6 +66,15 @@ struct WineDetailView: View {
                                 .scaleEffect(animate ? 1.0 : 0.95)
                                 .opacity(animate ? 1 : 0)
                                 .animation(.spring(response: 0.6, dampingFraction: 0.7), value: animate)
+                            
+                            Text("\(wineData.category.displayName)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .scaleEffect(animate ? 1.0 : 0.95)
+                                .opacity(animate ? 1 : 0)
+                                .animation(.spring(response: 0.6, dampingFraction: 0.7), value: animate)
+                            
+                            
                         }
 
                         // 3) Details

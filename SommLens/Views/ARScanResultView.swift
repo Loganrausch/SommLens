@@ -117,17 +117,17 @@ struct ARScanResultView: View {
         }
         
         // Tasting flow sheet
-        .sheet(isPresented: $showTasteSheet) {
+        .fullScreenCover(isPresented: $showTasteSheet) {
             if let profile = aiProfile {
                 TastingFormView(
                     aiProfile: profile,
-                    wineDisplayName: wineData.displayName,      // computed property extension
+                    wineData: wineData,
+                    snapshot:  capturedImage, 
                     onSave: { session in tastingStore.add(session) }
                 )
-                .presentationDetents([.large])
+                .interactiveDismissDisabled()   // optional
             } else {
                 ProgressView()
-                    .presentationDetents([.medium])
             }
         }
     }

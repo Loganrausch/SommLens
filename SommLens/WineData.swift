@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 struct WineData: Codable {
     let producer: String?
     let region: String?
@@ -23,11 +24,12 @@ struct WineData: Codable {
     let drinkingWindow: String?
     let abv: String?
     let winemakingStyle: String?
+    let category: WineCategory
 
     enum CodingKeys: String, CodingKey {
         case producer, region, country, grapes, vintage,
              classification, tastingNotes, pairings, vibeTag,
-             vineyard, soilType, climate, drinkingWindow, abv, winemakingStyle
+             vineyard, soilType, climate, drinkingWindow, abv, winemakingStyle, category
     }
 
     init(from decoder: Decoder) throws {
@@ -54,6 +56,7 @@ struct WineData: Codable {
         drinkingWindow   = try container.decodeIfPresent(String.self,   forKey: .drinkingWindow)
         abv              = try container.decodeIfPresent(String.self,   forKey: .abv)
         winemakingStyle  = try container.decodeIfPresent(String.self,   forKey: .winemakingStyle)
+        category        = try container.decodeIfPresent(WineCategory.self, forKey: .category) ?? .unknown
     }
 }
 
@@ -85,5 +88,77 @@ extension WineData {
         if let producer = producer { parts.append(producer) }
         if let vintage  = vintage  { parts.append(vintage) }
         return parts.isEmpty ? "Unknown Wine" : parts.joined(separator: " ")
+    }
+}
+
+// ──────────────────────────────────────────────────────────────
+// MARK: – WineCategory  (explicit – 10 cases + fallback)
+// ──────────────────────────────────────────────────────────────
+enum WineCategory: String, Codable, CaseIterable {
+    // still
+    case red, white, rosé = "rose", orange        // “rosé” normalises to “rose”
+    // sparkling
+    case redSparkling     = "red sparkling"
+    case whiteSparkling   = "white sparkling"
+    // dessert
+    case redDessert       = "red dessert"
+    case whiteDessert     = "white dessert"
+    // fortified
+    case redFortified     = "red fortified"
+    case whiteFortified   = "white fortified"
+    // fallback
+    case unknown
+}
+
+// ---------- Custom decoder (robust normalisation) -------------
+extension WineCategory {
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+
+        // strip whitespace, accents, case, and trailing “wine”
+        let cleaned = raw
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: .diacriticInsensitive, locale: .current) // rosé → rose
+            .lowercased()
+            .replacingOccurrences(of: #"\s*wine\s*$"#,
+                                  with: "",
+                                  options: .regularExpression)
+
+        self = WineCategory(rawValue: cleaned) ?? .unknown
+    }
+
+    /// Readable label for UI sheets
+    var displayName: String {
+        switch self {
+        case .unknown:      return "Unknown"
+        case .rosé:         return "Rosé Wine"      // restore accent for display
+        default:            return rawValue.capitalized + " Wine"
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────
+// MARK: – Descriptor pools (1-to-1 mapping)
+// ──────────────────────────────────────────────────────────────
+extension WineCategory {
+    var aromaPool:   [String] { descriptorPair.aromas }
+    var flavourPool: [String] { descriptorPair.flavours }
+
+    private var descriptorPair: (aromas: [String], flavours: [String]) {
+        switch self {
+        case .red:            return (Descriptors.redAromas,          Descriptors.redFlavours)
+        case .white:          return (Descriptors.whiteAromas,        Descriptors.whiteFlavours)
+        case .rosé:           return (Descriptors.roséAromas,         Descriptors.roséFlavours)
+        case .orange:         return (Descriptors.orangeAromas,       Descriptors.orangeFlavours)
+        case .redSparkling:   return (Descriptors.redSparklingAromas, Descriptors.redSparklingFlavours)
+        case .whiteSparkling: return (Descriptors.whiteSparklingAromas,Descriptors.whiteSparklingFlavours)
+        case .redDessert:     return (Descriptors.redDessertAromas,   Descriptors.redDessertFlavours)
+        case .whiteDessert:   return (Descriptors.whiteDessertAromas, Descriptors.whiteDessertFlavours)
+        case .redFortified:   return (Descriptors.redFortifiedAromas, Descriptors.redFortifiedFlavours)
+        case .whiteFortified: return (Descriptors.whiteFortifiedAromas,Descriptors.whiteFortifiedFlavours)
+        case .unknown:        // broad fallback
+            return (Descriptors.whiteAromas + Descriptors.redAromas,
+                    Descriptors.whiteFlavours + Descriptors.redFlavours)
+        }
     }
 }

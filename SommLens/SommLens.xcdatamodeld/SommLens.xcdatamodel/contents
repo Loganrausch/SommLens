@@ -2,6 +2,7 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23507" systemVersion="24D5034f" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
     <entity name="BottleScan" representedClassName="BottleScan" syncable="YES" codeGenerationType="class">
         <attribute name="abv" optional="YES" attributeType="String"/>
+        <attribute name="category" optional="YES" attributeType="String"/>
         <attribute name="classification" optional="YES" attributeType="String"/>
         <attribute name="climate" optional="YES" attributeType="String"/>
         <attribute name="country" optional="YES" attributeType="String"/>

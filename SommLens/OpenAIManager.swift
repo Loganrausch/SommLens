@@ -48,31 +48,45 @@ final class OpenAIManager: ObservableObject {
     
     // ---------- NEW  WineData → AITastingProfile (async) ----------
     
-    /// Builds a concise prompt from `WineData`, returns a classic profile in JSON.
+    // MARK: - WineData ➜ AITastingProfile  (uses explicit category)
     func tastingProfile(for wine: WineData) async throws -> AITastingProfile {
-        let system = """
-        You are a sommelier AI that returns ONLY valid JSON, no prose.
-        """
+
+        // 1️⃣  Pull the 10 × 10 descriptor pools straight from the enum
+        let aromaPool    = wine.category.aromaPool
+        let flavourPool  = wine.category.flavourPool
+        let aromasCSV    = aromaPool.joined(separator: ", ")
+        let flavoursCSV  = flavourPool.joined(separator: ", ")
+
+        // 2️⃣  Minimal system message
+        let system = "You are a sommelier AI that returns ONLY valid JSON, no prose."
         
         let userPrompt = """
-        Provide a concise CLASSIC tasting profile JSON for this wine:
+           Provide a concise CLASSIC tasting profile JSON for this wine:
+           
+           Producer: \(wine.producer ?? "Unknown")
+           Region:   \(wine.region   ?? "Unknown")
+           Grapes:   \(wine.grapes?.joined(separator: ", ") ?? "N/A")
+           Vintage:  \(wine.vintage  ?? "NV")
+           
+           Choose exactly four aromas and exactly four flavours from the lists below.
+           Pick the appropriate boolean for hasTannin. Use true if there’s noticeable grip, otherwise use false. 
+           
+           AllowedAromas:  \(aromasCSV)
+           AllowedFlavors: \(flavoursCSV)
 
-        Producer: \(wine.producer ?? "Unknown")
-        Region:   \(wine.region   ?? "Unknown")
-        Grapes:   \(wine.grapes?.joined(separator: ", ") ?? "N/A")
-        Vintage:  \(wine.vintage  ?? "NV")
-
-        Respond with exactly:
-        {
-          "acidity":"Low|Medium-|Medium|Medium+|High",
-          "alcohol":"Low|Medium-|Medium|Medium+|High",
-          "body":"Light|Medium-|Medium|Medium+|Full",
-          "tannin":"Low|Medium-|Medium|Medium+|High",
-          "sweetness":"Bone-Dry|Dry|Off-Dry|Sweet|Very Sweet",
-          "aromas":["Cherry","Rose", "..."],
-          "tips":["One short palate‑training tip"]
-        }
-        """
+           Respond with exactly:
+           {
+             "acidity":"Low|Medium-|Medium|Medium+|High",
+             "alcohol":"Low|Medium-|Medium|Medium+|High",
+             "body":"Light|Medium-|Medium|Medium+|Full",
+             "tannin":"Low|Medium-|Medium|Medium+|High",
+             "sweetness":"Bone-Dry|Dry|Off-Dry|Sweet|Very Sweet",
+             "aromas":[/* 4 from AllowedAromas */],
+             "flavors":[/* 4 from AllowedFlavors */],
+             "tips":["One short palate-training tip"],
+             "hasTannin":<true|false>
+           }
+           """
         
         let body = chatBody(
             model: "gpt-4o",
@@ -89,44 +103,69 @@ final class OpenAIManager: ObservableObject {
     // MARK: - PRIVATE helpers ---------------------------------------------------
     
     private var ocrSystemPrompt: String {
-        """
-        You are an expert sommelier and spell‑checker.
+        #"""
+        ROLE
+        You are an expert sommelier-extractor.
+        Return only valid double-quoted JSON—no markdown, no code fences, no comments.
 
-        TASK A — PRE‑CLEAN TEXT
-        • Correct obvious OCR typos in well‑known winery / region names
-          (e.g. “Gacomo Conterno” → “Giacomo Conterno”).
-        • Normalise accents (Chateau → Château) and capitalisation.
+        ──────────────────── PHASE 1 – PRE-CLEAN
+        • Fix obvious OCR typos in producer/region names.  
+        • Restore accents (Chateau → Château) and title-case proper nouns.
 
-        TASK B — RETURN EXACTLY THIS JSON SCHEMA
+        ──────────────────── PHASE 2 – FIELD RULES
+        VINTAGE  
+          • Consider every 4-digit year 1900-to-(current year + 1).  
+          • Reject it if the word immediately before it is “est.”, “established”, “since”,  
+            “founded”, “bottled”, “produced”, or “imported”.  
+          • Accept the first remaining year that matches ONE of:  
+              ① directly after “vintage”, “harvest”, or “vendimia”  
+              ② directly after a grape variety name or the word “Porto”  
+              ③ appears on its own line or is the only year on the label  
+          • If several years qualify, choose the most recent one ≤ current year.  
+          • If no year qualifies, output "vintage":"NV".
+
+        GRAPES  
+          • Use the exact varieties printed on the label.  
+          • If multiple varieties are listed, return them all in order.
+          • If the bottle does not list grapes on the label, use the producer, region, country and vineyard to infer.
+          • If none are verifiable, return "Red Blend" or "White Blend".
+
+        CATEGORY  
+          Infer from grapes + tasting notes; choose ONE:  
+          red wine | white wine | rosé wine | red sparkling wine | white sparkling wine |  
+          red dessert wine | white dessert wine | red fortified wine | white fortified wine | orange wine.
+
+        PAIRINGS Exactly three concise dishes/items.  
+        VIBETAG  ≤ 8 words.
+
+        ──────────────────── RETURN JSON IN THIS KEY ORDER
         {
-          "producer":"<string>",
-          "region":"<string>",
-          "country":"<string>",
-          "grapes":["<string>", …],
-          "vintage":"<string|null>",
-          "classification":"<string|null>",
-          "tastingNotes":"<string>",
-          "pairings":["<string>", "<string>", "<string>"],
-          "vibeTag":"<≤8 words>",
-          "vineyard":"<string|null>",
-          "soilType":"<string|null>",
-          "climate":"<string|null>",
-          "drinkingWindow":"<string|null>",
-          "abv":"<string|null>",
-          "winemakingStyle":"<string|null>"
+          "producer": "",
+          "region": "",
+          "country": "",
+          "grapes": [],
+          "vintage": "",
+          "classification": null,
+          "tastingNotes": "",
+          "pairings": ["", "", ""],
+          "vibeTag": "",
+          "vineyard": null,
+          "soilType": null,
+          "climate": null,
+          "drinkingWindow": null,
+          "abv": null,
+          "winemakingStyle": null,
+          "category": ""
         }
 
-        RULES
-        1. "Do not hallucinate grapes. If unsure, use ‘Red Blend’ or 'White Blend', but if typical grapes are clearly implied (e.g., Barolo = Nebbiolo), fill them in confidently."
-        2. Output ONLY double‑quoted JSON, no markdown.
-        3. Preserve key order exactly.
-        4. Arrays must be valid JSON arrays even if only one element.
-        5. Keep vibeTag to eight words or fewer.
-        6. Use the region or vineyard to infer soil type & climate.
-        7. Leave fields blank ONLY if truly no information is available.
-        8. Infer drinking window from vintage and typical aging potential of the region if needed.
-        9. Use producer information to determine winemaking style if needed.
-        """
+        GENERAL CONSTRAINTS  
+        1. Arrays stay arrays even with one item.  
+        2. Leave a field null only when no reliable information exists.  
+        3. Infer soilType, climate, drinkingWindow, winemakingStyle when typical for the region/vintage.  
+        4. Do not output any extraneous keys, prose, or markdown.
+        """#
+        
+        
     }
     
     // Build the standard chat body
