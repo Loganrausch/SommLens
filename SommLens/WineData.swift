@@ -54,7 +54,17 @@ struct WineData: Codable {
         soilType         = try container.decodeIfPresent(String.self,   forKey: .soilType)
         climate          = try container.decodeIfPresent(String.self,   forKey: .climate)
         drinkingWindow   = try container.decodeIfPresent(String.self,   forKey: .drinkingWindow)
-        abv              = try container.decodeIfPresent(String.self,   forKey: .abv)
+       
+        // NEW  – accept either "13.5" **or** 13.5
+        if let abvStr = try? container.decode(String.self, forKey: .abv) {
+            abv = abvStr
+        } else if let abvDouble = try? container.decode(Double.self, forKey: .abv) {
+            // format: 13   → "13",   13.5 → "13.5"
+            abv = String(format: abvDouble == floor(abvDouble) ? "%.0f" : "%.1f", abvDouble)
+        } else {
+            abv = nil
+        }
+        
         winemakingStyle  = try container.decodeIfPresent(String.self,   forKey: .winemakingStyle)
         category        = try container.decodeIfPresent(WineCategory.self, forKey: .category) ?? .unknown
     }
@@ -78,8 +88,14 @@ struct OpenAIResponse: Codable {
         }
         let message: Message
     }
-    let choices: [Choice]
-}
+    struct Usage: Codable {
+       let prompt_tokens: Int
+       let completion_tokens: Int
+       let total_tokens: Int
+     }
+     let choices: [Choice]
+     let usage: Usage
+   }
 
 extension WineData {
     /// Something like “Produttori del Barbaresco 2019”

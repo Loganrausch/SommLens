@@ -18,6 +18,7 @@ struct ARScanResultView: View {
     // Inputs
     let capturedImage: UIImage
     let wineData:      WineData
+    let onDismiss: () -> Void    // ← new callback
     
     // Existing wine‑detail sheet
     @State private var showDetailSheet = false
@@ -29,16 +30,24 @@ struct ARScanResultView: View {
     
     var body: some View {
         ZStack {
+           
+            
             /* ───── Bottle photo ───── */
-            Image(uiImage: capturedImage)
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea(.container, edges: .horizontal)
+            GeometryReader { geo in
+                Image(uiImage: capturedImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    
+            }
+            .ignoresSafeArea()           // ← ADD THIS
             
             /* ───── Gradient for legibility ───── */
             LinearGradient(colors: [.clear, .black.opacity(0.45)],
                            startPoint: .center, endPoint: .bottom)
                 .allowsHitTesting(false)
+                .ignoresSafeArea()    // ← also stretch into the inset
             
             /* ───── Bottom info tray ───── */
             VStack(spacing: 0) {
@@ -95,18 +104,22 @@ struct ARScanResultView: View {
                 .padding(.bottom, 20)
             }
         }
+       
         .navigationBarBackButtonHidden(true)
         .overlay(alignment: .topTrailing) {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.body.weight(.semibold))
-                    .padding(12)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .shadow(radius: 3)
-            }
-            .padding(.top, 30)
-            .padding(.trailing, 20)
-        }
+            Button {
+                         onDismiss()     // ← clean state first
+                         dismiss()       // ← then dismiss
+                     } label: {
+                         Image(systemName: "xmark")
+                             .font(.body.weight(.semibold))
+                             .padding(12)
+                             .background(.ultraThinMaterial, in: Circle())
+                             .shadow(radius: 3)
+                     }
+                     .padding(.top, 30)
+                     .padding(.trailing, 20)
+                 }
         
         /* ───── Sheets ───── */
         

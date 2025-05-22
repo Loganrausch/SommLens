@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F6F55D6BB50E401FFFC5AF06 /* Pods_SommLens.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1AAA635CF912F5D2A2238B67 /* Pods_SommLens.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CEC2C77C2DB1517C0043FAEB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1AAA635CF912F5D2A2238B67 /* Pods_SommLens.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SommLens.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		72C908E1A8811CD122186EF9 /* Pods-SommLens.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SommLens.debug.xcconfig"; path = "Target Support Files/Pods-SommLens/Pods-SommLens.debug.xcconfig"; sourceTree = "<group>"; };
+		AD70645990D572090A087C19 /* Pods-SommLens.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SommLens.release.xcconfig"; path = "Target Support Files/Pods-SommLens/Pods-SommLens.release.xcconfig"; sourceTree = "<group>"; };
 		CEC2C8152DB95BFF0043FAEB /* SommLens.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SommLens.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEC2C8162DB95BFF0043FAEB /* SommLensTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEC2C8172DB95BFF0043FAEB /* SommLensUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -65,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6F55D6BB50E401FFFC5AF06 /* Pods_SommLens.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +93,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		09A9EA84C4CE08A1BC57F44E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1AAA635CF912F5D2A2238B67 /* Pods_SommLens.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		CEC2C75B2DB1517B0043FAEB = {
 			isa = PBXGroup;
 			children = (
@@ -94,7 +110,18 @@
 				CEC2C8152DB95BFF0043FAEB /* SommLens.app */,
 				CEC2C8162DB95BFF0043FAEB /* SommLensTests.xctest */,
 				CEC2C8172DB95BFF0043FAEB /* SommLensUITests.xctest */,
+				E12A5D2359DB37B8BC878B09 /* Pods */,
+				09A9EA84C4CE08A1BC57F44E /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		E12A5D2359DB37B8BC878B09 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				72C908E1A8811CD122186EF9 /* Pods-SommLens.debug.xcconfig */,
+				AD70645990D572090A087C19 /* Pods-SommLens.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -104,9 +131,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEC2C78E2DB1517C0043FAEB /* Build configuration list for PBXNativeTarget "SommLens" */;
 			buildPhases = (
+				4E80725981077BE730A5B0F4 /* [CP] Check Pods Manifest.lock */,
 				CEC2C7602DB1517B0043FAEB /* Sources */,
 				CEC2C7612DB1517B0043FAEB /* Frameworks */,
 				CEC2C7622DB1517B0043FAEB /* Resources */,
+				0A0C7FB247168FA6C6B6C4B4 /* [CP] Embed Pods Frameworks */,
+				9A6B1B5FF5815329F1E0F0F5 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -116,8 +146,6 @@
 				CEC2C7662DB1517B0043FAEB /* SommLens */,
 			);
 			name = SommLens;
-			packageProductDependencies = (
-			);
 			productName = SommLens;
 			productReference = CEC2C8152DB95BFF0043FAEB /* SommLens.app */;
 			productType = "com.apple.product-type.application";
@@ -139,8 +167,6 @@
 				CEC2C77E2DB1517C0043FAEB /* SommLensTests */,
 			);
 			name = SommLensTests;
-			packageProductDependencies = (
-			);
 			productName = SommLensTests;
 			productReference = CEC2C8162DB95BFF0043FAEB /* SommLensTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -162,8 +188,6 @@
 				CEC2C7882DB1517C0043FAEB /* SommLensUITests */,
 			);
 			name = SommLensUITests;
-			packageProductDependencies = (
-			);
 			productName = SommLensUITests;
 			productReference = CEC2C8172DB95BFF0043FAEB /* SommLensUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -236,6 +260,65 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		0A0C7FB247168FA6C6B6C4B4 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SommLens/Pods-SommLens-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SommLens/Pods-SommLens-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SommLens/Pods-SommLens-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4E80725981077BE730A5B0F4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SommLens-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9A6B1B5FF5815329F1E0F0F5 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SommLens/Pods-SommLens-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SommLens/Pods-SommLens-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SommLens/Pods-SommLens-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		CEC2C7602DB1517B0043FAEB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -276,6 +359,7 @@
 /* Begin XCBuildConfiguration section */
 		CEC2C78F2DB1517C0043FAEB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 72C908E1A8811CD122186EF9 /* Pods-SommLens.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -292,7 +376,6 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -312,6 +395,7 @@
 		};
 		CEC2C7902DB1517C0043FAEB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AD70645990D572090A087C19 /* Pods-SommLens.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -328,7 +412,6 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -372,7 +455,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -383,7 +466,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -392,13 +475,14 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -435,7 +519,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -446,16 +530,17 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

@@ -1,80 +1,188 @@
-//
-//  ARScanView.swift
-//  SommLens
-//
-//  Created by Logan Rausch on 4/17/25.
-//
 
-// ARScanView.swift
+//  ARScanView.swift
+//  VinoBytes
+//
 
 import SwiftUI
-import RealityKit
-import ARKit
-import Vision
+import UIKit               // for UIImage
+import AVFoundation
+import CoreImage
+import CoreImage.CIFilterBuiltins
 import CoreData
-import UIKit
 
-// ——————————————
-// 1) ScanResult drives navigation
-// ——————————————
+// ─────────────────────────────────────────────────────────────
+// 1) Your ScanResult model
+// ─────────────────────────────────────────────────────────────
 struct ScanResult: Identifiable, Hashable {
-let id = UUID()
-let image: UIImage
-let wineData: WineData
+    let id       = UUID()
+    let image: UIImage
+    let wineData: WineData
 
-
-func hash(into hasher: inout Hasher) { hasher.combine(id) }
-static func == (lhs: ScanResult, rhs: ScanResult) -> Bool { lhs.id == rhs.id }
-
-
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    static func ==(a: ScanResult, b: ScanResult) -> Bool { a.id == b.id }
 }
 
-struct ARScanView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-    @StateObject private var openAI = OpenAIManager()
+// ─────────────────────────────────────────────────────────────
+// 2) Live camera preview with pinch-to-zoom
+// ─────────────────────────────────────────────────────────────
+struct CameraPreview: UIViewRepresentable {
 
-    @State private var arView: ARView?
-    @State private var viewSize: CGSize = .zero
+    // AVCapture device we created in configureSession()
+    let session: AVCaptureSession
+    let device: AVCaptureDevice               // ← new
 
-// ——————————————
-// 2) Capture & processing state
-// ——————————————
-@State private var capturedImage: UIImage? = nil
-@State private var isProcessing    = false
+    // ---------- UIView subclass whose CA-layer *is* a preview layer ----------
+    class PreviewView: UIView {
+        override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+        var videoLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
+    }
 
-@State private var scanResult: ScanResult? = nil
+    // ---------- Coordinator handles gestures ----------
+    final class Coordinator: NSObject {
+        private let device: AVCaptureDevice
+        init(device: AVCaptureDevice) { self.device = device }
+
+        @objc func handlePinch(_ g: UIPinchGestureRecognizer) {
+            guard g.state == .changed || g.state == .ended else { return }
+
+            let maxZoom = min(device.activeFormat.videoMaxZoomFactor, 6.0)
+            let minZoom: CGFloat = 1.0
+            var newZoom = device.videoZoomFactor * g.scale
+            newZoom = max(min(newZoom, maxZoom), minZoom)
+
+            do {
+                try device.lockForConfiguration()
+                device.videoZoomFactor = newZoom
+                device.unlockForConfiguration()
+            } catch { print("Zoom error:", error) }
+
+            g.scale = 1          // reset incremental scale
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(device: device) }
+
+    func makeUIView(context: Context) -> PreviewView {
+        let view = PreviewView()
+        let layer = view.videoLayer
+        layer.session      = session
+        layer.videoGravity = .resizeAspectFill
+        layer.connection?.videoOrientation = .portrait
+
+        // pinch gesture
+        let pinch = UIPinchGestureRecognizer(target: context.coordinator,
+                                             action: #selector(Coordinator.handlePinch(_:)))
+        view.addGestureRecognizer(pinch)
+        return view
+    }
+    func updateUIView(_ uiView: PreviewView, context: Context) {}
+}
+
+// ─────────────────────────────────────────────────────────────
+// 3) PhotoDelegate for high-res stills
+// ─────────────────────────────────────────────────────────────
+class PhotoDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+    let callback: (UIImage?) -> Void
+    init(_ cb: @escaping (UIImage?) -> Void) { callback = cb }
+
+    func photoOutput(_ output: AVCapturePhotoOutput,
+                     didFinishProcessingPhoto photo: AVCapturePhoto,
+                     error: Error?) {
+        guard let data = photo.fileDataRepresentation(),
+              let img  = UIImage(data: data)
+        else {
+            callback(nil)
+            return
+        }
+        callback(img)
+    }
+}
 
 
-var body: some View {
-    NavigationStack {
+// ─────────────────────────────────────────────────────────────
+// 5) FreezeOverlay (show frozen frame + shimmer + AI call)
+// ─────────────────────────────────────────────────────────────
+struct FreezeOverlay: View {
+    let overlayImage: UIImage
+    @Binding var isProcessing: Bool
+
+    var body: some View {
         ZStack {
-            // Live AR feed
-            ARViewContainer(arView: $arView, viewSize: $viewSize)
-                .ignoresSafeArea(.container, edges: .horizontal)
+            Color.black.ignoresSafeArea()
 
-            // 1️⃣ In your body, add a transition to the frozen snapshot:
-            if let img = capturedImage {
-                Image(uiImage: img)
-                  .resizable()
-                  .scaledToFill()
-                  .ignoresSafeArea(.container, edges: .horizontal)
-                  .transition(.opacity)                                    // ← add this
-                  .animation(.easeInOut(duration: 0.2), value: capturedImage)
+            Image(uiImage: overlayImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: UIScreen.main.bounds.width,
+                       height: UIScreen.main.bounds.height)
+                .clipped()
+                .ignoresSafeArea()
 
-                    }
+            if isProcessing {
+                HorizontalShimmer(speed: 0.8, beamWidthFraction: 0.2)
+                    .frame(width: UIScreen.main.bounds.width,
+                           height: UIScreen.main.bounds.height)
+                    .ignoresSafeArea()
+            }
+        }
+        .zIndex(1)
+    }
+}
+       
+                    
+                
             
-            // 2) The shimmer beam
-                         if isProcessing {
-                             HorizontalShimmer(speed: 0.8, beamWidthFraction: 0.2)
-                         }
-            
-            // 3) Camera button (only before snapshot)
-            if capturedImage == nil {
-                VStack {
-                    Spacer()
-                    HStack {
+        
+    
+
+
+// ─────────────────────────────────────────────────────────────
+// 6) Main ARScanView: tap shutter → freeze → improved OCR → AI → result
+// ─────────────────────────────────────────────────────────────
+struct ARScanView: View {
+    @Environment(\.managedObjectContext) private var ctx
+    @StateObject private var ai = OpenAIManager()
+    
+    // camera + photo capture
+    @State private var session     = AVCaptureSession()
+    @State private var photoOutput = AVCapturePhotoOutput()
+    @State private var photoDel: PhotoDelegate?
+    
+    // freeze + AI(image) + navigation
+    @State private var frozenImage  : UIImage?
+    @State private var isProcessing = false
+    @State private var scanResult   : ScanResult?
+    @State private var captureDevice: AVCaptureDevice?
+    @State private var showOverlay = false
+    @State private var hasExtracted = false
+    @State private var bufferDelegate = BufferDelegate()
+    @State private var highResImage: UIImage? = nil
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                // 1) Live camera preview
+                if let dev = captureDevice {
+                    CameraPreview(session: session, device: dev)
+                        .ignoresSafeArea()
+                }
+                
+                // 2) FreezeOverlay: UI only
+                if let img = frozenImage, showOverlay {
+                  FreezeOverlay(
+                    overlayImage: img,
+                    isProcessing: $isProcessing
+                  )
+                  .transition(.identity)          // no transition
+                  .animation(nil, value: showOverlay)
+                }
+                
+                // 3) Shutter button
+                if frozenImage == nil && !isProcessing {
+                    VStack {
+                        Spacer()
                         Button {
-                            takeSnapshot()
+                            takePhoto()
                         } label: {
                             Image(systemName: "camera.viewfinder")
                                 .font(.largeTitle)
@@ -82,173 +190,180 @@ var body: some View {
                                 .background(.ultraThinMaterial)
                                 .clipShape(Circle())
                         }
-                        .padding(25)
+                        .padding(30)
                     }
                 }
             }
-        }
-        // Navigate when we have a result
-        .navigationDestination(item: $scanResult) { result in
-            ARScanResultView(
-                capturedImage: result.image,
-                wineData:      result.wineData
-            )
-            .onDisappear {
-                capturedImage = nil
-                scanResult    = nil
-            }
-        }
-    }
-}
-
-private func takeSnapshot() {
-    // 1️⃣ Turn on the spinner immediately
-    isProcessing = true
-
-    guard let arView = arView else { return }
-    arView.snapshot(saveToHDR: false) { image in
-        DispatchQueue.main.async {
-            guard let uiImage = image else {
-                // if snapshot somehow fails, hide the spinner
-                isProcessing = false
-                return
-            }
-
-            // 2️⃣ Freeze the frame
-            capturedImage = uiImage
-
-            // 3️⃣ Do your OCR/OpenAI/CoreData work
-            Task {
-                do {
-                    let raw = try await recognizeText(from: uiImage)
-                    let cleaned = cleanOCRText(raw)
-                    let wine = try await openAIExtract(from: cleaned)
-                    let rawJSON = (try? JSONEncoder().encode(wine))
-                                  .flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
-
-                    await MainActor.run {
-                        saveScan(wineData: wine,
-                                 rawJSON: rawJSON,
-                                 screenshot: uiImage)
-                        scanResult = ScanResult(image: uiImage,
-                                                wineData: wine)
+            .onAppear(perform: configureSession)
+            .navigationDestination(item: $scanResult) { res in
+                ARScanResultView(
+                    capturedImage: res.image,
+                    wineData: res.wineData,
+                    onDismiss: {
+                        // 1️⃣ Reset state BEFORE dismissing
+                        frozenImage   = nil
+                        highResImage  = nil
+                        isProcessing  = false
+                        scanResult    = nil
+                        showOverlay   = false
+                        hasExtracted  = false
                     }
-                } catch {
-                    print("Scan error:", error)
-                }
-
-                // 4️⃣ Always hide the spinner at the end
-                await MainActor.run {
-                    isProcessing = false
-                }
+                )
             }
         }
     }
-}
-
-private func recognizeText(from image: UIImage) async throws -> String {
-    // Preprocess for sharper OCR
-    let procImage = ImagePreprocessor.preprocess(image) ?? image
-    let ci       = CIImage(image: procImage)!
-    let handler  = VNImageRequestHandler(ciImage: ci, options: [:])
     
-    return try await withCheckedThrowingContinuation { cont in
-        let req = VNRecognizeTextRequest { req, err in
-            if let e = err { return cont.resume(throwing: e) }
-            let joined = (req.results as? [VNRecognizedTextObservation])?
-                .compactMap { $0.topCandidates(1).first?.string }
-                .joined(separator: " ") ?? ""
-            cont.resume(returning: joined)
+    
+    
+    private func configureSession() {
+        guard session.inputs.isEmpty else { return }
+        session.beginConfiguration()
+        session.sessionPreset = .photo
+        
+        // 1️⃣ Add camera input
+        if let cam = AVCaptureDevice.default(.builtInWideAngleCamera,
+                                             for: .video,
+                                             position: .back),
+           let input = try? AVCaptureDeviceInput(device: cam),
+           session.canAddInput(input) {
+            session.addInput(input)
+            captureDevice = cam
         }
-        // **Use the highest OCR accuracy + language correction**
-        req.recognitionLevel      = .accurate
-        req.usesLanguageCorrection = true
-
+        
+        // 2️⃣ Add photo output (for high-res image)
+        if session.canAddOutput(photoOutput) {
+            session.addOutput(photoOutput)
+            photoOutput.isHighResolutionCaptureEnabled = true
+        }
+        
+        // 3️⃣ Add video buffer output (for instant overlay)
+        let videoOutput = AVCaptureVideoDataOutput()
+        videoOutput.setSampleBufferDelegate(bufferDelegate, queue: DispatchQueue(label: "bufferQueue"))
+        videoOutput.alwaysDiscardsLateVideoFrames = true
+        
+        if session.canAddOutput(videoOutput) {
+            session.addOutput(videoOutput)
+        }
+        
+        session.commitConfiguration()
+        
+        // 🔧 4️⃣ Force orientation to portrait (AFTER commitConfiguration)
+        if let connection = videoOutput.connection(with: .video),
+           connection.isVideoOrientationSupported {
+            connection.videoOrientation = .portrait
+        }
+        
+        // 4️⃣ Start running
         DispatchQueue.global(qos: .userInitiated).async {
-            try? handler.perform([req])
+            session.startRunning()
         }
+    }
+    
+    private func takePhoto() {
+        // 1️⃣ Re-install the one-shot handler on each tap…
+        bufferDelegate.onFrame = { image in
+            DispatchQueue.main.async {
+                // only freeze once
+                guard frozenImage == nil && !isProcessing else { return }
+
+                // Freeze immediately
+                frozenImage  = image
+                showOverlay  = true
+                hasExtracted = false
+
+                // Disable further freezes until the next tap
+                bufferDelegate.onFrame = nil
+            }
+        }
+
+        
+        // 1️⃣ Kick off the high-res capture immediately
+        let settings = AVCapturePhotoSettings()
+        settings.photoQualityPrioritization = photoOutput.maxPhotoQualityPrioritization
+        
+        let del = PhotoDelegate { img in
+            Task { @MainActor in
+                guard let hiRes = img else { return }
+                
+                // show the shimmer
+                highResImage = hiRes
+                isProcessing = true
+                
+                // 2️⃣ Only _now_ call AI on the high-res image:
+                ai.extractWineInfo(from: hiRes) { result in
+                    DispatchQueue.main.async {
+                        isProcessing = false
+                        switch result {
+                        case .success(let wine):
+                            // ─── SAVE YOUR SCAN HERE ───
+                            let rawJSON = (try? JSONEncoder().encode(wine))
+                                .flatMap { String(data: $0, encoding: .utf8) }
+                            ?? "{}"
+                            saveScan(in: ctx,
+                                     wineData: wine,
+                                     rawJSON: rawJSON,
+                                     screenshot: hiRes)
+                            
+                            // ─── NAVIGATE ───
+                            scanResult = ScanResult(image: hiRes, wineData: wine)
+                            
+                        case .failure(let error):
+                            print("❌ Extraction failed:", error)
+                        }
+                    }
+                }
+            }
+        }
+        
+        photoDel = del
+        photoOutput.capturePhoto(with: settings, delegate: del)
     }
 }
 
-/// Collapse newlines and multi–spaces, trim edges
-private func cleanOCRText(_ text: String) -> String {
-    let singleLine = text
-        .replacingOccurrences(of: "\n", with: " ")
-        .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-    return singleLine.trimmingCharacters(in: .whitespacesAndNewlines)
-}
+class BufferDelegate: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+    var onFrame: ((UIImage) -> Void)?  // callback to pass frozen buffer image
 
-private func openAIExtract(from text: String) async throws -> WineData {
-    try await withCheckedThrowingContinuation { cont in
-        openAI.extractWineInfo(from: text) { res in
-            switch res {
-            case .success(let d): cont.resume(returning: d)
-            case .failure(let e): cont.resume(throwing: e)
+    func captureOutput(_ output: AVCaptureOutput,
+                       didOutput sampleBuffer: CMSampleBuffer,
+                       from connection: AVCaptureConnection) {
+        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+        let ciImage = CIImage(cvImageBuffer: imageBuffer)
+        let context = CIContext()
+
+        if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
+            let uiImage = UIImage(cgImage: cgImage)
+            DispatchQueue.main.async {
+                self.onFrame?(uiImage)
             }
         }
     }
 }
 
-private func saveScan(wineData: WineData,
+private func saveScan(in ctx: NSManagedObjectContext,
+                      wineData: WineData,
                       rawJSON: String,
-                      screenshot: UIImage) {
-    let scan = BottleScan(context: viewContext)
-    scan.id               = UUID()
-    scan.timestamp        = Date()
-    scan.producer         = wineData.producer
-    scan.region           = wineData.region
-    scan.country          = wineData.country
-    scan.grapes           = wineData.grapes?.joined(separator: ", ")
-    scan.vintage          = wineData.vintage
-    scan.classification   = wineData.classification
-    scan.tastingNotes     = wineData.tastingNotes
-    scan.pairings         = wineData.pairings?.joined(separator: ", ")
-    scan.vibeTag          = wineData.vibeTag
-    scan.vineyard         = wineData.vineyard
-    scan.soilType         = wineData.soilType
-    scan.climate          = wineData.climate
-    scan.drinkingWindow   = wineData.drinkingWindow
-    scan.abv              = wineData.abv
-    scan.winemakingStyle  = wineData.winemakingStyle
-    scan.category         = wineData.category.rawValue
-
-    scan.rawJSON          = rawJSON
-    if let data = screenshot.jpegData(compressionQuality: 0.8) {
-        scan.screenshot   = data
-    }
-
-    do {
-        try viewContext.save()
-    } catch {
-        print("Core Data save error:", error)
-    }
-}
-
-
-}
-
-// ——————————————
-// ARViewContainer (unchanged)
-// ——————————————
-struct ARViewContainer: UIViewRepresentable {
-@Binding var arView: ARView?
-@Binding var viewSize: CGSize
-
-
-func makeUIView(context: Context) -> ARView {
-    let view = ARView(frame: .zero)
-    let cfg  = ARWorldTrackingConfiguration()
-    view.session.run(cfg)
-    DispatchQueue.main.async {
-        arView   = view
-        viewSize = view.bounds.size
-    }
-    return view
-}
-
-func updateUIView(_ uiView: ARView, context: Context) {
-    DispatchQueue.main.async { viewSize = uiView.bounds.size }
-}
-
-
+                      screenshot: UIImage?) {
+    let scan = BottleScan(context: ctx)
+    scan.id              = UUID()
+    scan.timestamp       = Date()
+    scan.producer        = wineData.producer
+    scan.region          = wineData.region
+    scan.country         = wineData.country
+    scan.grapes          = wineData.grapes?.joined(separator: ", ")
+    scan.vintage         = wineData.vintage
+    scan.classification  = wineData.classification
+    scan.tastingNotes    = wineData.tastingNotes
+    scan.pairings        = wineData.pairings?.joined(separator: ", ")
+    scan.vibeTag         = wineData.vibeTag
+    scan.vineyard        = wineData.vineyard
+    scan.soilType        = wineData.soilType
+    scan.climate         = wineData.climate
+    scan.drinkingWindow  = wineData.drinkingWindow
+    scan.abv             = wineData.abv
+    scan.winemakingStyle = wineData.winemakingStyle
+    scan.category        = wineData.category.rawValue
+    scan.rawJSON         = rawJSON
+    scan.screenshot      = screenshot?.jpegData(compressionQuality: 0.8)
+    try? ctx.save()
 }
