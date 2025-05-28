@@ -13,9 +13,11 @@ struct ARScanResultView: View {
     
     // Inject your managers
     @EnvironmentObject private var openAIManager: OpenAIManager
-    @EnvironmentObject private var tastingStore:  TastingStore      // simple CoreData/SwiftData wrapper
+    
+    @Environment(\.managedObjectContext) private var ctx   // add this
     
     // Inputs
+    let bottle: BottleScan
     let capturedImage: UIImage
     let wineData:      WineData
     let onDismiss: () -> Void    // ← new callback
@@ -26,11 +28,14 @@ struct ARScanResultView: View {
     // NEW – tasting flow sheet
     @State private var showTasteSheet  = false
     @State private var aiProfile: AITastingProfile?
-    @State private var isLoadingTaste  = false                      // simple loading flag
+    @State private var isLoadingTaste  = false
+    
+    @Binding var selectedTab: MainTab
+    
     
     var body: some View {
         ZStack {
-           
+            
             
             /* ───── Bottle photo ───── */
             GeometryReader { geo in
@@ -39,15 +44,15 @@ struct ARScanResultView: View {
                     .scaledToFill()
                     .frame(width: geo.size.width, height: geo.size.height)
                     .clipped()
-                    
+                
             }
             .ignoresSafeArea()           // ← ADD THIS
             
             /* ───── Gradient for legibility ───── */
             LinearGradient(colors: [.clear, .black.opacity(0.45)],
                            startPoint: .center, endPoint: .bottom)
-                .allowsHitTesting(false)
-                .ignoresSafeArea()    // ← also stretch into the inset
+            .allowsHitTesting(false)
+            .ignoresSafeArea()    // ← also stretch into the inset
             
             /* ───── Bottom info tray ───── */
             VStack(spacing: 0) {
@@ -85,7 +90,7 @@ struct ARScanResultView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
                         } else {
-                            Label("Taste This Wine", systemImage: "wineglass")
+                            Label("Taste with Vini AI", systemImage: "wineglass")
                                 .font(.headline)
                                 .padding(.horizontal, 24)
                                 .padding(.vertical, 10)
@@ -100,32 +105,37 @@ struct ARScanResultView: View {
                 .frame(maxWidth: .infinity)
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
+                .shadow(color: .black.opacity(0.25), radius: 6, y: 2)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 20)
             }
         }
-       
+        
         .navigationBarBackButtonHidden(true)
         .overlay(alignment: .topTrailing) {
             Button {
-                         onDismiss()     // ← clean state first
-                         dismiss()       // ← then dismiss
-                     } label: {
-                         Image(systemName: "xmark")
-                             .font(.body.weight(.semibold))
-                             .padding(12)
-                             .background(.ultraThinMaterial, in: Circle())
-                             .shadow(radius: 3)
-                     }
-                     .padding(.top, 30)
-                     .padding(.trailing, 20)
-                 }
+                onDismiss()     // ← clean state first
+                dismiss()       // ← then dismiss
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.body.weight(.semibold))
+                    .padding(12)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .shadow(radius: 3)
+            }
+            .padding(.top, 30)
+            .padding(.trailing, 20)
+        }
         
         /* ───── Sheets ───── */
         
         // Wine‑detail sheet
         .sheet(isPresented: $showDetailSheet) {
-            WineDetailView(wineData: wineData, snapshot: capturedImage)
+            WineDetailView(
+                bottle:   bottle,           // 👈 NEW
+                wineData: wineData,
+                snapshot: capturedImage
+            )
                 .presentationDetents([.large])
         }
         
@@ -134,11 +144,18 @@ struct ARScanResultView: View {
             if let profile = aiProfile {
                 TastingFormView(
                     aiProfile: profile,
-                    wineData: wineData,
-                    snapshot:  capturedImage, 
-                    onSave: { session in tastingStore.add(session) }
-                )
-                .interactiveDismissDisabled()   // optional
+                    wineData:  wineData,
+                    snapshot:  capturedImage
+                ) { dto in
+                    try? persist(dto, on: bottle)     // ✅ here
+                    showTasteSheet = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        onDismiss()
+                        dismiss()
+                        selectedTab = .home
+                    }
+                }
+                .interactiveDismissDisabled()
             } else {
                 ProgressView()
             }
@@ -162,6 +179,27 @@ struct ARScanResultView: View {
             print("❌ AI fetch failed:", error.localizedDescription)
         }
     }
+    
+    // MARK: – Persist tasting DTO
+    /// Adds one tasting to an *already-created* BottleScan row
+    private func persist(
+        _ dto: TastingSession,
+        on bottle: BottleScan            // ← pass the parent row, not WineData
+    ) throws {
+        
+        // 1️⃣ child tasting entity
+        _ = try TastingSessionEntity(
+            from:    dto,
+            bottle:  bottle,
+            context: ctx
+        )
+        
+        // 2️⃣ optional meta update on the parent
+        bottle.lastTasted = dto.date        // keeps “most-recent tasting” info
+        
+        // 3️⃣ commit
+        if ctx.hasChanges { try ctx.save() }
+    }
 }
 
 /* ---------- Quick info card ---------- */
@@ -171,7 +209,7 @@ private struct QuickCard: View {
     let text:  String?
     
     private let cardWidth:  CGFloat = 170
-    private let cardHeight: CGFloat = 95
+    private let cardHeight: CGFloat = 85
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -188,3 +226,4 @@ private struct QuickCard: View {
         .cornerRadius(12)
     }
 }
+

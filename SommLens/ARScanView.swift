@@ -9,12 +9,12 @@ import AVFoundation
 import CoreImage
 import CoreImage.CIFilterBuiltins
 import CoreData
-
 // ─────────────────────────────────────────────────────────────
 // 1) Your ScanResult model
 // ─────────────────────────────────────────────────────────────
 struct ScanResult: Identifiable, Hashable {
     let id       = UUID()
+    let bottle:     BottleScan   // ← store the Core-Data row
     let image: UIImage
     let wineData: WineData
 
@@ -102,9 +102,14 @@ class PhotoDelegate: NSObject, AVCapturePhotoCaptureDelegate {
 // ─────────────────────────────────────────────────────────────
 // 5) FreezeOverlay (show frozen frame + shimmer + AI call)
 // ─────────────────────────────────────────────────────────────
+
+private enum OverlayPhase { case sweep, processing }
+
 struct FreezeOverlay: View {
     let overlayImage: UIImage
     @Binding var isProcessing: Bool
+    
+    @State private var phase: OverlayPhase = .sweep
 
     var body: some View {
         ZStack {
@@ -118,16 +123,24 @@ struct FreezeOverlay: View {
                 .clipped()
                 .ignoresSafeArea()
 
-            if isProcessing {
-                HorizontalShimmer(speed: 0.8, beamWidthFraction: 0.2)
-                    .frame(width: UIScreen.main.bounds.width,
-                           height: UIScreen.main.bounds.height)
-                    .ignoresSafeArea()
-            }
-        }
-        .zIndex(1)
-    }
-}
+            switch phase {
+            case .sweep:
+                VerticalSweepLayer {
+                    // called when sweep finishes
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        phase = .processing
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)  // ← important
+                .ignoresSafeArea()
+                      case .processing:
+                          // the same wine-glass loader you already have
+                          WineGlassLoadingView()
+                      }
+                  }
+                  .zIndex(1)
+              }
+          }
        
                     
                 
@@ -157,6 +170,8 @@ struct ARScanView: View {
     @State private var hasExtracted = false
     @State private var bufferDelegate = BufferDelegate()
     @State private var highResImage: UIImage? = nil
+    
+    @Binding var selectedTab: MainTab
     
     var body: some View {
         NavigationStack {
@@ -197,6 +212,7 @@ struct ARScanView: View {
             .onAppear(perform: configureSession)
             .navigationDestination(item: $scanResult) { res in
                 ARScanResultView(
+                    bottle:       res.bottle,   // ← pass it
                     capturedImage: res.image,
                     wineData: res.wineData,
                     onDismiss: {
@@ -207,7 +223,8 @@ struct ARScanView: View {
                         scanResult    = nil
                         showOverlay   = false
                         hasExtracted  = false
-                    }
+                    },
+                    selectedTab: $selectedTab
                 )
             }
         }
@@ -299,13 +316,20 @@ struct ARScanView: View {
                             let rawJSON = (try? JSONEncoder().encode(wine))
                                 .flatMap { String(data: $0, encoding: .utf8) }
                             ?? "{}"
-                            saveScan(in: ctx,
-                                     wineData: wine,
-                                     rawJSON: rawJSON,
-                                     screenshot: hiRes)
-                            
-                            // ─── NAVIGATE ───
-                            scanResult = ScanResult(image: hiRes, wineData: wine)
+                            let bottle = saveScan(        // ← returns BottleScan
+                                                      in:         ctx,
+                                                      wineData:   wine,
+                                                      rawJSON:    rawJSON,
+                                                      screenshot: hiRes
+                                                  )
+
+                                                  // 4️⃣  Push navigation with that row
+                            scanResult = ScanResult(
+                                bottle:    bottle,
+                                image:     hiRes,
+                                wineData:  wine
+                                      // NEW argument
+                            )
                             
                         case .failure(let error):
                             print("❌ Extraction failed:", error)
@@ -343,9 +367,11 @@ class BufferDelegate: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 private func saveScan(in ctx: NSManagedObjectContext,
                       wineData: WineData,
                       rawJSON: String,
-                      screenshot: UIImage?) {
+                      screenshot: UIImage?
+) -> BottleScan {
     let scan = BottleScan(context: ctx)
     scan.id              = UUID()
+    scan.fingerprint     = wineData.id          // ← add this line
     scan.timestamp       = Date()
     scan.producer        = wineData.producer
     scan.region          = wineData.region
@@ -366,4 +392,6 @@ private func saveScan(in ctx: NSManagedObjectContext,
     scan.rawJSON         = rawJSON
     scan.screenshot      = screenshot?.jpegData(compressionQuality: 0.8)
     try? ctx.save()
+    
+    return scan                       // ← NEW
 }

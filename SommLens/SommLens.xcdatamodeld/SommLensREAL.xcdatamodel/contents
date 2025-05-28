@@ -7,8 +7,10 @@
         <attribute name="climate" optional="YES" attributeType="String"/>
         <attribute name="country" optional="YES" attributeType="String"/>
         <attribute name="drinkingWindow" optional="YES" attributeType="String"/>
+        <attribute name="fingerprint" optional="YES" attributeType="String"/>
         <attribute name="grapes" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="lastTasted" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="pairings" optional="YES" attributeType="String"/>
         <attribute name="producer" optional="YES" attributeType="String"/>
         <attribute name="rawJSON" optional="YES" attributeType="String"/>
@@ -22,5 +24,13 @@
         <attribute name="vineyard" optional="YES" attributeType="String"/>
         <attribute name="vintage" optional="YES" attributeType="String"/>
         <attribute name="winemakingStyle" optional="YES" attributeType="String"/>
+        <relationship name="tastings" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TastingSession" inverseName="bottle" inverseEntity="TastingSession"/>
+    </entity>
+    <entity name="TastingSession" representedClassName="TastingSessionEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="aiProfileData" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData"/>
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="userInputData" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData"/>
+        <relationship name="bottle" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="BottleScan" inverseName="tastings" inverseEntity="BottleScan"/>
     </entity>
 </model>

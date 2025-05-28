@@ -12,6 +12,9 @@ enum TastingStep: Int, CaseIterable {
 }
 
 struct TastingFormView: View {
+    
+    @Environment(\.dismiss) private var dismiss      // ← add
+
     // Inject these when presenting the sheet
     let aiProfile: AITastingProfile
     let wineData:   WineData            // ← add your WineData here
@@ -50,11 +53,6 @@ struct TastingFormView: View {
                     Text("\(wineData.region ?? "-") · \(wineData.country ?? "-")")
                         .font(.caption2)
                         .foregroundColor(.secondary)
-                    if wineData.category != .unknown {
-                        Text(wineData.category.displayName)
-                          .font(.caption2)
-                          .foregroundColor(.secondary)
-                    }
                 }
                 Spacer()
             }
@@ -191,18 +189,22 @@ struct TastingFormView: View {
       }
     }
     
+    // ▼ paste over your existing saveSession()
     private func saveSession() {
-        let session = TastingSession(
-            wineID: UUID().uuidString,
+        // Build the lightweight DTO the UI works with
+        let dto = TastingSession(
+            id: UUID(),                               // auto-id for this tasting
+            wineID:   wineData.id,                    // <<< NOT random any more
             wineName: wineData.displayName,
-            grape: aiProfile.aromas.first ?? "",
-            region: wineData.region ?? "",
-            vintage: wineData.vintage,
-            userInput: input,        //  ← put the whole input here
+            grape:    aiProfile.aromas.first ?? "",
+            region:   wineData.region ?? "",
+            vintage:  wineData.vintage,
+            userInput: input,
             aiProfile: aiProfile,
             date: Date()
         )
-        onSave(session)
+
+        onSave(dto)           // fires the closure supplied by ARScanResultView
     }
     
     
@@ -260,7 +262,7 @@ struct TastingFormView: View {
             
         case .flavors:
             SelectionGrid(
-                title: "Which flavours do you notice?",
+                title: "Which flavors do you notice?",
                 options: flavorOptions,
                 selection: $input.flavors
             )

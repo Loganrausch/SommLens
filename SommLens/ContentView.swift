@@ -20,14 +20,14 @@ struct ContentView: View {
 
             /* ── Home ── */
             NavigationStack {
-                HomeView(selectedTab: $selectedTab)   // ④ inject binding
+                HeroHomeView(selectedTab: $selectedTab)   // ④ inject binding
             }
             .tabItem { Label("Home", systemImage: "house") }
             .tag(MainTab.home)
 
             /* ── Scan ── */
             NavigationStack {
-                ARScanView()
+                ARScanView(selectedTab: $selectedTab)
             }
             .tabItem { Label("Scan", systemImage: "camera.viewfinder") }
             .tag(MainTab.scan)

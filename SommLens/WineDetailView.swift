@@ -12,12 +12,33 @@
 import SwiftUI
 
 struct WineDetailView: View {
+    @ObservedObject var bottle: BottleScan   // 👈 get the row
     let wineData: WineData
     let snapshot: UIImage?
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.managedObjectContext) private var ctx          // ← add
     @State private var animate = false
+    @State private var selectedDTO: TastingSession? = nil         // ← for sheet
+    
+    // ───────── Tastings for *this* bottle ─────────
+        @FetchRequest private var tastings: FetchedResults<TastingSessionEntity>
 
+        // ---------- NEW initialiser ----------
+        init(bottle: BottleScan, wineData: WineData, snapshot: UIImage?) {
+            self.bottle   = bottle          // keep a strong ref to the row
+            self.wineData = wineData
+            self.snapshot = snapshot
+
+            // fetch tastings by OBJECT, not by fingerprint string
+            _tastings = FetchRequest(
+                sortDescriptors: [NSSortDescriptor(
+                                    keyPath: \TastingSessionEntity.date,
+                                    ascending: false)],
+                predicate: NSPredicate(format: "bottle == %@", bottle),
+                animation: .default
+            )
+        }
     var body: some View {
         ZStack {
             // Optional background texture or material
@@ -75,6 +96,26 @@ struct WineDetailView: View {
                                 .animation(.spring(response: 0.6, dampingFraction: 0.7), value: animate)
                             
                             
+                        }
+                        
+                        if let tasting = tastings.first { // ← only one expected
+                            Button {
+                                selectedDTO = tasting.dto // open the summary
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Label("You tasted this wine!", systemImage: "checkmark.seal.fill")
+                                        
+                                    Image(systemName: "chevron.right")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundColor(.burgundy.opacity(0.8))
+                                }
+                                .font(.subheadline.bold())
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.burgundy.opacity(0.1), in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .transition(.opacity)
                         }
 
                         // 3) Details
@@ -137,6 +178,17 @@ struct WineDetailView: View {
                 Spacer()
             }
         }
+        
+        .sheet(item: $selectedDTO) { dto in          // ← NEW
+            // reuse the read-only summary
+            TastingSummaryView(
+                input: .constant(dto.userInput),     // constant = read-only binding
+                aiProfile: dto.aiProfile,
+                wineName:  dto.wineName
+            )
+            .presentationDetents([.medium])
+        }
+        
         .onAppear { animate = true }
         .navigationBarHidden(true)
     }

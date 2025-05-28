@@ -118,10 +118,14 @@ struct TastingSummaryView: View {
                     }
                 }
             }
+           
             .padding(.horizontal)
             .padding(.bottom, 32)
             }
             .safeAreaInset(edge: .bottom) {
+              Color.clear.frame(height: 20)   // reserve 72 pts for your button
+            }
+            .safeAreaInset(edge: .top) {
               Color.clear.frame(height: 20)   // reserve 72 pts for your button
             }
             .scrollDismissesKeyboard(.interactively)
@@ -147,7 +151,7 @@ private var comparisonRows: some View {
                 .frame(width: pillWidth)
             
             Spacer(minLength: 12)
-            Text("Vini")
+            Text("Vini AI")
                 .font(.headline.bold())
                 .foregroundStyle(Color.burgundy)
                 .frame(width: pillWidth)
@@ -223,7 +227,7 @@ private func pillColumnsSection(title: String,
             
             // ── Right column: Somm Detected ───────────
             VStack(alignment: .center, spacing: 8) {
-                Text("Vini Detected")
+                Text("Vini AI Detected")
                     .font(.headline.bold())
                     .foregroundStyle(classicFG)
                 ForEach(shared.sorted(),  id: \.self) {

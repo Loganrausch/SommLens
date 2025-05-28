@@ -13,7 +13,6 @@ struct SommLensApp: App {
     
     // 1) Managers
     @StateObject private var openAIManager = OpenAIManager()
-    @StateObject private var tastingStore  = TastingStore()   // in‑memory for now
     
     // 2) Existing CoreData stack (if you still need it elsewhere)
     let persistenceController = PersistenceController.shared
@@ -34,7 +33,6 @@ struct SommLensApp: App {
                 
                 // Inject both managers for child views
                 .environmentObject(openAIManager)
-                .environmentObject(tastingStore)
         }
     }
     
