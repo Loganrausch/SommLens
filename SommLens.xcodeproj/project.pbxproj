@@ -6,6 +6,60 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CE2416A82DEF481900BBF387 /* LaunchAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416A72DEF480F00BBF387 /* LaunchAnimationView.swift */; };
+		CE2416AA2DEF620100BBF387 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416A92DEF61F400BBF387 /* AppRootView.swift */; };
+		CE2416AC2DEFA7F100BBF387 /* PushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416AB2DEFA7EE00BBF387 /* PushManager.swift */; };
+		CE2416AE2DEFA8D700BBF387 /* PushAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416AD2DEFA8D000BBF387 /* PushAPI.swift */; };
+		CE976C892DEE3A16008B774B /* PopulateFakeScans.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE976C882DEE3A0E008B774B /* PopulateFakeScans.swift */; };
+		CE976C8D2DEE7DAA008B774B /* SimulatedScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE976C8C2DEE7DA3008B774B /* SimulatedScanView.swift */; };
+		CEA0F6602DE773EE0082F76F /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */; };
+		CEA0F6632DE776FE0082F76F /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = CEA0F6622DE776FE0082F76F /* RevenueCat */; };
+		CEA0F6652DE776FE0082F76F /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = CEA0F6642DE776FE0082F76F /* RevenueCatUI */; };
+		CEA0F6672DE7DEAB0082F76F /* ScanQuotaKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA0F6662DE7DEA80082F76F /* ScanQuotaKeychain.swift */; };
+		CEA401012DE8A63F00B498CC /* UnifiedOnboardingOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA401002DE8A63900B498CC /* UnifiedOnboardingOverlayView.swift */; };
+		CEA401052DE8F33600B498CC /* EngagementPromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA401042DE8F32E00B498CC /* EngagementPromptManager.swift */; };
+		CEA401072DE93FB800B498CC /* BottleScanIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA401062DE93FA400B498CC /* BottleScanIdentity.swift */; };
+		CED9D07D2DE75B1800C217AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CED9D0562DE75B1800C217AE /* Assets.xcassets */; };
+		CED9D07E2DE75B1800C217AE /* ScanResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0542DE75B1800C217AE /* ScanResultView.swift */; };
+		CED9D07F2DE75B1800C217AE /* AccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0512DE75B1800C217AE /* AccountViewModel.swift */; };
+		CED9D0802DE75B1800C217AE /* TastingSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0712DE75B1800C217AE /* TastingSummaryView.swift */; };
+		CED9D0822DE75B1800C217AE /* SommLensApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06B2DE75B1800C217AE /* SommLensApp.swift */; };
+		CED9D0832DE75B1800C217AE /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0722DE75B1800C217AE /* Toast.swift */; };
+		CED9D0842DE75B1800C217AE /* NotesStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0612DE75B1800C217AE /* NotesStep.swift */; };
+		CED9D0852DE75B1800C217AE /* VerticalTubeStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0752DE75B1800C217AE /* VerticalTubeStep.swift */; };
+		CED9D0862DE75B1800C217AE /* ScanPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0662DE75B1800C217AE /* ScanPrompts.swift */; };
+		CED9D0872DE75B1800C217AE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0632DE75B1800C217AE /* Persistence.swift */; };
+		CED9D0882DE75B1800C217AE /* MyScansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0602DE75B1800C217AE /* MyScansView.swift */; };
+		CED9D0892DE75B1800C217AE /* TastingInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06E2DE75B1800C217AE /* TastingInput.swift */; };
+		CED9D08A2DE75B1800C217AE /* MailComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D05F2DE75B1800C217AE /* MailComposeView.swift */; };
+		CED9D08B2DE75B1800C217AE /* ContactFormViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0582DE75B1800C217AE /* ContactFormViewModel.swift */; };
+		CED9D08C2DE75B1800C217AE /* SelectionStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0672DE75B1800C217AE /* SelectionStep.swift */; };
+		CED9D08D2DE75B1800C217AE /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D05A2DE75B1800C217AE /* DashboardView.swift */; };
+		CED9D08E2DE75B1800C217AE /* OpenAIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0622DE75B1800C217AE /* OpenAIManager.swift */; };
+		CED9D08F2DE75B1800C217AE /* WineData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0772DE75B1800C217AE /* WineData.swift */; };
+		CED9D0902DE75B1800C217AE /* IntensityEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D05E2DE75B1800C217AE /* IntensityEnum.swift */; };
+		CED9D0922DE75B1800C217AE /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0502DE75B1800C217AE /* AccountView.swift */; };
+		CED9D0932DE75B1800C217AE /* MainScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0552DE75B1800C217AE /* MainScanView.swift */; };
+		CED9D0942DE75B1800C217AE /* ICloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D05C2DE75B1800C217AE /* ICloudSyncService.swift */; };
+		CED9D0952DE75B1800C217AE /* ResetService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0652DE75B1800C217AE /* ResetService.swift */; };
+		CED9D0962DE75B1800C217AE /* VerticalSweepLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0742DE75B1800C217AE /* VerticalSweepLayer.swift */; };
+		CED9D0972DE75B1800C217AE /* WineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0792DE75B1800C217AE /* WineDetailView.swift */; };
+		CED9D0982DE75B1800C217AE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0592DE75B1800C217AE /* ContentView.swift */; };
+		CED9D09A2DE75B1800C217AE /* ActiveAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0522DE75B1800C217AE /* ActiveAlert.swift */; };
+		CED9D09B2DE75B1800C217AE /* AITastingProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0532DE75B1800C217AE /* AITastingProfile.swift */; };
+		CED9D09C2DE75B1800C217AE /* WineDescriptors.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0782DE75B1800C217AE /* WineDescriptors.swift */; };
+		CED9D09D2DE75B1800C217AE /* HeroHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D05B2DE75B1800C217AE /* HeroHomeView.swift */; };
+		CED9D09E2DE75B1800C217AE /* RefreshNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0642DE75B1800C217AE /* RefreshNotifier.swift */; };
+		CED9D09F2DE75B1800C217AE /* ContactFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0572DE75B1800C217AE /* ContactFormView.swift */; };
+		CED9D0A02DE75B1800C217AE /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0682DE75B1800C217AE /* ShareSheet.swift */; };
+		CED9D0A12DE75B1800C217AE /* TastingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06F2DE75B1800C217AE /* TastingSession.swift */; };
+		CED9D0A22DE75B1800C217AE /* WineGlassLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D07A2DE75B1800C217AE /* WineGlassLoadingView.swift */; };
+		CED9D0A32DE75B1800C217AE /* SommLens.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06A2DE75B1800C217AE /* SommLens.xcdatamodeld */; };
+		CED9D0A42DE75B1800C217AE /* TastingFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06D2DE75B1800C217AE /* TastingFormView.swift */; };
+		CED9D0A52DE75B1800C217AE /* TastingSessionEntity+DTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0702DE75B1800C217AE /* TastingSessionEntity+DTO.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CEC2C77C2DB1517C0043FAEB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,72 +78,63 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CE2416A72DEF480F00BBF387 /* LaunchAnimationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAnimationView.swift; sourceTree = "<group>"; };
+		CE2416A92DEF61F400BBF387 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
+		CE2416AB2DEFA7EE00BBF387 /* PushManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushManager.swift; sourceTree = "<group>"; };
+		CE2416AD2DEFA8D000BBF387 /* PushAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushAPI.swift; sourceTree = "<group>"; };
+		CE976C882DEE3A0E008B774B /* PopulateFakeScans.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopulateFakeScans.swift; sourceTree = "<group>"; };
+		CE976C8C2DEE7DA3008B774B /* SimulatedScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatedScanView.swift; sourceTree = "<group>"; };
+		CEA0F6572DE762730082F76F /* SommLensTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEA0F6582DE762730082F76F /* SommLensUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		CEA0F6662DE7DEA80082F76F /* ScanQuotaKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQuotaKeychain.swift; sourceTree = "<group>"; };
+		CEA401002DE8A63900B498CC /* UnifiedOnboardingOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedOnboardingOverlayView.swift; sourceTree = "<group>"; };
+		CEA401042DE8F32E00B498CC /* EngagementPromptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngagementPromptManager.swift; sourceTree = "<group>"; };
+		CEA401062DE93FA400B498CC /* BottleScanIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottleScanIdentity.swift; sourceTree = "<group>"; };
 		CEC2C8152DB95BFF0043FAEB /* SommLens.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SommLens.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEC2C8162DB95BFF0043FAEB /* SommLensTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEC2C8172DB95BFF0043FAEB /* SommLensUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CED9D0502DE75B1800C217AE /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		CED9D0512DE75B1800C217AE /* AccountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountViewModel.swift; sourceTree = "<group>"; };
+		CED9D0522DE75B1800C217AE /* ActiveAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveAlert.swift; sourceTree = "<group>"; };
+		CED9D0532DE75B1800C217AE /* AITastingProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITastingProfile.swift; sourceTree = "<group>"; };
+		CED9D0542DE75B1800C217AE /* ScanResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResultView.swift; sourceTree = "<group>"; };
+		CED9D0552DE75B1800C217AE /* MainScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScanView.swift; sourceTree = "<group>"; };
+		CED9D0562DE75B1800C217AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CED9D0572DE75B1800C217AE /* ContactFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactFormView.swift; sourceTree = "<group>"; };
+		CED9D0582DE75B1800C217AE /* ContactFormViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactFormViewModel.swift; sourceTree = "<group>"; };
+		CED9D0592DE75B1800C217AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CED9D05A2DE75B1800C217AE /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		CED9D05B2DE75B1800C217AE /* HeroHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroHomeView.swift; sourceTree = "<group>"; };
+		CED9D05C2DE75B1800C217AE /* ICloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudSyncService.swift; sourceTree = "<group>"; };
+		CED9D05D2DE75B1800C217AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CED9D05E2DE75B1800C217AE /* IntensityEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntensityEnum.swift; sourceTree = "<group>"; };
+		CED9D05F2DE75B1800C217AE /* MailComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailComposeView.swift; sourceTree = "<group>"; };
+		CED9D0602DE75B1800C217AE /* MyScansView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyScansView.swift; sourceTree = "<group>"; };
+		CED9D0612DE75B1800C217AE /* NotesStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesStep.swift; sourceTree = "<group>"; };
+		CED9D0622DE75B1800C217AE /* OpenAIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIManager.swift; sourceTree = "<group>"; };
+		CED9D0632DE75B1800C217AE /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		CED9D0642DE75B1800C217AE /* RefreshNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshNotifier.swift; sourceTree = "<group>"; };
+		CED9D0652DE75B1800C217AE /* ResetService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetService.swift; sourceTree = "<group>"; };
+		CED9D0662DE75B1800C217AE /* ScanPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanPrompts.swift; sourceTree = "<group>"; };
+		CED9D0672DE75B1800C217AE /* SelectionStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionStep.swift; sourceTree = "<group>"; };
+		CED9D0682DE75B1800C217AE /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		CED9D06B2DE75B1800C217AE /* SommLensApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SommLensApp.swift; sourceTree = "<group>"; };
+		CED9D06D2DE75B1800C217AE /* TastingFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingFormView.swift; sourceTree = "<group>"; };
+		CED9D06E2DE75B1800C217AE /* TastingInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingInput.swift; sourceTree = "<group>"; };
+		CED9D06F2DE75B1800C217AE /* TastingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingSession.swift; sourceTree = "<group>"; };
+		CED9D0702DE75B1800C217AE /* TastingSessionEntity+DTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TastingSessionEntity+DTO.swift"; sourceTree = "<group>"; };
+		CED9D0712DE75B1800C217AE /* TastingSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingSummaryView.swift; sourceTree = "<group>"; };
+		CED9D0722DE75B1800C217AE /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
+		CED9D0742DE75B1800C217AE /* VerticalSweepLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalSweepLayer.swift; sourceTree = "<group>"; };
+		CED9D0752DE75B1800C217AE /* VerticalTubeStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalTubeStep.swift; sourceTree = "<group>"; };
+		CED9D0772DE75B1800C217AE /* WineData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WineData.swift; sourceTree = "<group>"; };
+		CED9D0782DE75B1800C217AE /* WineDescriptors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WineDescriptors.swift; sourceTree = "<group>"; };
+		CED9D0792DE75B1800C217AE /* WineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WineDetailView.swift; sourceTree = "<group>"; };
+		CED9D07A2DE75B1800C217AE /* WineGlassLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WineGlassLoadingView.swift; sourceTree = "<group>"; };
+		CED9D07C2DE75B1800C217AE /* SommLensREAL.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SommLensREAL.xcdatamodel; sourceTree = "<group>"; };
+		CED9D0AF2DE761D000C217AE /* SommLens.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SommLens.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CE25B36E2DE68E5200F0F7EA /* Exceptions for "SommLens" folder in "SommLens" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				AccountView.swift,
-				AccountViewModel.swift,
-				ActiveAlert.swift,
-				AITastingProfile.swift,
-				ARScanResultView.swift,
-				ARScanView.swift,
-				Assets.xcassets,
-				ContactFormView.swift,
-				ContactFormViewModel.swift,
-				ContentView.swift,
-				DashboardView.swift,
-				HeroHomeView.swift,
-				HorizontalShimmer.swift,
-				ICloudSyncService.swift,
-				ImagePreprocessor.swift,
-				IntensityEnum.swift,
-				MailComposeView.swift,
-				MyScansView.swift,
-				NotesStep.swift,
-				OpenAIManager.swift,
-				Persistence.swift,
-				RefreshNotifier.swift,
-				ResetService.swift,
-				ScanPrompts.swift,
-				SelectionStep.swift,
-				ShareSheet.swift,
-				SommLens.xcdatamodeld,
-				SommLensApp.swift,
-				SquishyButtonStyle.swift,
-				TastingFormView.swift,
-				TastingInput.swift,
-				TastingSession.swift,
-				"TastingSessionEntity+DTO.swift",
-				TastingSummaryView.swift,
-				Toast.swift,
-				"UIImage+Resize.swift",
-				VerticalLaserScanOneShot.swift,
-				VerticalTubeStep.swift,
-				Wave.swift,
-				WineData.swift,
-				WineDescriptors.swift,
-				WineDetailView.swift,
-				WineGlassLoadingView.swift,
-			);
-			target = CEC2C7632DB1517B0043FAEB /* SommLens */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CE25B36B2DE68D9500F0F7EA /* SommLens */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				CE25B36E2DE68E5200F0F7EA /* Exceptions for "SommLens" folder in "SommLens" target */,
-			);
-			path = SommLens;
-			sourceTree = "<group>";
-		};
 		CEC2C77E2DB1517C0043FAEB /* SommLensTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = SommLensTests;
@@ -107,6 +152,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEA0F6652DE776FE0082F76F /* RevenueCatUI in Frameworks */,
+				CEA0F6632DE776FE0082F76F /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,24 +174,146 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		09A9EA84C4CE08A1BC57F44E /* Frameworks */ = {
+		CE976C8E2DEE8432008B774B /* Screenshot Code */ = {
 			isa = PBXGroup;
 			children = (
+				CE976C882DEE3A0E008B774B /* PopulateFakeScans.swift */,
+				CE976C8C2DEE7DA3008B774B /* SimulatedScanView.swift */,
 			);
-			name = Frameworks;
+			path = "Screenshot Code";
 			sourceTree = "<group>";
 		};
 		CEC2C75B2DB1517B0043FAEB = {
 			isa = PBXGroup;
 			children = (
-				CE25B36B2DE68D9500F0F7EA /* SommLens */,
+				CED9D07B2DE75B1800C217AE /* SommLens */,
 				CEC2C77E2DB1517C0043FAEB /* SommLensTests */,
 				CEC2C7882DB1517C0043FAEB /* SommLensUITests */,
 				CEC2C8152DB95BFF0043FAEB /* SommLens.app */,
-				CEC2C8162DB95BFF0043FAEB /* SommLensTests.xctest */,
-				CEC2C8172DB95BFF0043FAEB /* SommLensUITests.xctest */,
-				09A9EA84C4CE08A1BC57F44E /* Frameworks */,
+				CEA0F6572DE762730082F76F /* SommLensTests.xctest */,
+				CEA0F6582DE762730082F76F /* SommLensUITests.xctest */,
 			);
+			sourceTree = "<group>";
+		};
+		CED9D07B2DE75B1800C217AE /* SommLens */ = {
+			isa = PBXGroup;
+			children = (
+				CED9D0A62DE75B7100C217AE /* Account */,
+				CED9D0AD2DE75DB400C217AE /* App Startup */,
+				CED9D0A92DE75D1300C217AE /* Dashboard */,
+				CED9D0AC2DE75D9300C217AE /* MyScans */,
+				CED9D0A82DE75CE100C217AE /* Scanning */,
+				CED9D0AA2DE75D5B00C217AE /* Shared */,
+				CED9D0AB2DE75D7800C217AE /* Supporting */,
+				CED9D0A72DE75C3200C217AE /* Tasting */,
+				CED9D06A2DE75B1800C217AE /* SommLens.xcdatamodeld */,
+				CE976C8E2DEE8432008B774B /* Screenshot Code */,
+				CED9D0562DE75B1800C217AE /* Assets.xcassets */,
+			);
+			path = SommLens;
+			sourceTree = "<group>";
+		};
+		CED9D0A62DE75B7100C217AE /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				CED9D0502DE75B1800C217AE /* AccountView.swift */,
+				CED9D0512DE75B1800C217AE /* AccountViewModel.swift */,
+				CED9D0522DE75B1800C217AE /* ActiveAlert.swift */,
+				CED9D0572DE75B1800C217AE /* ContactFormView.swift */,
+				CED9D0582DE75B1800C217AE /* ContactFormViewModel.swift */,
+				CED9D05C2DE75B1800C217AE /* ICloudSyncService.swift */,
+				CED9D05F2DE75B1800C217AE /* MailComposeView.swift */,
+				CED9D0652DE75B1800C217AE /* ResetService.swift */,
+				CED9D0682DE75B1800C217AE /* ShareSheet.swift */,
+				CED9D0722DE75B1800C217AE /* Toast.swift */,
+			);
+			path = Account;
+			sourceTree = "<group>";
+		};
+		CED9D0A72DE75C3200C217AE /* Tasting */ = {
+			isa = PBXGroup;
+			children = (
+				CEA401062DE93FA400B498CC /* BottleScanIdentity.swift */,
+				CED9D0532DE75B1800C217AE /* AITastingProfile.swift */,
+				CED9D05E2DE75B1800C217AE /* IntensityEnum.swift */,
+				CED9D0612DE75B1800C217AE /* NotesStep.swift */,
+				CED9D0672DE75B1800C217AE /* SelectionStep.swift */,
+				CED9D06D2DE75B1800C217AE /* TastingFormView.swift */,
+				CED9D06E2DE75B1800C217AE /* TastingInput.swift */,
+				CED9D06F2DE75B1800C217AE /* TastingSession.swift */,
+				CED9D0702DE75B1800C217AE /* TastingSessionEntity+DTO.swift */,
+				CED9D0712DE75B1800C217AE /* TastingSummaryView.swift */,
+				CED9D0752DE75B1800C217AE /* VerticalTubeStep.swift */,
+				CED9D0782DE75B1800C217AE /* WineDescriptors.swift */,
+			);
+			path = Tasting;
+			sourceTree = "<group>";
+		};
+		CED9D0A82DE75CE100C217AE /* Scanning */ = {
+			isa = PBXGroup;
+			children = (
+				CED9D0542DE75B1800C217AE /* ScanResultView.swift */,
+				CED9D0552DE75B1800C217AE /* MainScanView.swift */,
+				CED9D0742DE75B1800C217AE /* VerticalSweepLayer.swift */,
+				CED9D07A2DE75B1800C217AE /* WineGlassLoadingView.swift */,
+			);
+			path = Scanning;
+			sourceTree = "<group>";
+		};
+		CED9D0A92DE75D1300C217AE /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				CEA401002DE8A63900B498CC /* UnifiedOnboardingOverlayView.swift */,
+				CED9D05A2DE75B1800C217AE /* DashboardView.swift */,
+				CED9D05B2DE75B1800C217AE /* HeroHomeView.swift */,
+				CED9D0662DE75B1800C217AE /* ScanPrompts.swift */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		CED9D0AA2DE75D5B00C217AE /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CEA401042DE8F32E00B498CC /* EngagementPromptManager.swift */,
+				CEA0F6662DE7DEA80082F76F /* ScanQuotaKeychain.swift */,
+				CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */,
+				CED9D0622DE75B1800C217AE /* OpenAIManager.swift */,
+				CED9D0632DE75B1800C217AE /* Persistence.swift */,
+				CED9D0772DE75B1800C217AE /* WineData.swift */,
+				CED9D0642DE75B1800C217AE /* RefreshNotifier.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		CED9D0AB2DE75D7800C217AE /* Supporting */ = {
+			isa = PBXGroup;
+			children = (
+				CED9D05D2DE75B1800C217AE /* Info.plist */,
+				CED9D0AF2DE761D000C217AE /* SommLens.entitlements */,
+			);
+			path = Supporting;
+			sourceTree = "<group>";
+		};
+		CED9D0AC2DE75D9300C217AE /* MyScans */ = {
+			isa = PBXGroup;
+			children = (
+				CED9D0602DE75B1800C217AE /* MyScansView.swift */,
+				CED9D0792DE75B1800C217AE /* WineDetailView.swift */,
+			);
+			path = MyScans;
+			sourceTree = "<group>";
+		};
+		CED9D0AD2DE75DB400C217AE /* App Startup */ = {
+			isa = PBXGroup;
+			children = (
+				CE2416AD2DEFA8D000BBF387 /* PushAPI.swift */,
+				CED9D06B2DE75B1800C217AE /* SommLensApp.swift */,
+				CE2416A92DEF61F400BBF387 /* AppRootView.swift */,
+				CED9D0592DE75B1800C217AE /* ContentView.swift */,
+				CE2416A72DEF480F00BBF387 /* LaunchAnimationView.swift */,
+				CE2416AB2DEFA7EE00BBF387 /* PushManager.swift */,
+			);
+			path = "App Startup";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -185,7 +354,7 @@
 			);
 			name = SommLensTests;
 			productName = SommLensTests;
-			productReference = CEC2C8162DB95BFF0043FAEB /* SommLensTests.xctest */;
+			productReference = CEA0F6572DE762730082F76F /* SommLensTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		CEC2C7842DB1517C0043FAEB /* SommLensUITests */ = {
@@ -206,7 +375,7 @@
 			);
 			name = SommLensUITests;
 			productName = SommLensUITests;
-			productReference = CEC2C8172DB95BFF0043FAEB /* SommLensUITests.xctest */;
+			productReference = CEA0F6582DE762730082F76F /* SommLensUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -242,6 +411,9 @@
 			);
 			mainGroup = CEC2C75B2DB1517B0043FAEB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CEA0F6612DE776FE0082F76F /* XCRemoteSwiftPackageReference "purchases-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CEC2C75B2DB1517B0043FAEB;
 			projectDirPath = "";
@@ -259,6 +431,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CED9D07D2DE75B1800C217AE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,6 +456,54 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CED9D07E2DE75B1800C217AE /* ScanResultView.swift in Sources */,
+				CED9D07F2DE75B1800C217AE /* AccountViewModel.swift in Sources */,
+				CE2416AE2DEFA8D700BBF387 /* PushAPI.swift in Sources */,
+				CED9D0802DE75B1800C217AE /* TastingSummaryView.swift in Sources */,
+				CED9D0822DE75B1800C217AE /* SommLensApp.swift in Sources */,
+				CED9D0832DE75B1800C217AE /* Toast.swift in Sources */,
+				CED9D0842DE75B1800C217AE /* NotesStep.swift in Sources */,
+				CEA0F6602DE773EE0082F76F /* AuthViewModel.swift in Sources */,
+				CEA401012DE8A63F00B498CC /* UnifiedOnboardingOverlayView.swift in Sources */,
+				CED9D0852DE75B1800C217AE /* VerticalTubeStep.swift in Sources */,
+				CED9D0862DE75B1800C217AE /* ScanPrompts.swift in Sources */,
+				CEA401072DE93FB800B498CC /* BottleScanIdentity.swift in Sources */,
+				CED9D0872DE75B1800C217AE /* Persistence.swift in Sources */,
+				CED9D0882DE75B1800C217AE /* MyScansView.swift in Sources */,
+				CED9D0892DE75B1800C217AE /* TastingInput.swift in Sources */,
+				CE2416AA2DEF620100BBF387 /* AppRootView.swift in Sources */,
+				CED9D08A2DE75B1800C217AE /* MailComposeView.swift in Sources */,
+				CED9D08B2DE75B1800C217AE /* ContactFormViewModel.swift in Sources */,
+				CED9D08C2DE75B1800C217AE /* SelectionStep.swift in Sources */,
+				CED9D08D2DE75B1800C217AE /* DashboardView.swift in Sources */,
+				CED9D08E2DE75B1800C217AE /* OpenAIManager.swift in Sources */,
+				CED9D08F2DE75B1800C217AE /* WineData.swift in Sources */,
+				CED9D0902DE75B1800C217AE /* IntensityEnum.swift in Sources */,
+				CED9D0922DE75B1800C217AE /* AccountView.swift in Sources */,
+				CED9D0932DE75B1800C217AE /* MainScanView.swift in Sources */,
+				CED9D0942DE75B1800C217AE /* ICloudSyncService.swift in Sources */,
+				CED9D0952DE75B1800C217AE /* ResetService.swift in Sources */,
+				CED9D0962DE75B1800C217AE /* VerticalSweepLayer.swift in Sources */,
+				CED9D0972DE75B1800C217AE /* WineDetailView.swift in Sources */,
+				CED9D0982DE75B1800C217AE /* ContentView.swift in Sources */,
+				CED9D09A2DE75B1800C217AE /* ActiveAlert.swift in Sources */,
+				CED9D09B2DE75B1800C217AE /* AITastingProfile.swift in Sources */,
+				CEA0F6672DE7DEAB0082F76F /* ScanQuotaKeychain.swift in Sources */,
+				CEA401052DE8F33600B498CC /* EngagementPromptManager.swift in Sources */,
+				CED9D09C2DE75B1800C217AE /* WineDescriptors.swift in Sources */,
+				CED9D09D2DE75B1800C217AE /* HeroHomeView.swift in Sources */,
+				CE2416A82DEF481900BBF387 /* LaunchAnimationView.swift in Sources */,
+				CED9D09E2DE75B1800C217AE /* RefreshNotifier.swift in Sources */,
+				CE976C892DEE3A16008B774B /* PopulateFakeScans.swift in Sources */,
+				CED9D09F2DE75B1800C217AE /* ContactFormView.swift in Sources */,
+				CED9D0A02DE75B1800C217AE /* ShareSheet.swift in Sources */,
+				CED9D0A12DE75B1800C217AE /* TastingSession.swift in Sources */,
+				CE2416AC2DEFA7F100BBF387 /* PushManager.swift in Sources */,
+				CED9D0A22DE75B1800C217AE /* WineGlassLoadingView.swift in Sources */,
+				CED9D0A32DE75B1800C217AE /* SommLens.xcdatamodeld in Sources */,
+				CED9D0A42DE75B1800C217AE /* TastingFormView.swift in Sources */,
+				CE976C8D2DEE7DAA008B774B /* SimulatedScanView.swift in Sources */,
+				CED9D0A52DE75B1800C217AE /* TastingSessionEntity+DTO.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,15 +543,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = SommLens/SommLens.entitlements;
+				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SommLens/Info.plist;
+				INFOPLIST_FILE = SommLens/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SommLens;
-				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to scan wine labels in augmented reality.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "SommLens uses the camera to scan wine labels and for AI insights.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -359,15 +580,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = SommLens/SommLens.entitlements;
+				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SommLens/Info.plist;
+				INFOPLIST_FILE = SommLens/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SommLens;
-				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to scan wine labels in augmented reality.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "SommLens uses the camera to scan wine labels and for AI insights.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -622,6 +843,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CEA0F6612DE776FE0082F76F /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.25.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CEA0F6622DE776FE0082F76F /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CEA0F6612DE776FE0082F76F /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCat;
+		};
+		CEA0F6642DE776FE0082F76F /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CEA0F6612DE776FE0082F76F /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCatUI;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		CED9D06A2DE75B1800C217AE /* SommLens.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				CED9D07C2DE75B1800C217AE /* SommLensREAL.xcdatamodel */,
+			);
+			currentVersion = CED9D07C2DE75B1800C217AE /* SommLensREAL.xcdatamodel */;
+			path = SommLens.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = CEC2C75C2DB1517B0043FAEB /* Project object */;
 }
