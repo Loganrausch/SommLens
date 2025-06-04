@@ -111,7 +111,7 @@ struct DashboardView: View {
                     QuotaCard(
                         used: scansUsed,
                         limit: auth.scanLimit,
-                        resetDate: resetString
+                        resetDate: auth.hasActiveSubscription ? resetString : "--"
                     )
                     .padding(.horizontal)
                     

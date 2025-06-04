@@ -82,9 +82,11 @@ struct WineDetailView: View {
                         Text("“\(vibe)”")
                             .font(.body.italic())
                             .multilineTextAlignment(.center)
-                            .padding(.top, 6)
                             .foregroundColor(.primary)
+                            .padding(.top, 6)
+                            .padding(.horizontal)
                     }
+                    
                     if let tasting = tastings.first {
                         Button {
                             selectedDTO = tasting.dto

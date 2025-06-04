@@ -60,10 +60,12 @@ final class AccountViewModel: ObservableObject {
     func rateAppTapped() { showRateAlert = true }
     
     func openAppStoreForRating() {
-        // TODO: replace APP_ID
-        let appURL = URL(string: "itms-apps://itunes.apple.com/app/idAPP_ID?action=write-review")!
-        if UIApplication.shared.canOpenURL(appURL) {
-            UIApplication.shared.open(appURL)
+        let appStoreURL = URL(string: "itms-apps://itunes.apple.com/app/id6746465776?action=write-review")!
+        if UIApplication.shared.canOpenURL(appStoreURL) {
+            UIApplication.shared.open(appStoreURL)
+        } else {
+            let fallbackURL = URL(string: "https://apps.apple.com/app/id6746465776?action=write-review")!
+            UIApplication.shared.open(fallbackURL)
         }
     }
     

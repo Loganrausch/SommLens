@@ -244,7 +244,7 @@ final class OpenAIManager: ObservableObject {
             • "grapes": all visible or inferable varieties as an array of strings.
             • "vintage": four-digit year if shown or known.
             • "tastingNotes": should always be filled out, inferred from grapes + location if needed.
-            • "pairings": 3 specific food pairings (not broad cuisines).
+            • "pairings": 3 specific food pairings (not broad cuisines) e.g., Grilled chicken with lemon butter sauce.
             • "vibeTag": 10 - 15 words, emotional tone (e.g., Graceful, earthy, and quietly seductive — a true expression of Burgundian finesse.).
             • "vineyard": only if specific site is known (e.g., “La Tâche” or “To-Kalon”).
             • "soilType": e.g., clay-limestone, volcanic — use known terroirs.

@@ -9,7 +9,6 @@ import SwiftUI
 import MessageUI
 
 struct MailComposeView: UIViewControllerRepresentable {
-    @Environment(\.dismiss) var dismiss
     @Binding var isShowing: Bool
     @Binding var result: Result<MFMailComposeResult, Error>?
     var configure: (MFMailComposeViewController) -> Void
@@ -29,13 +28,19 @@ struct MailComposeView: UIViewControllerRepresentable {
         let parent: MailComposeView
         init(_ parent: MailComposeView) { self.parent = parent }
 
-        func mailComposeController(_ controller: MFMailComposeViewController,
-                                   didFinishWith result: MFMailComposeResult,
-                                   error: Error?) {
-            if let error { parent.result = .failure(error) }
-            else { parent.result = .success(result) }
+        func mailComposeController(
+            _ controller: MFMailComposeViewController,
+            didFinishWith mailResult: MFMailComposeResult,
+            error: Error?
+        ) {
+            if let error = error {
+                parent.result = .failure(error)
+            } else {
+                parent.result = .success(mailResult)
+            }
+
+            // Only toggle the binding—SwiftUI will dismiss the sheet for you.
             parent.isShowing = false
-            parent.dismiss()
         }
     }
 }

@@ -40,7 +40,7 @@ class ContactFormViewModel: ObservableObject {
 
     func configureMail(_ vc: MFMailComposeViewController) {
         vc.setSubject("Feedback from \(name)")
-        vc.setToRecipients(["support@sommlens.app"])
+        vc.setToRecipients(["support@vinobytes.com"])
         vc.setMessageBody(message, isHTML: false)
     }
 }

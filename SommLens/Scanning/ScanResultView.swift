@@ -7,12 +7,14 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct ScanResultView: View {
     @Environment(\.dismiss) private var dismiss
     
     // Inject your managers
     @EnvironmentObject private var openAIManager: OpenAIManager
+    @EnvironmentObject var engagementState: EngagementState
     
     @Environment(\.managedObjectContext) private var ctx   // add this
     
@@ -29,6 +31,7 @@ struct ScanResultView: View {
     @State private var showTasteSheet  = false
     @State private var aiProfile: AITastingProfile?
     @State private var isLoadingTaste  = false
+    
     
     @Binding var selectedTab: MainTab
     
@@ -153,7 +156,7 @@ struct ScanResultView: View {
                 wineData: wineData,
                 snapshot: capturedImage
             )
-                .presentationDetents([.large])
+            .presentationDetents([.large])
         }
         
         // Tasting flow sheet
@@ -178,13 +181,11 @@ struct ScanResultView: View {
             }
         }
         // ← add these two at the very end:
-            .onChange(of: selectedTab) { _ in
-                onDismiss()
-                dismiss()
-            }
-            .onDisappear {
-                   onDismiss()
-               }
+        .onChange(of: selectedTab) { _ in
+            onDismiss()
+            dismiss()
+        }
+        
     }
     
     // MARK: – AI fetch

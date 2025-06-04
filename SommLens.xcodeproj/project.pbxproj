@@ -11,6 +11,9 @@
 		CE2416AA2DEF620100BBF387 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416A92DEF61F400BBF387 /* AppRootView.swift */; };
 		CE2416AC2DEFA7F100BBF387 /* PushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416AB2DEFA7EE00BBF387 /* PushManager.swift */; };
 		CE2416AE2DEFA8D700BBF387 /* PushAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416AD2DEFA8D000BBF387 /* PushAPI.swift */; };
+		CE4EF4262DEFD199006AD0FA /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4252DEFD192006AD0FA /* DebugSection.swift */; };
+		CE4EF4282DEFDB05006AD0FA /* EngagementState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4272DEFDAFE006AD0FA /* EngagementState.swift */; };
+		CE4EF42A2DEFDBA3006AD0FA /* EngagementMilestones.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4292DEFDB9B006AD0FA /* EngagementMilestones.swift */; };
 		CE976C892DEE3A16008B774B /* PopulateFakeScans.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE976C882DEE3A0E008B774B /* PopulateFakeScans.swift */; };
 		CE976C8D2DEE7DAA008B774B /* SimulatedScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE976C8C2DEE7DA3008B774B /* SimulatedScanView.swift */; };
 		CEA0F6602DE773EE0082F76F /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */; };
@@ -82,6 +85,9 @@
 		CE2416A92DEF61F400BBF387 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
 		CE2416AB2DEFA7EE00BBF387 /* PushManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushManager.swift; sourceTree = "<group>"; };
 		CE2416AD2DEFA8D000BBF387 /* PushAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushAPI.swift; sourceTree = "<group>"; };
+		CE4EF4252DEFD192006AD0FA /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
+		CE4EF4272DEFDAFE006AD0FA /* EngagementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngagementState.swift; sourceTree = "<group>"; };
+		CE4EF4292DEFDB9B006AD0FA /* EngagementMilestones.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngagementMilestones.swift; sourceTree = "<group>"; };
 		CE976C882DEE3A0E008B774B /* PopulateFakeScans.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopulateFakeScans.swift; sourceTree = "<group>"; };
 		CE976C8C2DEE7DA3008B774B /* SimulatedScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatedScanView.swift; sourceTree = "<group>"; };
 		CEA0F6572DE762730082F76F /* SommLensTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -177,6 +183,7 @@
 		CE976C8E2DEE8432008B774B /* Screenshot Code */ = {
 			isa = PBXGroup;
 			children = (
+				CE4EF4252DEFD192006AD0FA /* DebugSection.swift */,
 				CE976C882DEE3A0E008B774B /* PopulateFakeScans.swift */,
 				CE976C8C2DEE7DA3008B774B /* SimulatedScanView.swift */,
 			);
@@ -274,6 +281,8 @@
 		CED9D0AA2DE75D5B00C217AE /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				CE4EF4292DEFDB9B006AD0FA /* EngagementMilestones.swift */,
+				CE4EF4272DEFDAFE006AD0FA /* EngagementState.swift */,
 				CEA401042DE8F32E00B498CC /* EngagementPromptManager.swift */,
 				CEA0F6662DE7DEA80082F76F /* ScanQuotaKeychain.swift */,
 				CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */,
@@ -470,6 +479,7 @@
 				CEA401072DE93FB800B498CC /* BottleScanIdentity.swift in Sources */,
 				CED9D0872DE75B1800C217AE /* Persistence.swift in Sources */,
 				CED9D0882DE75B1800C217AE /* MyScansView.swift in Sources */,
+				CE4EF4282DEFDB05006AD0FA /* EngagementState.swift in Sources */,
 				CED9D0892DE75B1800C217AE /* TastingInput.swift in Sources */,
 				CE2416AA2DEF620100BBF387 /* AppRootView.swift in Sources */,
 				CED9D08A2DE75B1800C217AE /* MailComposeView.swift in Sources */,
@@ -477,6 +487,7 @@
 				CED9D08C2DE75B1800C217AE /* SelectionStep.swift in Sources */,
 				CED9D08D2DE75B1800C217AE /* DashboardView.swift in Sources */,
 				CED9D08E2DE75B1800C217AE /* OpenAIManager.swift in Sources */,
+				CE4EF4262DEFD199006AD0FA /* DebugSection.swift in Sources */,
 				CED9D08F2DE75B1800C217AE /* WineData.swift in Sources */,
 				CED9D0902DE75B1800C217AE /* IntensityEnum.swift in Sources */,
 				CED9D0922DE75B1800C217AE /* AccountView.swift in Sources */,
@@ -495,6 +506,7 @@
 				CE2416A82DEF481900BBF387 /* LaunchAnimationView.swift in Sources */,
 				CED9D09E2DE75B1800C217AE /* RefreshNotifier.swift in Sources */,
 				CE976C892DEE3A16008B774B /* PopulateFakeScans.swift in Sources */,
+				CE4EF42A2DEFDBA3006AD0FA /* EngagementMilestones.swift in Sources */,
 				CED9D09F2DE75B1800C217AE /* ContactFormView.swift in Sources */,
 				CED9D0A02DE75B1800C217AE /* ShareSheet.swift in Sources */,
 				CED9D0A12DE75B1800C217AE /* TastingSession.swift in Sources */,
@@ -545,7 +557,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -582,7 +594,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

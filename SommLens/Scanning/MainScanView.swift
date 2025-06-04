@@ -223,6 +223,7 @@ struct FreezeOverlay: View {
 // ─────────────────────────────────────────────────────────────
 struct MainScanView: View {
     @EnvironmentObject var auth: AuthViewModel               // ← add
+    @EnvironmentObject var engagementState: EngagementState
     @Environment(\.managedObjectContext) private var ctx
     @StateObject private var ai = OpenAIManager()
     
@@ -238,9 +239,13 @@ struct MainScanView: View {
     @State private var captureDevice: AVCaptureDevice?
     @State private var bufferDelegate = BufferDelegate()
     @State private var highResImage: UIImage? = nil
+    
     @State private var reachedProLimit = false                // ← alert for Pro users
+    @State private var reachedFreeLimit = false
+    
     @State private var didShowPaywall = false
     @State private var showScanError = false
+    @State private var showShareSheet = false
     
     @Binding var selectedTab: MainTab
     @Binding var frozenImage: UIImage?
@@ -248,6 +253,7 @@ struct MainScanView: View {
     @Binding var isProcessing: Bool
     @Binding var showOverlay: Bool
     @Binding var hasExtracted: Bool
+    
     
     
     private var canScan: Bool {
@@ -305,14 +311,16 @@ struct MainScanView: View {
                         showOverlay   = false
                         hasExtracted  = false
                         
-                        // After saving a scan result
-                        EngagementMilestones.increment("scanShareCount",  type: .share)
-                        EngagementMilestones.increment("scanReviewCount", type: .review)
-
-                    },
-                    selectedTab: $selectedTab
-                )
-            }
+                        // Defer the increments so that the view is fully out of the hierarchy first:
+                                   DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                       EngagementMilestones.increment("scanShareCount",  type: .share)
+                                       EngagementMilestones.increment("scanReviewCount", type: .review)
+                                       
+                                   }
+                               },
+                               selectedTab: $selectedTab
+                           )
+                       }
         }
         .alert("Scan failed", isPresented: $showScanError) {
             Button("Try Again", role: .cancel) { }
@@ -327,8 +335,33 @@ struct MainScanView: View {
         } message: {
             Text("Wow, you scanned 200 wines this month! Your scan limit resets on the first of each month. Thank you for being a SommLens Pro user.")
         }
+        .alert("Scan Limit Reached", isPresented: $reachedFreeLimit) {
+            Button("Upgrade to Pro") {
+                auth.isPaywallPresented = true
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Free users get 10 free scans. Upgrade to SommLens Pro to unlock 200 scans every month!")
+        }
+        // “Love SommLens?” alert—this only appears when `request(.share)` sets the flag:
+               .alert("Love SommLens?", isPresented: $engagementState.showSharePrompt) {
+                   Button("Not Now", role: .cancel) {}
+                   Button("Share") {
+                       // Defer toggling the system share sheet so the alert has time to dismiss:
+                       DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                           showShareSheet = true
+                       }
+                   }
+               } message: {
+                   Text("Tell your friends about SommLens!")
+               }
+               // System share sheet:
+               .sheet(isPresented: $showShareSheet) {
+                   ShareSheet(activityItems: ["I’m using SommLens to learn about wine — check it out!"])
+               }
        
     }
+    
     
     
     
@@ -383,7 +416,7 @@ struct MainScanView: View {
             if auth.hasActiveSubscription {
                 reachedProLimit = true            // 200 reached
             } else {
-                auth.isPaywallPresented = true   // free user upsell
+                reachedFreeLimit = true    // ← show alert first
             }
             return
         }

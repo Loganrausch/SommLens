@@ -9,9 +9,12 @@ import SwiftUI
 import MessageUI
 
 struct ContactFormView: View {
+    
+    @Environment(\.dismiss) private var dismiss
+    
     @StateObject private var viewModel = ContactFormViewModel()
     @FocusState private var isMessageFocused: Bool
-
+    
     var body: some View {
         Form {
             // ── Name ────────────────────────────────
@@ -19,14 +22,14 @@ struct ContactFormView: View {
                 TextField("Name", text: $viewModel.name)
                     .autocapitalization(.words)
             }
-
+            
             // ── Message ─────────────────────────────
             Section(header: Text("Your Feedback")) {
                 TextEditor(text: $viewModel.message)
                     .frame(minHeight: 150)
                     .focused($isMessageFocused)
             }
-
+            
             // ── Send ───────────────────────────────
             Button("Send Feedback") {
                 isMessageFocused = false
@@ -51,7 +54,20 @@ struct ContactFormView: View {
                             result: $viewModel.mailResult) { mailVC in
                 viewModel.configureMail(mailVC)
             }
-            .preferredColorScheme(.light)
+                            .preferredColorScheme(.light)
+        }
+        .onReceive(viewModel.$mailResult) { newResult in
+            guard let result = newResult else { return }
+            switch result {
+            case .success(let mfResult):
+                if mfResult == .sent {
+                    viewModel.name = ""
+                    viewModel.message = ""
+                    dismiss()
+                }
+            case .failure:
+                break
+            }
         }
     }
 }

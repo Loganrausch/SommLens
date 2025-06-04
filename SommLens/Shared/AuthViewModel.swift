@@ -26,8 +26,12 @@ final class AuthViewModel: NSObject, ObservableObject {
     @Published var isPaywallPresented:    Bool    = false         // RC pay-wall trigger
 
     // MARK: - Constants
-    private let proLimit  = 200
-    private let freeLimit = 5
+    private let proLimit  = 200 // MONTHLY
+    private let freeLimit = 10  // LIFETIME
+    
+    // One key that never resets for free users
+        private let freeScanKey = "freeScanCount"
+    
     var   scanLimit: Int  { hasActiveSubscription ? proLimit : freeLimit }
 
     // MARK: - Private
@@ -94,16 +98,16 @@ final class AuthViewModel: NSObject, ObservableObject {
     }
 
     func getScanCount() -> Int {
-        let key = scanCountKey()
-        return ScanQuotaKeychain.loadCount(for: key) ?? 0
-    }
+           let key = hasActiveSubscription ? scanCountKey() : freeScanKey
+           return ScanQuotaKeychain.loadCount(for: key) ?? 0
+       }
 
     func incrementScanCount() {
-        let key = scanCountKey()
-        let current = ScanQuotaKeychain.loadCount(for: key) ?? 0
-        ScanQuotaKeychain.saveCount(current + 1, for: key)
-    }
-}
+           let key = hasActiveSubscription ? scanCountKey() : freeScanKey
+           let current = ScanQuotaKeychain.loadCount(for: key) ?? 0
+           ScanQuotaKeychain.saveCount(current + 1, for: key)
+       }
+   }
 
 // MARK: - PurchasesDelegate
 extension AuthViewModel: PurchasesDelegate {

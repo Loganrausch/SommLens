@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import RevenueCat
 
 struct AccountView: View {
     
@@ -16,6 +17,8 @@ struct AccountView: View {
     @ObservedObject                      var refreshNotifier: RefreshNotifier
     
     @StateObject private var viewModel: AccountViewModel
+    
+    @State private var showVinoBytesPrompt = false
     
     // MARK: – Init
     init(refreshNotifier: RefreshNotifier,
@@ -47,7 +50,7 @@ struct AccountView: View {
         }
         .sheet(isPresented: $viewModel.showingShareSheet) {
             ShareSheet(activityItems: [
-                "SommLens makes learning wine effortless – download it here: <App Store URL>"
+                "Check out SommLens! You can scan wine bottles with AI:\nhttps://apps.apple.com/app/id6746465776"
             ])
             .environment(\.colorScheme, .light)
         }
@@ -75,90 +78,110 @@ struct AccountView: View {
         } message: {
             Text("Please take a moment to rate us on the App Store.")
         }
-    }
-    
-    // MARK: – Sub-views
-    private var formSection: some View {
-        Form {
-            generalSection
-            accountSection
-            legalSection
-        }
-        .accentColor(.black)
-    }
-    
-    private var generalSection: some View {
-        Section("General") {
-            Button("Feedback",       action: viewModel.feedbackTapped)
-            Button("Invite Friends", action: viewModel.inviteFriends)
-            Button("Rate SommLens",  action: viewModel.rateAppTapped)
+        // ── VinoBytes Install prompt ────────────────────────────
+        .alert("Ultimate Wine Knowledge",
+               isPresented: $showVinoBytesPrompt) {
+            Button("Download VinoBytes") {
+                if let url = URL(string: "https://apps.apple.com/us/app/vinobytes/id6736579105") {
+                    openURL(url)
+                }
+            }
+            Button("Later", role: .cancel) { }
+        } message: {
+            Text("Access thousands of wine flashcards, regions, grape profiles, and more in our companion app – VinoBytes.")
         }
     }
-    
-    private var accountSection: some View {
-        Section("Account") {
-            Button("Delete All Scans") { viewModel.activeAlert = .resetScans }
-            Button {
-                Task { await viewModel.checkICloud(showAlert: true) }
-            } label: {
-                HStack {
-                    Text("iCloud Sync")
-                    Spacer()
-                    if viewModel.isCheckingICloud {
-                        ProgressView()
-                    } else if viewModel.isICloudAvailable {
-                        Image(systemName: "checkmark.circle").foregroundColor(.green)
-                    } else {
-                        Image(systemName: "xmark.circle").foregroundColor(.red)
-                    }
+
+// MARK: – Sub-views
+private var formSection: some View {
+    Form {
+        generalSection
+        accountSection
+        legalSection
+    }
+    .accentColor(.black)
+}
+
+private var generalSection: some View {
+    Section("General") {
+        Button("Feedback",       action: viewModel.feedbackTapped)
+        Button("Invite Friends", action: viewModel.inviteFriends)
+        Button("Rate SommLens",  action: viewModel.rateAppTapped)
+        Button("Ultimate Wine Knowledge") {
+            showVinoBytesPrompt = true
+        }
+        Button("Redeem Offer Code") {
+            if #available(iOS 14.0, *) {
+                Purchases.shared.presentCodeRedemptionSheet()
+            }
+        }
+    }
+}
+
+private var accountSection: some View {
+    Section("Account") {
+        Button("Delete All Scans") { viewModel.activeAlert = .resetScans }
+        Button {
+            Task { await viewModel.checkICloud(showAlert: true) }
+        } label: {
+            HStack {
+                Text("iCloud Sync")
+                Spacer()
+                if viewModel.isCheckingICloud {
+                    ProgressView()
+                } else if viewModel.isICloudAvailable {
+                    Image(systemName: "checkmark.circle").foregroundColor(.green)
+                } else {
+                    Image(systemName: "xmark.circle").foregroundColor(.red)
                 }
             }
         }
     }
-    
-    private var legalSection: some View {
-        Section("Legal") {
-            Button("Privacy Policy") {
-                openURL(URL(string: "https://vinobytes.my.canva.site/sommlens-privacy-policy")!)
-            }
-            Button("Terms and Conditions") {
-                openURL(URL(string: "https://vinobytes.my.canva.site/sommlens-terms")!)
-            }
+}
+
+private var legalSection: some View {
+    Section("Legal") {
+        Button("Privacy Policy") {
+            openURL(URL(string: "https://vinobytes.my.canva.site/sommlens")!)
+        }
+        Button("Terms and Conditions") {
+            openURL(URL(string: "https://vinobytes.my.canva.site/sommlens-terms")!)
         }
     }
-    
-    private var footer: some View {
-        VStack(spacing: 6) {
-            // 🔹 OpenAI attribution
-            Text("© 2025 SommLens - All Rights Reserved.")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                Image("OpenAIBadge")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 25)
+}
 
+private var footer: some View {
+    VStack(spacing: 6) {
+        // 🔹 OpenAI attribution
+        Text("© 2025 SommLens - All Rights Reserved.")
+            .font(.caption2)
+            .foregroundColor(.secondary)
+        Image("OpenAIBadge")
+            .resizable()
+            .scaledToFit()
+            .frame(height: 25)
+        
+        
+        // 🔹 App version
+        Text(viewModel.appVersion)
+            .font(.footnote)
+            .foregroundColor(.gray)
+    }
+    .frame(maxWidth: .infinity)
+    .padding(.bottom, 12)
+}
 
-            // 🔹 App version
-            Text(viewModel.appVersion)
-                .font(.footnote)
-                .foregroundColor(.gray)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.bottom, 12)
-    }
-    
-    // MARK: – Helpers
-    private func resetAlert(title: String, action: @escaping () -> Void) -> Alert {
-        Alert(title: Text("Confirm Delete"),
-              message: Text("Are you sure you want to \(title.lowercased())? This cannot be undone."),
-              primaryButton: .destructive(Text("Delete"), action: action),
-              secondaryButton: .cancel())
-    }
-    
-    private func openSettings() {
-        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-        UIApplication.shared.open(url)
-    }
+// MARK: – Helpers
+private func resetAlert(title: String, action: @escaping () -> Void) -> Alert {
+    Alert(title: Text("Confirm Delete"),
+          message: Text("Are you sure you want to \(title.lowercased())? This cannot be undone."),
+          primaryButton: .destructive(Text("Delete"), action: action),
+          secondaryButton: .cancel())
+}
+
+private func openSettings() {
+    guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+    UIApplication.shared.open(url)
+}
 }
 

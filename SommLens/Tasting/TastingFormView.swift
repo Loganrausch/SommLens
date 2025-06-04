@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import StoreKit
 
 enum TastingStep: Int, CaseIterable {
     case acidity, alcohol, tannin, body, sweetness, aromas, flavors, summary
 }
 
 struct TastingFormView: View {
-    
+    @EnvironmentObject var engagementState: EngagementState
     @Environment(\.dismiss) private var dismiss      // ← add
 
     // Inject these when presenting the sheet
@@ -274,9 +275,6 @@ struct TastingFormView: View {
 
         onSave(dto)           // fires the closure supplied by ARScanResultView
         
-        // After saving a tasting session
-        EngagementMilestones.increment("tastingReviewCount", type: .review)
-        EngagementMilestones.increment("tastingShareCount",  type: .share)
     }
     
     

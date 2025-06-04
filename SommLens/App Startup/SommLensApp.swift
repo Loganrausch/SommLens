@@ -10,7 +10,7 @@ import CoreData          // keep if you still use PersistenceController
 
 @main
 struct SommLensApp: App {
-    
+    @StateObject private var engagementState = EngagementState()
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     
     let persistenceController = PersistenceController.shared
@@ -28,18 +28,18 @@ struct SommLensApp: App {
     var body: some Scene {
         WindowGroup {
             AppRootView()
-                .environment(\.managedObjectContext,
-                              persistenceController.container.viewContext)
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .preferredColorScheme(.light)
                 .environmentObject(openAIManager)
                 .environmentObject(auth)
+                .environmentObject(engagementState)
+                .onAppear {
+                    EngagementPromptManager.engagementState = engagementState
+                }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
-            // Fires every time scenePhase changes.
-            // We only care when we become active again.
             if newPhase == .active {
-                UNUserNotificationCenter.current()
-                    .setBadgeCount(0) { _ in /* ignore result */ }
+                UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
             }
         }
     }
