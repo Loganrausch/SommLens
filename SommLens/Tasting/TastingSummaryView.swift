@@ -118,8 +118,7 @@ struct TastingSummaryView: View {
                     }
                 }
             }
-           
-            .padding(.horizontal)
+            .frame(maxWidth: .infinity) // ✅ Add this
             .padding(.bottom, 32)
             }
             .safeAreaInset(edge: .bottom) {
@@ -239,6 +238,7 @@ private func pillColumnsSection(title: String,
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, alignment: .center) // ✅ key fix here
     }
 }
 

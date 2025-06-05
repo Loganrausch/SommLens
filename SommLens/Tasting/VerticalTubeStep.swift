@@ -26,8 +26,10 @@ struct VerticalTubeStep<E>: View where
             Text("How would you rate this wine’s \(title.lowercased())?")
                 .font(.title2)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal)
-                .padding(.bottom, 40)
+                .lineLimit(2) // or nil if you want full flexibility
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 32)
             
             GeometryReader { geo in
                 let stroke: CGFloat = 2
@@ -79,7 +81,7 @@ struct VerticalTubeStep<E>: View where
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(height: 450)
+            .frame(height: UIScreen.main.bounds.height < 700 ? 300 : 450)
         }
         .padding()
     }

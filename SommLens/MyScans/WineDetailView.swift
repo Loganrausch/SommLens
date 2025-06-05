@@ -205,6 +205,7 @@ struct WineDetailView: View {
                 aiProfile: dto.aiProfile,
                 wineName: dto.wineName
             )
+            .padding(.horizontal, 16) // ✅ Apply here for the sheet only
             .presentationDetents([.medium])
         }
         .fullScreenCover(isPresented: $showTasteSheet) {

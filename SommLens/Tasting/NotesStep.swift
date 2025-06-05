@@ -11,7 +11,7 @@ import SwiftUI
 struct NotesStep: View {
     @Binding var notes: String
     @FocusState private var isEditing: Bool
-    private let placeholder = "Drank this with a ribeye…"
+    private let placeholder = "Jot down your impressions..."
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

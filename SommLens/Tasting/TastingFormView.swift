@@ -60,8 +60,8 @@ struct TastingFormView: View {
                     }
                     Spacer()
                 }
-                .padding(.horizontal)
-                .padding(.top)
+                .padding(.top, 16)
+                .padding(.horizontal, 16)
                 
                 // ── 2) Animated Content ──
                 ZStack {
@@ -72,7 +72,9 @@ struct TastingFormView: View {
                                 aiProfile: aiProfile,
                                 wineName: wineData.displayName
                             )
-                            .padding()
+                            .frame(maxWidth: .infinity)
+                           
+                            
                         } else if !isSliderStep {
                             stepContent()
                                 .padding()
@@ -90,6 +92,7 @@ struct TastingFormView: View {
                     ))
                 }
                 .animation(.easeInOut(duration: 0.6), value: step)
+                .padding(.horizontal, 16)   // ← add this line
                 
                 // ── 3) Footer ──
                 VStack(spacing: 12) {
@@ -114,10 +117,11 @@ struct TastingFormView: View {
                     }
                     .disabled(shouldDisableNext)
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 16)
                 
+                .padding(.horizontal, 16)   // ← add this line
+                .padding(.vertical, 16)
             }
+            
             
             // ── Vini Intro Overlay ──
             if showViniIntro {
