@@ -5,48 +5,23 @@
 //  Created by Logan Rausch on 4/17/25.
 //
 
+//  Displays user scan history with filter, search, and multi-select delete.
+//
+//  Yeah, this file does a lot — but everything here is UI-facing or scoped to this view.
+//  I considered a ViewModel, but honestly it would’ve just moved code around without
+//  adding clarity. Nothing here is reused and it's easy to follow.
+//  Keeping it lean and local made more sense than slicing it up just to check MVVM box, will revisit if view expands.
+//
+
+
 import SwiftUI
 import CoreData
 import UIKit   // for UIImage
 
-/* ────────────────────────────────────────
- UI-level colour buckets → WineCategory
- ──────────────────────────────────────── */
-enum ScanFilter: String, CaseIterable, Identifiable {
-    case all, red, white, rosé, sparkling, orange
-    var id: Self { self }
-    var label: String { rawValue.capitalized }
-    
-    var matchingRawValues: [String] {
-        switch self {
-        case .all:
-            return []
-        case .red:
-            return [WineCategory.red,
-                    .redDessert,
-                    .redFortified,
-                    .redSparkling].map(\.rawValue)
-        case .white:
-            return [WineCategory.white,
-                    .whiteDessert,
-                    .whiteFortified].map(\.rawValue)
-        case .rosé:
-            return [WineCategory.rosé.rawValue]
-        case .sparkling:
-            return [WineCategory.whiteSparkling,
-                    .redSparkling].map(\.rawValue)
-        case .orange:
-            return [WineCategory.orange.rawValue]
-            
-        }
-    }
-}
 
-/* ────────────────────────────────────────
- Main View
- ──────────────────────────────────────── */
 struct MyScansView: View {
     @Environment(\.managedObjectContext) private var ctx
+    @EnvironmentObject private var openAIManager: OpenAIManager
     
     // Own this locally
     @State private var editMode: EditMode = .inactive
@@ -95,31 +70,31 @@ struct MyScansView: View {
                                    let data    = rawJSON.data(using: .utf8),
                                    let wine    = try? JSONDecoder().decode(WineData.self, from: data) {
                                     scanRow(scan, wine: wine)           // ① show the row
-
-                                               // ② decide what a tap means
-                                               .onTapGesture {
-                                                   if editMode == .active {    // ── multi-select
-                                                       if selectedScanIDs.contains(scan.id!) {
-                                                           selectedScanIDs.remove(scan.id!)
-                                                       } else {
-                                                           selectedScanIDs.insert(scan.id!)
-                                                       }
-                                                   } else {                    // ── normal navigation
-                                                       selectedScan = scan
-                                                   }
-                                               }
-
-                                               // ③ keep swipe-to-delete unchanged
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                        Button(role: .destructive) {
-                                            // find index in your filtered array, then delete that one
-                                            if let idx = filteredScans.firstIndex(where: { $0.id == scan.id }) {
-                                                deleteScans(at: IndexSet(integer: idx))
+                                    
+                                    // ② decide what a tap means
+                                        .onTapGesture {
+                                            if editMode == .active {    // ── multi-select
+                                                if selectedScanIDs.contains(scan.id!) {
+                                                    selectedScanIDs.remove(scan.id!)
+                                                } else {
+                                                    selectedScanIDs.insert(scan.id!)
+                                                }
+                                            } else {                    // ── normal navigation
+                                                selectedScan = scan
                                             }
-                                        } label: {
-                                            Label("Delete", systemImage: "trash")
                                         }
-                                    }
+                                    
+                                    // ③ keep swipe-to-delete unchanged
+                                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                            Button(role: .destructive) {
+                                                // find index in your filtered array, then delete that one
+                                                if let idx = filteredScans.firstIndex(where: { $0.id == scan.id }) {
+                                                    deleteScans(at: IndexSet(integer: idx))
+                                                }
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
+                                        }
                                 } else {        // invalid JSON fallback (unchanged)
                                     VStack(alignment: .leading) {
                                         Text("Invalid Scan").foregroundColor(.red)
@@ -142,7 +117,10 @@ struct MyScansView: View {
                             WineDetailView(
                                 bottle:   scan,
                                 wineData: wine,
-                                snapshot: scan.screenshot.flatMap { UIImage(data: $0) }
+                                snapshot: scan.screenshot.flatMap { UIImage(data: $0)},
+                                openAIManager: openAIManager,
+                                ctx: ctx
+                              
                             )
                         } else {
                             VStack { Text("Couldn't load details") }
@@ -220,12 +198,12 @@ struct MyScansView: View {
     /* ───────── Wine row extracted for clarity ───────── */
     private func scanRow(_ scan: BottleScan, wine: WineData) -> some View {
         HStack(spacing: 12) {
-
+            
             VStack(alignment: .leading) {
                 Text(scan.timestamp.map { "\($0, formatter: dateFormatter)" } ?? "-")
                     .font(.caption)
                     .foregroundColor(.secondary)
-
+                
                 HStack(spacing: 4) {
                     if let vintage = wine.vintage, !vintage.isEmpty {
                         Text(vintage)
@@ -236,9 +214,9 @@ struct MyScansView: View {
                         .foregroundColor(wine.producer == nil ? .secondary : .primary)
                 }
             }
-
+            
             Spacer()
-
+            
             if !scan.tastingsArray.isEmpty {
                 ZStack {
                     Circle()
@@ -249,7 +227,7 @@ struct MyScansView: View {
                         .foregroundColor(.burgundy)
                 }
             }
-
+            
             Image(systemName: "chevron.right")
                 .foregroundColor(.secondary)
         }

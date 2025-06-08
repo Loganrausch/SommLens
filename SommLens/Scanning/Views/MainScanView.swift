@@ -2,6 +2,11 @@
 //  ARScanView.swift
 //  VinoBytes
 //
+//
+//
+//
+//
+//  I prototyped a pure-MVVM version, but because it’s a live camera interface with tightly-timed frame capture, state reset, and navigation, the ViewModel layer actually introduced lifecycle bugs — especially when SwiftUI reused the view in a TabView. I reverted to a view-scoped structure because it was easier to reason about and guaranteed correct behavior. For code like this — where the state is not reused and timing matters — I believe clarity and correctness are more important than forcing MVVM.
 
 import SwiftUI
 import UIKit               // for UIImage
@@ -222,10 +227,10 @@ struct FreezeOverlay: View {
 // 6) Main ARScanView: tap shutter → freeze → improved OCR → AI → result
 // ─────────────────────────────────────────────────────────────
 struct MainScanView: View {
+    @EnvironmentObject var openAIManager: OpenAIManager
     @EnvironmentObject var auth: AuthViewModel               // ← add
     @EnvironmentObject var engagementState: EngagementState
     @Environment(\.managedObjectContext) private var ctx
-    @StateObject private var ai = OpenAIManager()
     
     // camera + photo capture
     @State private var session     = AVCaptureSession()
@@ -297,31 +302,33 @@ struct MainScanView: View {
                 }
             }
             .onAppear(perform: configureSession)
-            .navigationDestination(item: $scanResult) { res in
+            .navigationDestination(item: $scanResult) { result in
                 ScanResultView(
-                    bottle:       res.bottle,   // ← pass it
-                    capturedImage: res.image,
-                    wineData: res.wineData,
-                    onDismiss: {
-                        // 1️⃣ Reset state BEFORE dismissing
-                        frozenImage   = nil
-                        highResImage  = nil
-                        isProcessing  = false
-                        scanResult    = nil
-                        showOverlay   = false
-                        hasExtracted  = false
-                        
-                        // Defer the increments so that the view is fully out of the hierarchy first:
-                                   DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                       EngagementMilestones.increment("scanShareCount",  type: .share)
-                                       EngagementMilestones.increment("scanReviewCount", type: .review)
+                                   bottle:       result.bottle,   // ← pass it
+                                   capturedImage: result.image,
+                                   wineData: result.wineData,
+                                   onDismiss: {
+                                       // 1️⃣ Reset state BEFORE dismissing
+                                       frozenImage   = nil
+                                       highResImage  = nil
+                                       isProcessing  = false
+                                       scanResult    = nil
+                                       showOverlay   = false
+                                       hasExtracted  = false
                                        
-                                   }
-                               },
-                               selectedTab: $selectedTab
-                           )
+                                       // Defer the increments so that the view is fully out of the hierarchy first:
+                                                  DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                                      EngagementMilestones.increment("scanShareCount",  type: .share)
+                                                      EngagementMilestones.increment("scanReviewCount", type: .review)
+                                                      
+                                                  }
+                                              },
+                                              selectedTab: $selectedTab,
+                                              ctx: ctx,
+                                              openAIManager: openAIManager
+                                          )
+                                      }
                        }
-        }
         .alert("Scan failed", isPresented: $showScanError) {
             Button("Try Again", role: .cancel) { }
         } message: {
@@ -451,7 +458,7 @@ struct MainScanView: View {
                 isProcessing = true
                 
                 // 2️⃣ Only _now_ call AI on the high-res image:
-                ai.extractWineInfo(from: hiRes) { result in
+                openAIManager.extractWineInfo(from: hiRes) { result in
                     DispatchQueue.main.async {
                         isProcessing = false
                         switch result {

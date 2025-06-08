@@ -7,28 +7,29 @@
 // IMPROVED: Modern card-style layout using Latte + Burgundy palette
 
 import SwiftUI
+import CoreData
 
 struct WineDetailView: View {
+    
+    @StateObject private var vm: WineDetailViewModel
+    
     @ObservedObject var bottle: BottleScan
     let wineData: WineData
     let snapshot: UIImage?
     
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.managedObjectContext) private var ctx
-    @EnvironmentObject private var openAIManager: OpenAIManager
-
-    
-    @State private var animate = false
-    @State private var selectedDTO: TastingSession? = nil
-    @State private var showTasteSheet  = false
-    @State private var aiProfile       : AITastingProfile? = nil
-    @State private var isLoadingTaste  = false
     
     @FetchRequest private var tastings: FetchedResults<TastingSessionEntity>
-    init(bottle: BottleScan, wineData: WineData, snapshot: UIImage?) {
+    
+    init(bottle: BottleScan, wineData: WineData, snapshot: UIImage?, openAIManager: OpenAIManager, ctx: NSManagedObjectContext) {
         self.bottle   = bottle
         self.wineData = wineData
         self.snapshot = snapshot
+        self._vm = StateObject(wrappedValue: WineDetailViewModel(
+                  openAIManager: openAIManager,
+                  ctx: ctx,
+                  wineData: wineData
+              ))
         
         _tastings = FetchRequest(
             sortDescriptors: [NSSortDescriptor(keyPath: \TastingSessionEntity.date, ascending: false)],
@@ -49,9 +50,9 @@ struct WineDetailView: View {
                             .cornerRadius(20)
                             .shadow(color: .primary.opacity(0.2), radius: 20, x: 0, y: 10)
                             .padding(.horizontal, 24)
-                            .scaleEffect(animate ? 1.0 : 0.95)
-                            .opacity(animate ? 1 : 0)
-                            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: animate)
+                            .scaleEffect(vm.animate ? 1.0 : 0.95)
+                            .opacity(vm.animate ? 1 : 0)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: vm.animate)
                     }
                     
                     
@@ -89,14 +90,14 @@ struct WineDetailView: View {
                     
                     if let tasting = tastings.first {
                         Button {
-                            selectedDTO = tasting.dto
+                            vm.selectedDTO = tasting.dto
                         } label: {
                             HStack(spacing: 6) {
                                 Image(systemName: "checkmark.seal.fill")
                                     .foregroundColor(.burgundy) // ← make the checkmark burgundy
                                 Text("You tasted this wine!")
                                     .foregroundColor(.primary)
-
+                                
                                 Image(systemName: "chevron.right")
                                     .font(.subheadline.weight(.semibold))
                                     .foregroundColor(.burgundy.opacity(0.8))
@@ -110,10 +111,10 @@ struct WineDetailView: View {
                         .transition(.opacity)
                     } else {
                         Button {
-                            Task { await loadAIProfileAndShowTasting() }
+                            Task { await vm.loadAIProfileAndShowTasting() }
                         } label: {
                             Group {
-                                if isLoadingTaste {
+                                if vm.isLoadingTaste {
                                     HStack(spacing: 6) {
                                         ProgressView()
                                             .progressViewStyle(CircularProgressViewStyle(tint: .burgundy))
@@ -138,7 +139,7 @@ struct WineDetailView: View {
                             .background(Color.burgundy.opacity(0.1), in: Capsule())
                         }
                         .buttonStyle(.plain)
-                        .disabled(isLoadingTaste)
+                        .disabled(vm.isLoadingTaste)
                         .animation(.easeInOut, value: tastings.count)
                     }
                     
@@ -199,7 +200,7 @@ struct WineDetailView: View {
             }
             .padding()
         }
-        .sheet(item: $selectedDTO) { dto in
+        .sheet(item: $vm.selectedDTO) { dto in
             TastingSummaryView(
                 input: .constant(dto.userInput),
                 aiProfile: dto.aiProfile,
@@ -208,87 +209,25 @@ struct WineDetailView: View {
             .padding(.horizontal, 16) // ✅ Apply here for the sheet only
             .presentationDetents([.medium])
         }
-        .fullScreenCover(isPresented: $showTasteSheet) {
-            if let profile = aiProfile {
+        .fullScreenCover(isPresented: $vm.showTasteSheet) {
+            if let profile = vm.aiProfile {
                 TastingFormView(
                     aiProfile: profile,
                     wineData:  wineData,
                     snapshot:  snapshot          // same image already in view
                 ) { dto in
-                    try? persist(dto, on: bottle)
-                    showTasteSheet = false
+                    vm.persistTasting(dto, for: bottle)
+                    vm.showTasteSheet = false
                 }
                 .interactiveDismissDisabled()
             } else {
                 ProgressView()
             }
         }
-        .onAppear { animate = true }
+        .onAppear { vm.animate = true }
         .navigationBarHidden(true)
     }
-    // MARK: – AI fetch
-    @MainActor
-    private func loadAIProfileAndShowTasting() async {
-        guard !isLoadingTaste else { return }
-        isLoadingTaste = true
-        defer { isLoadingTaste = false }
-
-        do {
-            let profile = try await openAIManager.tastingProfile(for: wineData)
-            self.aiProfile      = profile
-            self.showTasteSheet = true
-        } catch {
-            // TODO: replace with user-visible alert / toast
-            print("❌ AI fetch failed:", error.localizedDescription)
-        }
-    }
-
-    // MARK: – Persist tasting DTO
-    private func persist(_ dto: TastingSession, on bottle: BottleScan) throws {
-        _ = try TastingSessionEntity(from: dto, bottle: bottle, context: ctx)
-        bottle.lastTasted = dto.date
-        if ctx.hasChanges { try ctx.save() }
-    }
 }
 
-struct InfoTile: View {
-    var label: String
-    var value: String?
-    
-    var body: some View {
-        if let value = value?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(label.uppercased())
-                    .font(.caption.weight(.medium))
-                    .foregroundColor(.secondary)
-                Text(value)
-                    .font(.body)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-}
 
-private struct CardBlock<Content: View>: View {
-    let title: String
-    let content: Content
-    init(title: String, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.content = content()
-    }
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(title)
-                .font(.headline)
-                .foregroundColor(.burgundy)
-            
-            content
-        }
-        .padding(20)
-        .background(.latte) // ← Matches the frosted image card look
-        .cornerRadius(24)
-        .shadow(color: .primary.opacity(0.2), radius: 12, x: 0, y: 6) // ← More pronounced shadow
-        .padding(.horizontal)
-    }
-}
 

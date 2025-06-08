@@ -4,6 +4,9 @@
 //
 //  Created by Logan Rausch on 5/11/25.
 //
+//
+//
+/// Pure view - Helper logic is strictly presentation level - will not be extracting into vm for now.
 
 import SwiftUI
 

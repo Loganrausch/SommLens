@@ -4,6 +4,13 @@
 //
 //  Created by Logan Rausch on 5/27/25.
 //
+//  Handles the main Dashboard tab.
+//  It includes scan stats, recent scans, subscription info, and scan prompt rotation.
+//
+//  Supporting views like StatCard, QuotaCard, and RecentScanCard are kept inline
+//  because they’re small, used only within this file, and don’t carry independent logic.
+//  Splitting them out would’ve added noise to the project structure without
+//  improving clarity, so everything remains scoped and self-contained.
 
 import SwiftUI
 import CoreData
@@ -11,7 +18,7 @@ import UIKit          // for UIImage
 import RevenueCatUI
 
 struct DashboardView: View {
-
+    @EnvironmentObject private var openAIManager: OpenAIManager
     @EnvironmentObject var auth: AuthViewModel
     // MARK: – Environment / Bindings
     @Environment(\.managedObjectContext) private var ctx
@@ -204,7 +211,9 @@ struct DashboardView: View {
                                 WineDetailView(
                                     bottle: scan,
                                     wineData: wine,
-                                    snapshot: image
+                                    snapshot: image,
+                                    openAIManager: openAIManager,
+                                    ctx: ctx
                                 )
                             } label: {
                                 RecentScanCard(wine: wine, image: image)
@@ -235,7 +244,7 @@ struct DashboardView: View {
     private func updatePrompt() {
         openCount += 1
         if openCount == 1 || openCount % 3 == 0 {
-            let newPrompt = scanPrompts.randomElement() ?? ""
+            let newPrompt = ScanPrompts.all.randomElement() ?? ""
             lastScanPrompt = newPrompt
             scanPrompt     = newPrompt
         } else {

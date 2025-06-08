@@ -8,33 +8,37 @@
 
 import SwiftUI
 import StoreKit
+import CoreData
 
 struct ScanResultView: View {
+    
+    @StateObject private var vm: ScanResultViewModel
     @Environment(\.dismiss) private var dismiss
-    
-    // Inject your managers
-    @EnvironmentObject private var openAIManager: OpenAIManager
     @EnvironmentObject var engagementState: EngagementState
-    
-    @Environment(\.managedObjectContext) private var ctx   // add this
-    
-    // Inputs
-    let bottle: BottleScan
-    let capturedImage: UIImage
-    let wineData:      WineData
-    let onDismiss: () -> Void    // ← new callback
-    
-    // Existing wine‑detail sheet
-    @State private var showDetailSheet = false
-    
-    // NEW – tasting flow sheet
-    @State private var showTasteSheet  = false
-    @State private var aiProfile: AITastingProfile?
-    @State private var isLoadingTaste  = false
-    
     
     @Binding var selectedTab: MainTab
     
+    let onDismiss: () -> Void    // ← new callback
+    
+    init(
+           bottle: BottleScan,
+           capturedImage: UIImage,
+           wineData: WineData,
+           onDismiss: @escaping () -> Void,
+           selectedTab: Binding<MainTab>,
+           ctx: NSManagedObjectContext,
+           openAIManager: OpenAIManager
+    ) {
+        _vm = StateObject(wrappedValue: ScanResultViewModel(
+            ctx: ctx,
+            openAIManager: openAIManager,
+            wineData: wineData,
+            bottle: bottle,
+            capturedImage: capturedImage
+        ))
+        self.onDismiss = onDismiss
+        self._selectedTab = selectedTab
+    }
     
     var body: some View {
         ZStack {
@@ -42,7 +46,7 @@ struct ScanResultView: View {
             
             /* ───── Bottle photo ───── */
             GeometryReader { geo in
-                Image(uiImage: capturedImage)
+                Image(uiImage: vm.capturedImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: geo.size.width, height: geo.size.height)
@@ -64,7 +68,7 @@ struct ScanResultView: View {
                 VStack(spacing: 14) {
                     
                     /* drag‑handle → open WineDetailView */
-                    Button { showDetailSheet = true } label: {
+                    Button { vm.showDetailSheet = true } label: {
                         Image(systemName: "chevron.up")
                             .font(.title2.weight(.medium))
                             .padding(10)
@@ -74,19 +78,19 @@ struct ScanResultView: View {
                     /* quick cards */
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            if let vintage = wineData.vintage?.trimmingCharacters(in: .whitespacesAndNewlines), !vintage.isEmpty {
+                            if let vintage = vm.wineData.vintage?.trimmingCharacters(in: .whitespacesAndNewlines), !vintage.isEmpty {
                                 QuickCard(title: "Vintage", text: vintage)
                             }
-                            if let producer = wineData.producer?.trimmingCharacters(in: .whitespacesAndNewlines), !producer.isEmpty {
+                            if let producer = vm.wineData.producer?.trimmingCharacters(in: .whitespacesAndNewlines), !producer.isEmpty {
                                 QuickCard(title: "Producer", text: producer)
                             }
-                            if let appellation = wineData.appellation?.trimmingCharacters(in: .whitespacesAndNewlines), !appellation.isEmpty {
+                            if let appellation = vm.wineData.appellation?.trimmingCharacters(in: .whitespacesAndNewlines), !appellation.isEmpty {
                                 QuickCard(title: "Appellation", text: appellation)
                             }
-                            if let region = wineData.region?.trimmingCharacters(in: .whitespacesAndNewlines), !region.isEmpty {
+                            if let region = vm.wineData.region?.trimmingCharacters(in: .whitespacesAndNewlines), !region.isEmpty {
                                 QuickCard(title: "Region", text: region)
                             }
-                            if let grapes = wineData.grapes, !grapes.isEmpty {
+                            if let grapes = vm.wineData.grapes, !grapes.isEmpty {
                                 let joined = grapes
                                     .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                                     .filter { !$0.isEmpty }
@@ -102,9 +106,9 @@ struct ScanResultView: View {
                     
                     /* Taste‑this‑wine button */
                     Button {
-                        Task { await loadAIProfileAndShowTasting() }
+                        Task { await vm.loadAIProfileAndShowTasting() }
                     } label: {
-                        if isLoadingTaste {
+                        if vm.isLoadingTaste {
                             ProgressView()
                                 .progressViewStyle(.circular)
                                 .frame(maxWidth: .infinity)
@@ -118,7 +122,7 @@ struct ScanResultView: View {
                         }
                     }
                     .background(.thinMaterial, in: Capsule())
-                    .disabled(isLoadingTaste)
+                    .disabled(vm.isLoadingTaste)
                     .padding(.horizontal, 32)
                 }
                 .padding(.vertical, 14)
@@ -150,25 +154,27 @@ struct ScanResultView: View {
         /* ───── Sheets ───── */
         
         // Wine‑detail sheet
-        .sheet(isPresented: $showDetailSheet) {
+        .sheet(isPresented: $vm.showDetailSheet) {
             WineDetailView(
-                bottle:   bottle,           // 👈 NEW
-                wineData: wineData,
-                snapshot: capturedImage
+                bottle:   vm.bottle,           // 👈 NEW
+                wineData: vm.wineData,
+                snapshot: vm.capturedImage,
+                openAIManager: vm.openAIManager,
+                ctx: vm.ctx
             )
             .presentationDetents([.large])
         }
         
         // Tasting flow sheet
-        .fullScreenCover(isPresented: $showTasteSheet) {
-            if let profile = aiProfile {
+        .fullScreenCover(isPresented: $vm.showTasteSheet) {
+            if let profile = vm.aiProfile {
                 TastingFormView(
                     aiProfile: profile,
-                    wineData:  wineData,
-                    snapshot:  capturedImage
+                    wineData:  vm.wineData,
+                    snapshot:  vm.capturedImage
                 ) { dto in
-                    try? persist(dto, on: bottle)     // ✅ here
-                    showTasteSheet = false
+                    try? vm.persistTasting(dto)    // ✅ here
+                    vm.showTasteSheet = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                         onDismiss()
                         dismiss()
@@ -181,74 +187,13 @@ struct ScanResultView: View {
             }
         }
         // ← add these two at the very end:
-        .onChange(of: selectedTab) { _ in
-            onDismiss()
-            dismiss()
+        .onChange(of: selectedTab) { newTab in
+            if newTab == .scan {
+                print("🔁 Tab re-tap detected in ScanResultView")
+                onDismiss()  // <- clears vm.scanResult
+                dismiss()    // <- exits the screen
+            }
         }
         
-    }
-    
-    // MARK: – AI fetch
-    
-    @MainActor
-    private func loadAIProfileAndShowTasting() async {
-        guard !isLoadingTaste else { return }
-        isLoadingTaste = true
-        defer { isLoadingTaste = false }
-        
-        do {
-            let profile = try await openAIManager.tastingProfile(for: wineData)
-            self.aiProfile     = profile
-            self.showTasteSheet = true
-        } catch {
-            // TODO: replace with user‑visible alert / toast
-            print("❌ AI fetch failed:", error.localizedDescription)
-        }
-    }
-    
-    // MARK: – Persist tasting DTO
-    /// Adds one tasting to an *already-created* BottleScan row
-    private func persist(
-        _ dto: TastingSession,
-        on bottle: BottleScan            // ← pass the parent row, not WineData
-    ) throws {
-        
-        // 1️⃣ child tasting entity
-        _ = try TastingSessionEntity(
-            from:    dto,
-            bottle:  bottle,
-            context: ctx
-        )
-        
-        // 2️⃣ optional meta update on the parent
-        bottle.lastTasted = dto.date        // keeps “most-recent tasting” info
-        
-        // 3️⃣ commit
-        if ctx.hasChanges { try ctx.save() }
-    }
-}
-
-/* ---------- Quick info card ---------- */
-
-private struct QuickCard: View {
-    let title: String
-    let text:  String?
-    
-    private let cardWidth:  CGFloat = 170
-    private let cardHeight: CGFloat = 85
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title.uppercased())
-                .font(.caption).foregroundColor(.burgundy).bold()
-            Text(text ?? "-")
-                .font(.headline.weight(.semibold))
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding()
-        .frame(width: cardWidth, height: cardHeight, alignment: .topLeading)
-        .background(.ultraThinMaterial)
-        .cornerRadius(12)
     }
 }
