@@ -4,9 +4,6 @@
 //
 //  Created by Logan Rausch on 5/27/25.
 //
-//  Handles the main Dashboard tab.
-//  It includes scan stats, recent scans, subscription info, and scan prompt rotation.
-//
 //  Supporting views like StatCard, QuotaCard, and RecentScanCard are kept inline
 //  because they’re small, used only within this file, and don’t carry independent logic.
 //  Splitting them out would’ve added noise to the project structure without
