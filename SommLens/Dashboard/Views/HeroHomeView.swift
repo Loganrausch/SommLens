@@ -92,7 +92,6 @@ struct HeroHomeView: View {
                 }
                 .scaleEffect(pulse ? 1.05 : 1)
                 .shadow(color: .black.opacity(pulse ? 0.4 : 0.15), radius: pulse ? 20 : 8, y: 6)
-                .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: pulse)
                 
                 Spacer()
                 
@@ -131,7 +130,7 @@ struct HeroHomeView: View {
             }
         }
         .onAppear {
-            pulse = true
+            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) { pulse = true }
             if !hasSeenOnboarding {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     withAnimation {
@@ -145,7 +144,7 @@ struct HeroHomeView: View {
                 .presentationDetents([.height(700)])
                 .presentationDragIndicator(.visible)
         }
-        .onChange(of: showOverlay) { newValue in
+        .onChange(of: showOverlay) { _, newValue in
                    if !newValue {
                        hasSeenOnboarding = true
                    }

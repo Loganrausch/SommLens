@@ -4,6 +4,12 @@
 //
 //  Created by Logan Rausch on 5/28/25.
 //
+
+// TODO: Refactor - Should move scan quota logic into a dedicated ScanQuotaManager.
+// This logic probably doesn't belong in AuthViewModel, which should focus only on auth/subscription.
+// A separate manager would improve modularity, testability, and single responsibility.
+
+
 import Foundation
 import SwiftUI
 import RevenueCat

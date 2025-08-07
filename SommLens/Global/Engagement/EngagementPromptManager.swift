@@ -1,9 +1,5 @@
-//
 //  ReviewRequestHelper.swift
-//  SommLens
-//
 //  Created by Logan Rausch on 5/29/25.
-//
 
 import SwiftUI
 import StoreKit

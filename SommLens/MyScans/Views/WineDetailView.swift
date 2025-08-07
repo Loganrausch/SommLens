@@ -79,8 +79,8 @@ struct WineDetailView: View {
                     }
                     .padding(.horizontal)
                     
-                    if let vibe = wineData.vibeTag?.trimmingCharacters(in: .whitespacesAndNewlines), !vibe.isEmpty {
-                        Text("“\(vibe)”")
+                    if let notes = wineData.tastingNotes?.trimmingCharacters(in: .whitespacesAndNewlines), !notes.isEmpty {
+                        Text(notes)
                             .font(.body.italic())
                             .multilineTextAlignment(.center)
                             .foregroundColor(.primary)

@@ -55,33 +55,34 @@ struct VerticalSweepLayer: UIViewRepresentable {
            return host
        }
     // ───────── Called every time SwiftUI knows the final frame
-    func updateUIView(_ uiView: UIView,
-                      context: Context)
-    {
-        let beam      = context.coordinator.beam
+    func updateUIView(_ uiView: UIView, context: Context) {
+        let beam = context.coordinator.beam
         let fullWidth = uiView.bounds.width
-        guard fullWidth > 1 else { return }          // no size yet
+        guard fullWidth > 1 else { return }           // wait for a real size
 
-        // Ensure the beam’s frame matches the host width
-        beam.frame = CGRect(x: 0,
-                            y: -heightPx,
-                            width: fullWidth,
-                            height: heightPx)
-
-        // Start the animation only once
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        beam.frame = CGRect(x: 0, y: -heightPx,
+                            width: fullWidth, height: heightPx)
+        CATransaction.commit()
+        
         if !context.coordinator.started {
             context.coordinator.started = true
-
-            let anim = CABasicAnimation(keyPath: "position.y")
-            anim.fromValue = -heightPx
-            anim.toValue   = uiView.bounds.height + heightPx
-            anim.duration  = duration
-            anim.timingFunction = CAMediaTimingFunction(name: .linear)
-
-            CATransaction.begin()
-            CATransaction.setCompletionBlock(onDone)
-            beam.add(anim, forKey: "sweep")
-            CATransaction.commit()
+            startSweep(in: uiView, beam: beam)
         }
+    }
+
+    /// pulled-out helper so it can be called inside DispatchQueue.main.async
+    private func startSweep(in host: UIView, beam: CAGradientLayer) {
+        let anim = CABasicAnimation(keyPath: "position.y")
+        anim.fromValue = -heightPx
+        anim.toValue   = host.bounds.height + heightPx
+        anim.duration  = duration
+        anim.timingFunction = CAMediaTimingFunction(name: .linear)
+
+        CATransaction.begin()
+        CATransaction.setCompletionBlock(onDone)      // your callback
+        beam.add(anim, forKey: "sweep")
+        CATransaction.commit()
     }
 }

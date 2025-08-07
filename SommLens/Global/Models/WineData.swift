@@ -76,7 +76,7 @@ struct WineData: Codable {
 
 extension WineData: Identifiable {
     public var id: String {
-        // you can combine fields if you like, but producer+timestamp is unique enough here
+        // can combine fields, but producer+timestamp is unique enough here
         [producer, region, country, vintage]
             .compactMap { $0 }
             .joined(separator: "-")

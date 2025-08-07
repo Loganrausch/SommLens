@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MainTabView.swift
 //  SommLens
 //
 //  Created by Logan Rausch on 4/17/25.
@@ -13,14 +13,14 @@ enum MainTab: Hashable {
     case home, scan, history
 }
 
-struct ContentView: View {
+struct MainTabView: View {
     
     @EnvironmentObject var auth: AuthViewModel
 
     // 🔹 Tab tracking
     @State private var _selectedTab: MainTab = .home
 
-    // 🔹 Scan-related state (lifted up from ARScanView)
+    // 🔹 Scan-related state (lifted up from MainScanView)
     @State private var frozenImage: UIImage? = nil
     @State private var scanResult: ScanResult? = nil
     @State private var isProcessing: Bool = false
@@ -96,9 +96,9 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct MainTabView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        MainTabView()
             .previewDevice("iPhone 15 Pro") // Or any device you prefer
             .environment(\.colorScheme, .light) // Preview in light mode
     }

@@ -11,6 +11,11 @@
 		CE2416AA2DEF620100BBF387 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416A92DEF61F400BBF387 /* AppRootView.swift */; };
 		CE2416AC2DEFA7F100BBF387 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416AB2DEFA7EE00BBF387 /* AppDelegate.swift */; };
 		CE2416AE2DEFA8D700BBF387 /* PushRegistrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416AD2DEFA8D000BBF387 /* PushRegistrationService.swift */; };
+		CE2CCF942E1339BE007D75CA /* JSONHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2CCF932E1339B9007D75CA /* JSONHelpers.swift */; };
+		CE2CCF962E1339CC007D75CA /* UIImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2CCF952E1339C4007D75CA /* UIImage+Resize.swift */; };
+		CE2CCF982E1339D5007D75CA /* VisionCost.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2CCF972E1339D0007D75CA /* VisionCost.swift */; };
+		CE4D080C2E273E0500DAF1BE /* Data+Append.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4D080B2E273DFA00DAF1BE /* Data+Append.swift */; };
+		CE4D080E2E27424200DAF1BE /* ImageSystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4D080D2E27423C00DAF1BE /* ImageSystemPrompt.swift */; };
 		CE4EF4282DEFDB05006AD0FA /* EngagementState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4272DEFDAFE006AD0FA /* EngagementState.swift */; };
 		CE4EF42A2DEFDBA3006AD0FA /* EngagementMilestones.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4292DEFDB9B006AD0FA /* EngagementMilestones.swift */; };
 		CE4EF45C2DF20A28006AD0FA /* ScanFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF45B2DF20A21006AD0FA /* ScanFilter.swift */; };
@@ -20,6 +25,12 @@
 		CE4EF4672DF21B9B006AD0FA /* ScanResultViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4662DF21B95006AD0FA /* ScanResultViewModel.swift */; };
 		CE4EF4692DF21F41006AD0FA /* QuickCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4682DF21F3D006AD0FA /* QuickCard.swift */; };
 		CE4EF4872DF502EE006AD0FA /* TastingFormViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4862DF502E7006AD0FA /* TastingFormViewModel.swift */; };
+		CEA099512E43B5EF00535C84 /* FreezeOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA099502E43B5E900535C84 /* FreezeOverlay.swift */; };
+		CEA099532E43B66800535C84 /* SaveScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA099522E43B65D00535C84 /* SaveScan.swift */; };
+		CEA099552E43B6C700535C84 /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA099542E43B6C300535C84 /* CameraPreview.swift */; };
+		CEA099572E43B70C00535C84 /* BufferDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA099562E43B70600535C84 /* BufferDelegate.swift */; };
+		CEA099592E43B76200535C84 /* PhotoDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA099582E43B75E00535C84 /* PhotoDelegate.swift */; };
+		CEA0995B2E43B7AB00535C84 /* ScanResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA0995A2E43B7A700535C84 /* ScanResult.swift */; };
 		CEA0F6602DE773EE0082F76F /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */; };
 		CEA0F6632DE776FE0082F76F /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = CEA0F6622DE776FE0082F76F /* RevenueCat */; };
 		CEA0F6652DE776FE0082F76F /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = CEA0F6642DE776FE0082F76F /* RevenueCatUI */; };
@@ -89,6 +100,11 @@
 		CE2416A92DEF61F400BBF387 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
 		CE2416AB2DEFA7EE00BBF387 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CE2416AD2DEFA8D000BBF387 /* PushRegistrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRegistrationService.swift; sourceTree = "<group>"; };
+		CE2CCF932E1339B9007D75CA /* JSONHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONHelpers.swift; sourceTree = "<group>"; };
+		CE2CCF952E1339C4007D75CA /* UIImage+Resize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Resize.swift"; sourceTree = "<group>"; };
+		CE2CCF972E1339D0007D75CA /* VisionCost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionCost.swift; sourceTree = "<group>"; };
+		CE4D080B2E273DFA00DAF1BE /* Data+Append.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Append.swift"; sourceTree = "<group>"; };
+		CE4D080D2E27423C00DAF1BE /* ImageSystemPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSystemPrompt.swift; sourceTree = "<group>"; };
 		CE4EF4272DEFDAFE006AD0FA /* EngagementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngagementState.swift; sourceTree = "<group>"; };
 		CE4EF4292DEFDB9B006AD0FA /* EngagementMilestones.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngagementMilestones.swift; sourceTree = "<group>"; };
 		CE4EF45B2DF20A21006AD0FA /* ScanFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanFilter.swift; sourceTree = "<group>"; };
@@ -99,6 +115,12 @@
 		CE4EF4682DF21F3D006AD0FA /* QuickCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCard.swift; sourceTree = "<group>"; };
 		CE4EF4862DF502E7006AD0FA /* TastingFormViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingFormViewModel.swift; sourceTree = "<group>"; };
 		CE4EF4882DF50F62006AD0FA /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		CEA099502E43B5E900535C84 /* FreezeOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreezeOverlay.swift; sourceTree = "<group>"; };
+		CEA099522E43B65D00535C84 /* SaveScan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveScan.swift; sourceTree = "<group>"; };
+		CEA099542E43B6C300535C84 /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
+		CEA099562E43B70600535C84 /* BufferDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BufferDelegate.swift; sourceTree = "<group>"; };
+		CEA099582E43B75E00535C84 /* PhotoDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDelegate.swift; sourceTree = "<group>"; };
+		CEA0995A2E43B7A700535C84 /* ScanResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResult.swift; sourceTree = "<group>"; };
 		CEA0F6572DE762730082F76F /* SommLensTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEA0F6582DE762730082F76F /* SommLensUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
@@ -189,6 +211,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CE2CCF8A2E1338E9007D75CA /* OpenAIManager */ = {
+			isa = PBXGroup;
+			children = (
+				CE4D080D2E27423C00DAF1BE /* ImageSystemPrompt.swift */,
+				CE4D080B2E273DFA00DAF1BE /* Data+Append.swift */,
+				CE2CCF972E1339D0007D75CA /* VisionCost.swift */,
+				CE2CCF952E1339C4007D75CA /* UIImage+Resize.swift */,
+				CE2CCF932E1339B9007D75CA /* JSONHelpers.swift */,
+				CED9D0622DE75B1800C217AE /* OpenAIManager.swift */,
+			);
+			path = OpenAIManager;
+			sourceTree = "<group>";
+		};
 		CE4EF44F2DF1FCD7006AD0FA /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -293,9 +328,7 @@
 		CE4EF4642DF21ACB006AD0FA /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				CE4EF4682DF21F3D006AD0FA /* QuickCard.swift */,
-				CED9D0742DE75B1800C217AE /* VerticalSweepLayer.swift */,
-				CED9D07A2DE75B1800C217AE /* WineGlassLoadingView.swift */,
+				CEA099502E43B5E900535C84 /* FreezeOverlay.swift */,
 				CED9D0542DE75B1800C217AE /* ScanResultView.swift */,
 				CED9D0552DE75B1800C217AE /* MainScanView.swift */,
 			);
@@ -331,7 +364,7 @@
 			isa = PBXGroup;
 			children = (
 				CEA0F6662DE7DEA80082F76F /* ScanQuotaKeychain.swift */,
-				CED9D0622DE75B1800C217AE /* OpenAIManager.swift */,
+				CE2CCF8A2E1338E9007D75CA /* OpenAIManager */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -402,6 +435,42 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		CEA0994C2E43B58500535C84 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				CE4EF4682DF21F3D006AD0FA /* QuickCard.swift */,
+				CED9D07A2DE75B1800C217AE /* WineGlassLoadingView.swift */,
+				CED9D0742DE75B1800C217AE /* VerticalSweepLayer.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		CEA0994D2E43B5A700535C84 /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				CEA099582E43B75E00535C84 /* PhotoDelegate.swift */,
+				CEA099562E43B70600535C84 /* BufferDelegate.swift */,
+				CEA099542E43B6C300535C84 /* CameraPreview.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		CEA0994E2E43B5B400535C84 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				CEA0995A2E43B7A700535C84 /* ScanResult.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		CEA0994F2E43B5BD00535C84 /* ScanPersistence */ = {
+			isa = PBXGroup;
+			children = (
+				CEA099522E43B65D00535C84 /* SaveScan.swift */,
+			);
+			path = ScanPersistence;
+			sourceTree = "<group>";
+		};
 		CEC2C75B2DB1517B0043FAEB = {
 			isa = PBXGroup;
 			children = (
@@ -457,8 +526,12 @@
 		CED9D0A82DE75CE100C217AE /* Scanning */ = {
 			isa = PBXGroup;
 			children = (
-				CE4EF4652DF21B81006AD0FA /* ViewModels */,
 				CE4EF4642DF21ACB006AD0FA /* Views */,
+				CE4EF4652DF21B81006AD0FA /* ViewModels */,
+				CEA0994D2E43B5A700535C84 /* Camera */,
+				CEA0994C2E43B58500535C84 /* Components */,
+				CEA0994E2E43B5B400535C84 /* Models */,
+				CEA0994F2E43B5BD00535C84 /* ScanPersistence */,
 			);
 			path = Scanning;
 			sourceTree = "<group>";
@@ -658,16 +731,20 @@
 				CED9D07E2DE75B1800C217AE /* ScanResultView.swift in Sources */,
 				CED9D07F2DE75B1800C217AE /* AccountViewModel.swift in Sources */,
 				CE2416AE2DEFA8D700BBF387 /* PushRegistrationService.swift in Sources */,
+				CEA099552E43B6C700535C84 /* CameraPreview.swift in Sources */,
 				CED9D0802DE75B1800C217AE /* TastingSummaryView.swift in Sources */,
+				CEA099592E43B76200535C84 /* PhotoDelegate.swift in Sources */,
 				CED9D0822DE75B1800C217AE /* SommLensApp.swift in Sources */,
 				CED9D0832DE75B1800C217AE /* Toast.swift in Sources */,
 				CE4EF45E2DF20BDB006AD0FA /* InfoTile.swift in Sources */,
 				CED9D0842DE75B1800C217AE /* NotesStepView.swift in Sources */,
+				CE4D080E2E27424200DAF1BE /* ImageSystemPrompt.swift in Sources */,
 				CEA0F6602DE773EE0082F76F /* AuthViewModel.swift in Sources */,
 				CEA401012DE8A63F00B498CC /* UnifiedOnboardingOverlayView.swift in Sources */,
 				CED9D0852DE75B1800C217AE /* VerticalTubeStep.swift in Sources */,
 				CED9D0862DE75B1800C217AE /* ScanPrompts.swift in Sources */,
 				CEA401072DE93FB800B498CC /* BottleScanIdentity.swift in Sources */,
+				CE2CCF982E1339D5007D75CA /* VisionCost.swift in Sources */,
 				CE4EF45C2DF20A28006AD0FA /* ScanFilter.swift in Sources */,
 				CED9D0872DE75B1800C217AE /* Persistence.swift in Sources */,
 				CED9D0882DE75B1800C217AE /* MyScansView.swift in Sources */,
@@ -688,8 +765,11 @@
 				CED9D0932DE75B1800C217AE /* MainScanView.swift in Sources */,
 				CED9D0942DE75B1800C217AE /* ICloudSyncService.swift in Sources */,
 				CED9D0952DE75B1800C217AE /* ResetService.swift in Sources */,
+				CEA099572E43B70C00535C84 /* BufferDelegate.swift in Sources */,
 				CE4EF4672DF21B9B006AD0FA /* ScanResultViewModel.swift in Sources */,
 				CED9D0962DE75B1800C217AE /* VerticalSweepLayer.swift in Sources */,
+				CE4D080C2E273E0500DAF1BE /* Data+Append.swift in Sources */,
+				CEA0995B2E43B7AB00535C84 /* ScanResult.swift in Sources */,
 				CED9D0972DE75B1800C217AE /* WineDetailView.swift in Sources */,
 				CED9D0982DE75B1800C217AE /* MainTabView.swift in Sources */,
 				CED9D09A2DE75B1800C217AE /* ActiveAlert.swift in Sources */,
@@ -701,13 +781,17 @@
 				CE2416A82DEF481900BBF387 /* LaunchAnimationView.swift in Sources */,
 				CE4EF4602DF20C55006AD0FA /* CardBlock.swift in Sources */,
 				CED9D09E2DE75B1800C217AE /* RefreshNotifier.swift in Sources */,
+				CE2CCF942E1339BE007D75CA /* JSONHelpers.swift in Sources */,
 				CE4EF42A2DEFDBA3006AD0FA /* EngagementMilestones.swift in Sources */,
+				CE2CCF962E1339CC007D75CA /* UIImage+Resize.swift in Sources */,
 				CED9D09F2DE75B1800C217AE /* ContactFormView.swift in Sources */,
+				CEA099532E43B66800535C84 /* SaveScan.swift in Sources */,
 				CED9D0A02DE75B1800C217AE /* ShareSheet.swift in Sources */,
 				CED9D0A12DE75B1800C217AE /* TastingSession.swift in Sources */,
 				CE2416AC2DEFA7F100BBF387 /* AppDelegate.swift in Sources */,
 				CED9D0A22DE75B1800C217AE /* WineGlassLoadingView.swift in Sources */,
 				CED9D0A32DE75B1800C217AE /* SommLens.xcdatamodeld in Sources */,
+				CEA099512E43B5EF00535C84 /* FreezeOverlay.swift in Sources */,
 				CED9D0A42DE75B1800C217AE /* TastingFormView.swift in Sources */,
 				CED9D0A52DE75B1800C217AE /* TastingSessionEntity+DTO.swift in Sources */,
 			);
@@ -751,7 +835,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -762,11 +846,12 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vinobytes.SommLens;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -788,7 +873,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -799,11 +884,12 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vinobytes.SommLens;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

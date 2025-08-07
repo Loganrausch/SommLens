@@ -14,11 +14,6 @@ enum ScanQuotaKeychain { }
 extension ScanQuotaKeychain {
     private static let rcService = "com.sommlens.rc.userid"
     private static let rcAccount = "appUserID"
-    
-    static func countKey(for date: Date = Date()) -> String {
-        let comps = Calendar.current.dateComponents([.year, .month], from: date)
-        return "scanCount_\(comps.year!)_\(comps.month!)"
-    }
 
     static func saveCount(_ count: Int, for key: String) {
         var query: [CFString: Any] = [

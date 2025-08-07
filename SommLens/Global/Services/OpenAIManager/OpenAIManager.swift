@@ -2,8 +2,8 @@
 //  OpenAIManager.swift
 //  SommLens
 //
-//  Created by ChatGPT on 11 May 2025
-//
+
+// Refactored by Logan Rausch on July 15th, 2025
 
 import Foundation
 import UIKit
@@ -46,7 +46,7 @@ final class OpenAIManager: ObservableObject {
         }
 
         // 2️⃣ Resize + JPEG-encode image (576 px, Q 0.7) ----------------------------
-        let resized  = image.resized(maxEdge: 576)          // helper added below
+        let resized  = image.resized(maxEdge: 576)
         guard let jpeg = resized.jpegData(compressionQuality: 0.7) else {
             return completion(.failure(
                 NSError(domain: "OpenAIManager", code: -1,
@@ -127,7 +127,7 @@ final class OpenAIManager: ObservableObject {
                          inCost, outCost, imageCost, inCost + outCost + imageCost))
 
             // 6️⃣ Decode into WineData ---------------------------------------------
-            self.decodeJSON(content, as: WineData.self, completion: completion)
+           decodeJSON(content, as: WineData.self, completion: completion)
         }
         .resume()
     }
@@ -199,67 +199,7 @@ final class OpenAIManager: ObservableObject {
           return profile
        }
     
-    // MARK: - PRIVATE helpers ---------------------------------------------------
-    
-    private var imageSystemPrompt: String {
-        #"""
-            You are a sommelier-AI that extracts structured data from wine label images and supplements missing details using your global wine knowledge.
-
-            I will provide you a JPEG image of a wine label. You must return only valid double-quoted JSON — no markdown, prose, or explanations.
-
-            Use the label image to identify key facts. If any detail is not visible on the label but you can reliably infer it from your vast wine knowledge (based on producer, region, classification, vineyard, vintage), then you should include it.
-
-            Leave a field `null` or `""` only if it cannot be found on the label AND cannot be inferred reliably.
-
-            ──────────────────────── RETURN JSON IN THIS KEY ORDER:
-            {
-                    "producer": "",
-                    "country": "",
-                    "region": "",
-                    "subregion": "",
-                    "appellation": "",
-                    "classification": null,
-                    "grapes": [],
-                    "vintage": "",
-                    "tastingNotes": "",
-                    "pairings": ["", "", ""],
-                    "vibeTag": "",
-                    "vineyard": null,
-                    "soilType": null,
-                    "climate": null,
-                    "drinkingWindow": null,
-                    "abv": null,
-                    "winemakingStyle": null,
-                    "category": ""
-                  }
-
-            ──────────────────────── FIELD HINTS
-            
-            
-            • "country": e.g., France, Italy, USA — always required.
-            • "region": major wine area, e.g., Burgundy, Piedmont, California.
-            • "subregion": optional — a zone within the region, e.g., Côte de Beaune, Langhe, Sonoma.
-            • "appellation": village or official zone, e.g., Savigny-lès-Beaune, Barolo, Russian River Valley.
-            • "classification": e.g., DOC, DOCG, AOC, AVA — if shown or inferable from location.
-            • "grapes": all visible or inferable varieties as an array of strings.
-            • "vintage": four-digit year if shown or known.
-            • "tastingNotes": should always be filled out, inferred from grapes + location if needed.
-            • "pairings": 3 specific food pairings (not broad cuisines) e.g., Grilled chicken with lemon butter sauce.
-            • "vibeTag": 10 - 15 words, emotional tone (e.g., Graceful, earthy, and quietly seductive — a true expression of Burgundian finesse.).
-            • "vineyard": only if specific site is known (e.g., “La Tâche” or “To-Kalon”).
-            • "soilType": e.g., clay-limestone, volcanic — use known terroirs.
-            • "climate": e.g., Mediterranean, continental, maritime.
-            • "drinkingWindow": e.g., "2022–2035" if wine is ageworthy.
-            • "winemakingStyle": e.g., traditional, natural, Bordeaux-style, oxidative.
-            • "category": Must choose from:
-              - red wine | white wine | rosé wine | orange wine
-              - red sparkling wine | white sparkling wine
-              - red dessert wine | white dessert wine
-              - red fortified wine | white fortified wine
-
-            DO NOT output any explanation, markdown, prose, or extra fields. Return pure JSON.
-            """#
-    }
+    // MARK: - PRIVATE helpers
     
     // Build the standard chat body
     private func chatBody(model: String,
@@ -351,100 +291,5 @@ final class OpenAIManager: ObservableObject {
 
       // ── 2) Return only the content ──
       return full.choices.first!.message.content
-    }
-    
-    // sync variant
-    private func decodeJSON<T: Decodable>(_ jsonString: String,
-                                          as type: T.Type,
-                                          completion: @escaping (Result<T, Error>) -> Void)
-    {
-        let trimmed = cleanJSON(jsonString)
-        
-        #if DEBUG
-        print("── AI raw jsonString ──\n\(jsonString)\n── trimmed ──\n\(trimmed)")
-        #endif
-        
-        do {
-            let data = Data(trimmed.utf8)
-            let obj  = try JSONDecoder().decode(T.self, from: data)
-            completion(.success(obj))
-        } catch {
-            completion(.failure(error))
-        }
-    }
-
-    // async variant
-    private func decodeJSON<T: Decodable>(_ jsonString: String, as type: T.Type) throws -> T {
-        let trimmed = cleanJSON(jsonString)
-        
-        #if DEBUG
-        print("── AI raw jsonString ──\n\(jsonString)\n── trimmed ──\n\(trimmed)")
-        #endif
-        
-        let data = Data(trimmed.utf8)
-        return try JSONDecoder().decode(T.self, from: data)
-    }
-}
-
-/// Remove ```json fences / extra back‑ticks & trim whitespace.
-private func cleanJSON(_ raw: String) -> String {
-    raw.replacingOccurrences(of: "```json", with: "")
-       .replacingOccurrences(of: "```",     with: "")
-       .trimmingCharacters(in: .whitespacesAndNewlines)
-}
-
-
-fileprivate extension Data {
-  mutating func appendString(_ string: String) {
-    if let d = string.data(using: .utf8) {
-      append(d)
-    }
-  }
-}
-
-
-// Re-scales an image so its longest edge ≤ maxEdge (keeps aspect ratio).
-extension UIImage {
-    func resized(maxEdge: CGFloat) -> UIImage {
-        let maxLength = max(size.width, size.height)
-        guard maxLength > maxEdge else { return self }  // already small enough
-        let scale = maxEdge / maxLength
-        let newSize = CGSize(width: size.width * scale,
-                             height: size.height * scale)
-
-        let renderer = UIGraphicsImageRenderer(size: newSize)
-        return renderer.image { _ in
-            self.draw(in: CGRect(origin: .zero, size: newSize))
-        }
-    }
-}
-
-/// Returns the token count for the *single* image block you send.
-/// Assumes detail:"low" (flat-rate = 85 tokens).
-private func visionTokens(detail: String = "low",
-                          size: CGSize) -> Int {
-    if detail == "low" { return 85 }
-
-    // detail:"high"
-    let tiles = ceil(size.width / 512) * ceil(size.height / 512)
-    return 85 + Int(tiles) * 170
-}
-
-func estimateVisionCost(for image: UIImage,
-                        detail: String = "low") -> Double {
-    let tokens = visionTokens(detail: detail, size: image.size)
-    return Double(tokens) / 1000 * 0.005      // GPT-4o input rate
-}
-
-func computeVisionCost(using usage: OpenAIResponse.Usage, fallbackImage: UIImage?) -> Double {
-    if let imgTokens = usage.image_tokens {
-        print("📦 Using actual image token count from OpenAI: \(imgTokens)")
-        return Double(imgTokens) / 1000 * 0.005
-    } else if let image = fallbackImage {
-        print("📐 Estimating image token usage based on image size")
-        return estimateVisionCost(for: image)
-    } else {
-        print("⚠️ No image or image_tokens available. Cannot compute image cost.")
-        return 0.0
     }
 }

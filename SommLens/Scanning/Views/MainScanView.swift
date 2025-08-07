@@ -1,256 +1,42 @@
 
-//  ARScanView.swift
-//  VinoBytes
 //
+//  MainScanView.swift
+//  SommLens
 //
+//  This view manages a tightly-timed camera capture flow for wine label scanning.
+//  While a pure MVVM approach was prototyped, it introduced lifecycle bugs due to SwiftUI view reuse,
+//  especially inside a TabView context (e.g., session duplication, premature delegate release).
 //
+//  To ensure clarity and lifecycle correctness, camera state, timing, and navigation logic are kept
+//  scoped to this view. Stateless components like overlays and delegates are extracted to dedicated files.
+//  For single-responsibility, real-time features like this, reliability and user experience take priority
+//  over architectural purity.
 //
+//  Summary:
+//  - View-scoped state: AVCaptureSession, device, delegates, navigation
+//  - Stateless components: CameraPreview, BufferDelegate, PhotoDelegate, overlays
+//  - One-shot flow: tap shutter → freeze → capture hi-res → AI → save → navigate
 //
-//  I prototyped a pure-MVVM version, but because it’s a live camera interface with tightly-timed frame capture, state reset, and navigation, the ViewModel layer actually introduced lifecycle bugs — especially when SwiftUI reused the view in a TabView. I reverted to a view-scoped structure because it was easier to reason about and guaranteed correct behavior. For code like this — where the state is not reused and timing matters — I believe clarity and correctness are more important than forcing MVVM.
 
 import SwiftUI
-import UIKit               // for UIImage
+import UIKit
 import AVFoundation
-import CoreImage
 import CoreData
-import RevenueCatUI
-// ─────────────────────────────────────────────────────────────
-// 1) Your ScanResult model
-// ─────────────────────────────────────────────────────────────
-struct ScanResult: Identifiable, Hashable {
-    let id       = UUID()
-    let bottle:     BottleScan   // ← store the Core-Data row
-    let image: UIImage
-    let wineData: WineData
-
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
-    static func ==(a: ScanResult, b: ScanResult) -> Bool { a.id == b.id }
-}
-
-// ─────────────────────────────────────────────────────────────
-// 2) Live camera preview with pinch-to-zoom
-// ─────────────────────────────────────────────────────────────
-struct CameraPreview: UIViewRepresentable {
-
-    // AVCapture device we created in configureSession()
-    let session: AVCaptureSession
-    let device: AVCaptureDevice               // ← new
-
-    // ---------- UIView subclass whose CA-layer *is* a preview layer ----------
-    class PreviewView: UIView {
-        override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
-        var videoLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
-        
-        private let focusRing = UIView()
-
-           override init(frame: CGRect) {
-               super.init(frame: frame)
-               setupFocusRing()
-           }
-
-           required init?(coder: NSCoder) {
-               super.init(coder: coder)
-               setupFocusRing()
-           }
-
-           private func setupFocusRing() {
-               focusRing.layer.borderColor = UIColor(named: "Latte")?.cgColor
-               focusRing.layer.borderWidth = 2
-               focusRing.layer.cornerRadius = 40
-               focusRing.alpha = 0
-               focusRing.frame = CGRect(x: 0, y: 0, width: 80, height: 80)
-               addSubview(focusRing)
-           }
-
-           func showFocusRing(at point: CGPoint) {
-               focusRing.center = point
-               focusRing.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
-               focusRing.alpha = 1
-
-               UIView.animate(withDuration: 0.3, animations: {
-                   self.focusRing.transform = .identity
-               }) { _ in
-                   UIView.animate(withDuration: 0.3, delay: 0.5, options: [], animations: {
-                       self.focusRing.alpha = 0
-                   }, completion: nil)
-               }
-           }
-    }
-
-    // ---------- Coordinator handles gestures ----------
-    final class Coordinator: NSObject {
-        private let device: AVCaptureDevice
-        init(device: AVCaptureDevice) { self.device = device }
-        
-        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-            let view = gesture.view as! PreviewView
-            let location = gesture.location(in: view)
-            let screenSize = view.bounds.size
-            
-            // Show animated ring
-              view.showFocusRing(at: location)
+import CoreMedia
 
 
-            let focusPoint = CGPoint(x: location.y / screenSize.height,
-                                     y: 1.0 - (location.x / screenSize.width))
+// MainScanView: tap shutter - freeze - AI - result
 
-            do {
-                try device.lockForConfiguration()
-                if device.isFocusPointOfInterestSupported {
-                    device.focusPointOfInterest = focusPoint
-                    device.focusMode = .autoFocus
-                }
-
-                if device.isExposurePointOfInterestSupported {
-                    device.exposurePointOfInterest = focusPoint
-                    device.exposureMode = .continuousAutoExposure
-                }
-                device.unlockForConfiguration()
-            } catch {
-                print("Focus error:", error)
-            }
-        }
-
-        @objc func handlePinch(_ g: UIPinchGestureRecognizer) {
-            guard g.state == .changed || g.state == .ended else { return }
-
-            let maxZoom = min(device.activeFormat.videoMaxZoomFactor, 6.0)
-            let minZoom: CGFloat = 1.0
-            var newZoom = device.videoZoomFactor * g.scale
-            newZoom = max(min(newZoom, maxZoom), minZoom)
-
-            do {
-                try device.lockForConfiguration()
-                device.videoZoomFactor = newZoom
-                device.unlockForConfiguration()
-            } catch { print("Zoom error:", error) }
-
-            g.scale = 1          // reset incremental scale
-        }
-    }
-
-    func makeCoordinator() -> Coordinator { Coordinator(device: device) }
-
-    func makeUIView(context: Context) -> PreviewView {
-        let view = PreviewView()
-        let layer = view.videoLayer
-        layer.session      = session
-        layer.videoGravity = .resizeAspectFill
-        layer.connection?.videoOrientation = .portrait
-        
-        // tap gesture
-        let tap = UITapGestureRecognizer(target: context.coordinator,
-                                         action: #selector(Coordinator.handleTap(_:)))
-        view.addGestureRecognizer(tap)
-
-        // pinch gesture
-        let pinch = UIPinchGestureRecognizer(target: context.coordinator,
-                                             action: #selector(Coordinator.handlePinch(_:)))
-        view.addGestureRecognizer(pinch)
-        return view
-    }
-    func updateUIView(_ uiView: PreviewView, context: Context) {}
-}
-
-// ─────────────────────────────────────────────────────────────
-// 3) PhotoDelegate for high-res stills
-// ─────────────────────────────────────────────────────────────
-class PhotoDelegate: NSObject, AVCapturePhotoCaptureDelegate {
-    let callback: (UIImage?) -> Void
-    init(_ cb: @escaping (UIImage?) -> Void) { callback = cb }
-
-    func photoOutput(_ output: AVCapturePhotoOutput,
-                     didFinishProcessingPhoto photo: AVCapturePhoto,
-                     error: Error?) {
-        guard let data = photo.fileDataRepresentation(),
-              let img  = UIImage(data: data)
-        else {
-            callback(nil)
-            return
-        }
-        callback(img)
-    }
-}
-
-
-// ─────────────────────────────────────────────────────────────
-// 5) FreezeOverlay (show frozen frame + shimmer + AI call)
-// ─────────────────────────────────────────────────────────────
-
-private enum OverlayPhase { case sweep, processing }
-
-struct FreezeOverlay: View {
-    let overlayImage: UIImage
-    @Binding var isProcessing: Bool
-    
-    @State private var phase: OverlayPhase = .sweep
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            Image(uiImage: overlayImage)
-                .resizable()
-                .scaledToFill()
-                .frame(width: UIScreen.main.bounds.width,
-                       height: UIScreen.main.bounds.height)
-                .clipped()
-                .ignoresSafeArea()
-
-            switch phase {
-            case .sweep:
-                VerticalSweepLayer {
-                    // called when sweep finishes
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        phase = .processing
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)  // ← important
-                .ignoresSafeArea()
-                      case .processing:
-                          // the same wine-glass loader you already have
-                          WineGlassLoadingView()
-                      }
-                  }
-                  .zIndex(1)
-              }
-          }
-       
-                    
-                
-            
-        
-    
-
-
-// ─────────────────────────────────────────────────────────────
-// 6) Main ARScanView: tap shutter → freeze → improved OCR → AI → result
-// ─────────────────────────────────────────────────────────────
 struct MainScanView: View {
+    
+    // MARK: - Dependencies
+    
     @EnvironmentObject var openAIManager: OpenAIManager
-    @EnvironmentObject var auth: AuthViewModel               // ← add
+    @EnvironmentObject var auth: AuthViewModel  
     @EnvironmentObject var engagementState: EngagementState
     @Environment(\.managedObjectContext) private var ctx
     
-    // camera + photo capture
-    @State private var session     = AVCaptureSession()
-    @State private var photoOutput = AVCapturePhotoOutput()
-    @State private var photoDel: PhotoDelegate?
-    
-    // freeze + AI(image) + navigation
-   
-   
-   
-    @State private var captureDevice: AVCaptureDevice?
-    @State private var bufferDelegate = BufferDelegate()
-    @State private var highResImage: UIImage? = nil
-    
-    @State private var reachedProLimit = false                // ← alert for Pro users
-    @State private var reachedFreeLimit = false
-    
-    @State private var didShowPaywall = false
-    @State private var showScanError = false
-    @State private var showShareSheet = false
+    // MARK: - Bindings from Parent
     
     @Binding var selectedTab: MainTab
     @Binding var frozenImage: UIImage?
@@ -259,22 +45,39 @@ struct MainScanView: View {
     @Binding var showOverlay: Bool
     @Binding var hasExtracted: Bool
     
+    // MARK: - Camera State
     
+    @State private var session     = AVCaptureSession()
+    @State private var photoOutput = AVCapturePhotoOutput()
+    @State private var photoDel: PhotoDelegate?
+    @State private var captureDevice: AVCaptureDevice?
+    @State private var bufferDelegate = BufferDelegate()
+    
+    // MARK: - Scan State
+    @State private var highResImage: UIImage? = nil
+    @State private var reachedProLimit = false
+    @State private var reachedFreeLimit = false
+    @State private var showScanError = false
+    @State private var showShareSheet = false
+    
+    
+    // MARK: - Computed Properties
     
     private var canScan: Bool {
         auth.canScan(currentCount: auth.getScanCount())
     }
     
+    
     var body: some View {
         NavigationStack {
             ZStack {
-                // 1) Live camera preview
+                // Live camera preview
                 if let dev = captureDevice {
                     CameraPreview(session: session, device: dev)
                         .ignoresSafeArea()
                 }
                 
-                // 2) FreezeOverlay: UI only
+                // FreezeOverlay: UI only
                 if let img = frozenImage, showOverlay {
                     FreezeOverlay(
                         overlayImage: img,
@@ -284,7 +87,7 @@ struct MainScanView: View {
                     .animation(nil, value: showOverlay)
                 }
                 
-                // 3) Shutter button
+                // Shutter button
                 if frozenImage == nil && !isProcessing {
                     VStack {
                         Spacer()
@@ -304,11 +107,11 @@ struct MainScanView: View {
             .onAppear(perform: configureSession)
             .navigationDestination(item: $scanResult) { result in
                 ScanResultView(
-                                   bottle:       result.bottle,   // ← pass it
+                                   bottle:       result.bottle,  // passing it
                                    capturedImage: result.image,
                                    wineData: result.wineData,
                                    onDismiss: {
-                                       // 1️⃣ Reset state BEFORE dismissing
+                                       // Reset state BEFORE dismissing
                                        frozenImage   = nil
                                        highResImage  = nil
                                        isProcessing  = false
@@ -316,7 +119,7 @@ struct MainScanView: View {
                                        showOverlay   = false
                                        hasExtracted  = false
                                        
-                                       // Defer the increments so that the view is fully out of the hierarchy first:
+                                       // Defering the increments so that the view is fully out of the hierarchy first:
                                                   DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                                       EngagementMilestones.increment("scanShareCount",  type: .share)
                                                       EngagementMilestones.increment("scanReviewCount", type: .review)
@@ -350,11 +153,11 @@ struct MainScanView: View {
         } message: {
             Text("Free users get 10 free scans. Upgrade to SommLens Pro to unlock 200 scans every month!")
         }
-        // “Love SommLens?” alert—this only appears when `request(.share)` sets the flag:
+      
                .alert("Love SommLens?", isPresented: $engagementState.showSharePrompt) {
                    Button("Not Now", role: .cancel) {}
                    Button("Share") {
-                       // Defer toggling the system share sheet so the alert has time to dismiss:
+                       // Defering toggling of the system share sheet so the alert has time to dismiss:
                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                            showShareSheet = true
                        }
@@ -369,15 +172,14 @@ struct MainScanView: View {
        
     }
     
-    
-    
+// MARK: Configure the session
     
     private func configureSession() {
         guard session.inputs.isEmpty else { return }
         session.beginConfiguration()
         session.sessionPreset = .photo
         
-        // 1️⃣ Add camera input
+        // Add camera input
         if let cam = AVCaptureDevice.default(.builtInWideAngleCamera,
                                              for: .video,
                                              position: .back),
@@ -387,13 +189,13 @@ struct MainScanView: View {
             captureDevice = cam
         }
         
-        // 2️⃣ Add photo output (for high-res image)
+        // Adds photo output (for high-res image)
         if session.canAddOutput(photoOutput) {
             session.addOutput(photoOutput)
-            photoOutput.isHighResolutionCaptureEnabled = true
+            photoOutput.maxPhotoDimensions = CMVideoDimensions(width: 4032, height: 3024) // 12MP (4:3)
         }
         
-        // 3️⃣ Add video buffer output (for instant overlay)
+        // Adds video buffer output (for instant overlay freeze)
         let videoOutput = AVCaptureVideoDataOutput()
         videoOutput.setSampleBufferDelegate(bufferDelegate, queue: DispatchQueue(label: "bufferQueue"))
         videoOutput.alwaysDiscardsLateVideoFrames = true
@@ -404,31 +206,36 @@ struct MainScanView: View {
         
         session.commitConfiguration()
         
-        // 🔧 4️⃣ Force orientation to portrait (AFTER commitConfiguration)
+        // 🔧 Force orientation to portrait (AFTER commitConfiguration)
         if let connection = videoOutput.connection(with: .video),
-           connection.isVideoOrientationSupported {
-            connection.videoOrientation = .portrait
+           connection.isVideoRotationAngleSupported(90) {
+            connection.videoRotationAngle = 90
         }
         
-        // 4️⃣ Start running
+        // Start running
         DispatchQueue.global(qos: .userInitiated).async {
             session.startRunning()
         }
     }
     
+   
+    
+    // MARK: Take Photo - Overlay - AI Call
+    
+    
     private func takePhoto() {
         
-        // ⚠️ quota check
+        // IMPORTANT quota check
         guard canScan else {
             if auth.hasActiveSubscription {
                 reachedProLimit = true            // 200 reached
             } else {
-                reachedFreeLimit = true    // ← show alert first
+                reachedFreeLimit = true    // show alert
             }
             return
         }
         
-        // 1️⃣ Re-install the one-shot handler on each tap…
+        // Re-install the one-shot handler on each tap
         bufferDelegate.onFrame = { image in
             DispatchQueue.main.async {
                 // only freeze once
@@ -437,7 +244,7 @@ struct MainScanView: View {
                 // Freeze immediately
                 frozenImage  = image
                 showOverlay  = true
-                hasExtracted = false
+                hasExtracted = false // prevents further freezing until the next tap
                 
                 // Disable further freezes until the next tap
                 bufferDelegate.onFrame = nil
@@ -445,7 +252,7 @@ struct MainScanView: View {
         }
         
         
-        // 1️⃣ Kick off the high-res capture immediately
+        // Kick off the high-res capture immediately
         let settings = AVCapturePhotoSettings()
         settings.photoQualityPrioritization = photoOutput.maxPhotoQualityPrioritization
         
@@ -457,7 +264,7 @@ struct MainScanView: View {
                 highResImage = hiRes
                 isProcessing = true
                 
-                // 2️⃣ Only _now_ call AI on the high-res image:
+                // Only _now_ call AI on the high-res image:
                 openAIManager.extractWineInfo(from: hiRes) { result in
                     DispatchQueue.main.async {
                         isProcessing = false
@@ -467,7 +274,7 @@ struct MainScanView: View {
                             let rawJSON = (try? JSONEncoder().encode(wine))
                                 .flatMap { String(data: $0, encoding: .utf8) }
                             ?? "{}"
-                            let bottle = saveScan(        // ← returns BottleScan
+                            let bottle = saveScan(        // returns BottleScan
                                 in:         ctx,
                                 wineData:   wine,
                                 rawJSON:    rawJSON,
@@ -476,12 +283,12 @@ struct MainScanView: View {
                             
                             auth.incrementScanCount()
                             
-                            // 4️⃣  Push navigation with that row
+                            // Push navigation with that row
                             scanResult = ScanResult(
                                 bottle:    bottle,
                                 image:     hiRes,
                                 wineData:  wine
-                                // NEW argument
+                           
                             )
                             
                         case .failure(let error):
@@ -504,87 +311,4 @@ struct MainScanView: View {
         photoDel = del
         photoOutput.capturePhoto(with: settings, delegate: del)
     }
-}
-
-final class BufferDelegate: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
-
-    // 1️⃣  One CIContext, one queue, forever.
-    private let renderQueue = DispatchQueue(label: "ci.render.serial")
-    private let ciContext   = CIContext(options: nil)   // GPU by default
-
-    // 2️⃣  Simple re-entrancy guard (optional but nice)
-    private var isRendering = false
-
-    var onFrame: ((UIImage) -> Void)?
-
-    func captureOutput(_ output: AVCaptureOutput,
-                       didOutput sampleBuffer: CMSampleBuffer,
-                       from connection: AVCaptureConnection) {
-
-        guard !isRendering else { return }
-        isRendering = true
-        renderQueue.async { [weak self] in
-            defer { self?.isRendering = false }
-
-            guard
-                let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-            else { return }
-
-            var ciImage = CIImage(cvImageBuffer: imageBuffer)
-
-            // 3️⃣  Discard zero-sized or bogus frames
-            guard !ciImage.extent.isEmpty else { return }
-
-            // 4️⃣  Explicit colours (fixes iOS 17 HDR crash paths)
-            let rgb = CGColorSpaceCreateDeviceRGB()
-
-            guard
-                let cgImage = self?.ciContext
-                    .createCGImage(ciImage,
-                                   from: ciImage.extent,
-                                   format: .RGBA8,
-                                   colorSpace: rgb)
-            else { return }
-
-            let uiImage = UIImage(cgImage: cgImage)
-
-            DispatchQueue.main.async {
-                self?.onFrame?(uiImage)   // downstream resize / OpenAI
-            }
-        }
-    }
-}
-
-private func saveScan(in ctx: NSManagedObjectContext,
-                      wineData: WineData,
-                      rawJSON: String,
-                      screenshot: UIImage?
-) -> BottleScan {
-    let scan = BottleScan(context: ctx)
-    scan.id              = UUID()
-    scan.fingerprint     = wineData.id          // ← add this line
-    scan.timestamp       = Date()
-    scan.producer        = wineData.producer
-    scan.region          = wineData.region
-    scan.subregion       = wineData.subregion
-    scan.appellation     = wineData.appellation
-    scan.country         = wineData.country
-    scan.grapes          = wineData.grapes?.joined(separator: ", ")
-    scan.vintage         = wineData.vintage
-    scan.classification  = wineData.classification
-    scan.tastingNotes    = wineData.tastingNotes
-    scan.pairings        = wineData.pairings?.joined(separator: ", ")
-    scan.vibeTag         = wineData.vibeTag
-    scan.vineyard        = wineData.vineyard
-    scan.soilType        = wineData.soilType
-    scan.climate         = wineData.climate
-    scan.drinkingWindow  = wineData.drinkingWindow
-    scan.abv             = wineData.abv
-    scan.winemakingStyle = wineData.winemakingStyle
-    scan.category        = wineData.category.rawValue
-    scan.rawJSON         = rawJSON
-    scan.screenshot      = screenshot?.jpegData(compressionQuality: 0.8)
-    try? ctx.save()
-    
-    return scan                       // ← NEW
 }

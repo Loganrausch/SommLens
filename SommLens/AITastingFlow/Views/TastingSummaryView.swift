@@ -3,9 +3,7 @@
 //  SommLens
 //
 //  Created by Logan Rausch on 5/11/25.
-//
-//
-//
+
 /// Pure view - Helper logic is strictly presentation level - will not be extracting into vm for now.
 
 import SwiftUI
@@ -173,7 +171,7 @@ private var comparisonRows: some View {
     }
 }
 
-    // 🔄 Replace your current compRow(_:_:_:) with this version
+  
     private func compRow<E: RawRepresentable>(
         _ title: String, _ you: E, _ classic: E
     ) -> some View where E.RawValue == String {

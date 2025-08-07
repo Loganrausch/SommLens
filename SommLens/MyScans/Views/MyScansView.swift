@@ -57,11 +57,12 @@ struct MyScansView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     
+                    
                     List(selection: $selectedScanIDs) {
                         // a Section with an empty, fixed‐height header
                         Section(header:
-                                    Color.clear
-                            .frame(height: 10)           // ← how much space you want
+                            Color.clear
+                        .frame(height: 10)           // ← how much space you want
                             .listRowInsets(.init())      // zero out the default insets
                         ) {
                             ForEach(filteredScans, id: \.identity) { scan in

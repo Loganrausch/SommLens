@@ -1,4 +1,3 @@
-//
 //  MailComposeView.swift
 //  SommLens
 //

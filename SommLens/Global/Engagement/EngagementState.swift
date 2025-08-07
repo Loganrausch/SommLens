@@ -8,6 +8,6 @@
 import SwiftUI
 
 final class EngagementState: ObservableObject {
-    @Published var showReviewPrompt = false
+   
     @Published var showSharePrompt = false
 }
