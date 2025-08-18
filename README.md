@@ -7,6 +7,14 @@
 Crafted by a Certified Sommelier and built with SwiftUI, Core Data, and the OpenAI API, SommLens decodes any wine label in seconds and guides users through a professional-level tasting — even if they’re brand new to wine.
 
 ---
+## ✨ Screenshots
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9a152074-87cd-42ce-9ec7-f65d94262f6a" width="150"/>
+  <img src="https://github.com/user-attachments/assets/710dc324-6e2a-4271-b0db-61aeaf12d794" width="150"/>
+  <img src="https://github.com/user-attachments/assets/eaca821f-2408-47d7-98e7-1d17df1a84e0" width="150"/>
+  <img src="https://github.com/user-attachments/assets/23542e76-c400-4887-86a1-481017796630" width="150"/>
+  <img src="https://github.com/user-attachments/assets/a8bd0133-2555-44a9-94dc-d83b767680a2" width="150"/>
+</p>
 
 ## 📸 Features
 
