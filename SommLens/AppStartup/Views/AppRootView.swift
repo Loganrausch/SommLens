@@ -23,7 +23,7 @@ struct AppRootView: View {
                    LaunchAnimationView()
                        .transition(.opacity)
                } else {
-                   ContentView()
+                   MainTabView()
                        .transition(.opacity)
                }
            }

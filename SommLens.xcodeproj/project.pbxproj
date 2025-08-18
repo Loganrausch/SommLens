@@ -13,7 +13,6 @@
 		CE2416AE2DEFA8D700BBF387 /* PushRegistrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2416AD2DEFA8D000BBF387 /* PushRegistrationService.swift */; };
 		CE2CCF942E1339BE007D75CA /* JSONHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2CCF932E1339B9007D75CA /* JSONHelpers.swift */; };
 		CE2CCF962E1339CC007D75CA /* UIImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2CCF952E1339C4007D75CA /* UIImage+Resize.swift */; };
-		CE2CCF982E1339D5007D75CA /* VisionCost.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE2CCF972E1339D0007D75CA /* VisionCost.swift */; };
 		CE4D080C2E273E0500DAF1BE /* Data+Append.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4D080B2E273DFA00DAF1BE /* Data+Append.swift */; };
 		CE4D080E2E27424200DAF1BE /* ImageSystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4D080D2E27423C00DAF1BE /* ImageSystemPrompt.swift */; };
 		CE4EF4282DEFDB05006AD0FA /* EngagementState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EF4272DEFDAFE006AD0FA /* EngagementState.swift */; };
@@ -49,7 +48,7 @@
 		CED9D0862DE75B1800C217AE /* ScanPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0662DE75B1800C217AE /* ScanPrompts.swift */; };
 		CED9D0872DE75B1800C217AE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0632DE75B1800C217AE /* Persistence.swift */; };
 		CED9D0882DE75B1800C217AE /* MyScansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0602DE75B1800C217AE /* MyScansView.swift */; };
-		CED9D0892DE75B1800C217AE /* TastingInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06E2DE75B1800C217AE /* TastingInput.swift */; };
+		CED9D0892DE75B1800C217AE /* UserTastingInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06E2DE75B1800C217AE /* UserTastingInput.swift */; };
 		CED9D08A2DE75B1800C217AE /* MailComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D05F2DE75B1800C217AE /* MailComposeView.swift */; };
 		CED9D08B2DE75B1800C217AE /* ContactFormViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0582DE75B1800C217AE /* ContactFormViewModel.swift */; };
 		CED9D08C2DE75B1800C217AE /* SelectionStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0672DE75B1800C217AE /* SelectionStepView.swift */; };
@@ -102,7 +101,6 @@
 		CE2416AD2DEFA8D000BBF387 /* PushRegistrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRegistrationService.swift; sourceTree = "<group>"; };
 		CE2CCF932E1339B9007D75CA /* JSONHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONHelpers.swift; sourceTree = "<group>"; };
 		CE2CCF952E1339C4007D75CA /* UIImage+Resize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Resize.swift"; sourceTree = "<group>"; };
-		CE2CCF972E1339D0007D75CA /* VisionCost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionCost.swift; sourceTree = "<group>"; };
 		CE4D080B2E273DFA00DAF1BE /* Data+Append.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Append.swift"; sourceTree = "<group>"; };
 		CE4D080D2E27423C00DAF1BE /* ImageSystemPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSystemPrompt.swift; sourceTree = "<group>"; };
 		CE4EF4272DEFDAFE006AD0FA /* EngagementState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngagementState.swift; sourceTree = "<group>"; };
@@ -156,7 +154,7 @@
 		CED9D0682DE75B1800C217AE /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		CED9D06B2DE75B1800C217AE /* SommLensApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SommLensApp.swift; sourceTree = "<group>"; };
 		CED9D06D2DE75B1800C217AE /* TastingFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingFormView.swift; sourceTree = "<group>"; };
-		CED9D06E2DE75B1800C217AE /* TastingInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingInput.swift; sourceTree = "<group>"; };
+		CED9D06E2DE75B1800C217AE /* UserTastingInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTastingInput.swift; sourceTree = "<group>"; };
 		CED9D06F2DE75B1800C217AE /* TastingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingSession.swift; sourceTree = "<group>"; };
 		CED9D0702DE75B1800C217AE /* TastingSessionEntity+DTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TastingSessionEntity+DTO.swift"; sourceTree = "<group>"; };
 		CED9D0712DE75B1800C217AE /* TastingSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TastingSummaryView.swift; sourceTree = "<group>"; };
@@ -216,7 +214,6 @@
 			children = (
 				CE4D080D2E27423C00DAF1BE /* ImageSystemPrompt.swift */,
 				CE4D080B2E273DFA00DAF1BE /* Data+Append.swift */,
-				CE2CCF972E1339D0007D75CA /* VisionCost.swift */,
 				CE2CCF952E1339C4007D75CA /* UIImage+Resize.swift */,
 				CE2CCF932E1339B9007D75CA /* JSONHelpers.swift */,
 				CED9D0622DE75B1800C217AE /* OpenAIManager.swift */,
@@ -400,7 +397,7 @@
 			children = (
 				CED9D0532DE75B1800C217AE /* AITastingProfile.swift */,
 				CED9D05E2DE75B1800C217AE /* IntensityEnums.swift */,
-				CED9D06E2DE75B1800C217AE /* TastingInput.swift */,
+				CED9D06E2DE75B1800C217AE /* UserTastingInput.swift */,
 				CED9D06F2DE75B1800C217AE /* TastingSession.swift */,
 			);
 			path = Models;
@@ -658,7 +655,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1610;
-				LastUpgradeCheck = 1610;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					CEC2C7632DB1517B0043FAEB = {
 						CreatedOnToolsVersion = 16.1;
@@ -744,12 +741,11 @@
 				CED9D0852DE75B1800C217AE /* VerticalTubeStep.swift in Sources */,
 				CED9D0862DE75B1800C217AE /* ScanPrompts.swift in Sources */,
 				CEA401072DE93FB800B498CC /* BottleScanIdentity.swift in Sources */,
-				CE2CCF982E1339D5007D75CA /* VisionCost.swift in Sources */,
 				CE4EF45C2DF20A28006AD0FA /* ScanFilter.swift in Sources */,
 				CED9D0872DE75B1800C217AE /* Persistence.swift in Sources */,
 				CED9D0882DE75B1800C217AE /* MyScansView.swift in Sources */,
 				CE4EF4282DEFDB05006AD0FA /* EngagementState.swift in Sources */,
-				CED9D0892DE75B1800C217AE /* TastingInput.swift in Sources */,
+				CED9D0892DE75B1800C217AE /* UserTastingInput.swift in Sources */,
 				CE2416AA2DEF620100BBF387 /* AppRootView.swift in Sources */,
 				CED9D08A2DE75B1800C217AE /* MailComposeView.swift in Sources */,
 				CED9D08B2DE75B1800C217AE /* ContactFormViewModel.swift in Sources */,
@@ -836,8 +832,9 @@
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7BWDUC2WMW;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SommLens/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SommLens;
@@ -874,8 +871,9 @@
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7BWDUC2WMW;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SommLens/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SommLens;
@@ -937,6 +935,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -961,6 +960,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -1001,6 +1001,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -1018,6 +1019,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1029,7 +1031,6 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
 				MARKETING_VERSION = 1.0;
@@ -1048,7 +1049,6 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
 				MARKETING_VERSION = 1.0;
@@ -1066,7 +1066,6 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vinobytes.SommLensUITests;
@@ -1083,7 +1082,6 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7BWDUC2WMW;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vinobytes.SommLensUITests;

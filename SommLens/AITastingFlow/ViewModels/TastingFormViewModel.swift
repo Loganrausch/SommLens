@@ -17,7 +17,7 @@ final class TastingFormViewModel: ObservableObject {
     
     @Published var step: TastingStep = .acidity
     @Published var previousStep: TastingStep = .acidity
-    @Published var input = TastingInput()
+    @Published var input = UserTastingInput()
     @Published var showViniIntro = false
     @Published var showCancelAlert = false
     
@@ -112,7 +112,7 @@ final class TastingFormViewModel: ObservableObject {
             date: Date()
         )
 
-        onSave(dto)           // fires the closure supplied by ARScanResultView
+        onSave(dto)           // fires the closure supplied by ScanResultView
         
     }
     

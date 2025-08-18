@@ -35,7 +35,7 @@ final class BufferDelegate: NSObject, AVCaptureVideoDataOutputSampleBufferDelega
                 let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
             else { return }
 
-            var ciImage = CIImage(cvImageBuffer: imageBuffer)
+            let ciImage = CIImage(cvImageBuffer: imageBuffer)
 
             // Discard zero-sized or bogus frames
             guard !ciImage.extent.isEmpty else { return }

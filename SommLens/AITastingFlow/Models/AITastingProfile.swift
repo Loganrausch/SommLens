@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: AI Tasting Response
 struct AITastingProfile: Codable {
     var acidity:   Intensity5
     var alcohol:   Intensity5

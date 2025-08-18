@@ -8,6 +8,7 @@
 import SwiftUI
 import UIKit   // haptics
 
+// MARK: VerticalTubeStep inside TastingFormView
 struct VerticalTubeStep<E>: View where
     E: RawRepresentable & CaseIterable & Hashable,
     E.RawValue == String
@@ -101,24 +102,3 @@ struct VerticalTubeStep<E>: View where
             .capitalized
     }
 }
-
-#if DEBUG
-fileprivate enum Mock: String, CaseIterable, Hashable {
-    case low, mediumMinus = "medium-", medium, mediumPlus = "medium+", high
-}
-
-struct TubePreview: View {
-    @State private var sel: Mock = .medium
-    var body: some View {
-        VerticalTubeStep(title: "Acidity",
-                         options: Mock.allCases,
-                         selection: $sel)
-            .frame(width: 180)
-            .padding()
-    }
-}
-
-struct TubePreview_Previews: PreviewProvider {
-    static var previews: some View { TubePreview() }
-}
-#endif

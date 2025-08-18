@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: SelectedGrid inside TastingFormView
 struct SelectionGrid: View {
     let title: String
     let options: [String]

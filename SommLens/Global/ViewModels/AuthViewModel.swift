@@ -31,12 +31,12 @@ final class AuthViewModel: NSObject, ObservableObject {
     @Published var hasActiveSubscription: Bool    = false
     @Published var isPaywallPresented:    Bool    = false         // RC pay-wall trigger
 
-    // MARK: - Constants
+    // MARK: - Quota Scan Limits
     private let proLimit  = 200 // MONTHLY
     private let freeLimit = 10  // LIFETIME
     
     // One key that never resets for free users
-        private let freeScanKey = "freeScanCount"
+    private let freeScanKey = "freeScanCount"
     
     var   scanLimit: Int  { hasActiveSubscription ? proLimit : freeLimit }
 
@@ -95,27 +95,36 @@ final class AuthViewModel: NSObject, ObservableObject {
             self.hasActiveSubscription = info?.entitlements[RC.entitlementID]?.isActive ?? false
         }
     }
-
-    func canScan(currentCount: Int) -> Bool { currentCount < scanLimit }
     
-    func scanCountKey(for date: Date = Date()) -> String {
-        let comps = Calendar.current.dateComponents([.year, .month], from: date)
-        return "scanCount_\(comps.year!)_\(comps.month!)"
-    }
-
+    // MARK: - Quota Flow
+    
+    /// 1) Read current usage
     func getScanCount() -> Int {
            let key = hasActiveSubscription ? scanCountKey() : freeScanKey
            return ScanQuotaKeychain.loadCount(for: key) ?? 0
        }
 
+    /// 2) Decide if the user can scan under the current limit
+    func canScan(currentCount: Int) -> Bool {
+        currentCount < scanLimit
+    }
+    
+    /// 3) Commit usage after a successful scan
     func incrementScanCount() {
            let key = hasActiveSubscription ? scanCountKey() : freeScanKey
            let current = ScanQuotaKeychain.loadCount(for: key) ?? 0
            ScanQuotaKeychain.saveCount(current + 1, for: key)
        }
-   }
+    
+    /// Helper used only by Pro path (monthly bucket) - New bucket every month for reset.
+    func scanCountKey(for date: Date = Date()) -> String {
+        let comps = Calendar.current.dateComponents([.year, .month], from: date)
+        return "scanCount_\(comps.year!)_\(comps.month!)"
+    }
+}
 
 // MARK: - PurchasesDelegate
+
 extension AuthViewModel: PurchasesDelegate {
     nonisolated func purchases(_ p: Purchases, receivedUpdated info: CustomerInfo) {
         Task { @MainActor in

@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: User + AI Responses attached to wine
 struct TastingSession: Identifiable, Codable {
     var id = UUID()
     var wineID:     String
@@ -16,7 +17,7 @@ struct TastingSession: Identifiable, Codable {
     var vintage:    String?
 
     // user + AI
-    var userInput:  TastingInput
+    var userInput:  UserTastingInput
     var aiProfile:  AITastingProfile
 
     var date:       Date = Date()

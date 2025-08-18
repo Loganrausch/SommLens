@@ -7,6 +7,8 @@
 
 import Foundation
 
+// Helper for appendString to avoid redundant code
+
 extension Data {
   mutating func appendString(_ string: String) {
     if let d = string.data(using: .utf8) {

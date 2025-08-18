@@ -15,6 +15,7 @@ extension ScanQuotaKeychain {
     private static let rcService = "com.sommlens.rc.userid"
     private static let rcAccount = "appUserID"
 
+    // Used in incrementScanCount - saves count
     static func saveCount(_ count: Int, for key: String) {
         var query: [CFString: Any] = [
             kSecClass:       kSecClassGenericPassword,
@@ -29,7 +30,8 @@ extension ScanQuotaKeychain {
 
         SecItemAdd(query as CFDictionary, nil)
     }
-
+    
+    // Used in getScanCount - loads count
     static func loadCount(for key: String) -> Int? {
         let query: [CFString: Any] = [
             kSecClass:       kSecClassGenericPassword,
@@ -47,6 +49,7 @@ extension ScanQuotaKeychain {
         return data.withUnsafeBytes { $0.load(as: Int.self) }
     }
     
+    // Either loads userID connected to user or creates a new ID the first load
     static func loadOrCreateAppUserID() -> String {
            // 1) try to load
            let query: [CFString: Any] = [

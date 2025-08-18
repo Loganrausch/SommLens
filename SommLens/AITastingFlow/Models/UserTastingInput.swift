@@ -7,7 +7,8 @@
 
 import SwiftUI
 
-struct TastingInput: Identifiable, Codable {
+// MARK: User Tasting Response
+struct UserTastingInput: Identifiable, Codable {
     var id = UUID()
     var acidity:  Intensity5      = .unknown
     var alcohol:  Intensity5      = .unknown

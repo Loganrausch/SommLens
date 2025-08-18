@@ -48,7 +48,7 @@ fileprivate func pill(_ text: String,
 
 // MARK: - Main view
 struct TastingSummaryView: View {
-    @Binding var input: TastingInput
+    @Binding var input: UserTastingInput
     let aiProfile:  AITastingProfile
     let wineName:   String
     
@@ -121,188 +121,135 @@ struct TastingSummaryView: View {
             }
             .frame(maxWidth: .infinity) // ✅ Add this
             .padding(.bottom, 32)
-            }
-            .safeAreaInset(edge: .bottom) {
-              Color.clear.frame(height: 20)   // reserve 72 pts for your button
-            }
-            .safeAreaInset(edge: .top) {
-              Color.clear.frame(height: 20)   // reserve 72 pts for your button
-            }
-            .scrollDismissesKeyboard(.interactively)
-                // tap anywhere to dismiss keyboard
-                .onTapGesture {
-                    UIApplication.shared.sendAction(
-                      #selector(UIResponder.resignFirstResponder),
-                      to: nil, from: nil, for: nil
-                    )
-                }
-            }
-
-// MARK: – Comparison rows
-private var comparisonRows: some View {
-    VStack(spacing: 15) {
-        // header
-        HStack {
-            Spacer().frame(width: 90)
-            Spacer(minLength: 12)
-            Text("You")
-                .font(.headline.bold())
-                .foregroundStyle(Color.burgundy)
-                .frame(width: pillWidth)
-            
-            Spacer(minLength: 12)
-            Text("Vini")
-                .font(.headline.bold())
-                .foregroundStyle(Color.burgundy)
-                .frame(width: pillWidth)
         }
-        
-        // data rows
-        compRow("Acidity",   input.acidity,   aiProfile.acidity)
-        compRow("Alcohol",   input.alcohol,   aiProfile.alcohol)
-        
-        // ← only show Tannin if hasTannin == true
-               if aiProfile.hasTannin {
-                   compRow("Tannin", input.tannin, aiProfile.tannin)
-               }
-        
-        compRow("Body",      input.body,      aiProfile.body)
-        compRow("Sweetness", input.sweetness, aiProfile.sweetness)
+        .safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: 20)   // reserve 72 pts for your button
+        }
+        .safeAreaInset(edge: .top) {
+            Color.clear.frame(height: 20)   // reserve 72 pts for your button
+        }
+        .scrollDismissesKeyboard(.interactively)
+        // tap anywhere to dismiss keyboard
+        .onTapGesture {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil, from: nil, for: nil
+            )
+        }
     }
-}
-
-  
+    
+    // MARK: – Comparison rows
+    private var comparisonRows: some View {
+        VStack(spacing: 15) {
+            // header
+            HStack {
+                Spacer().frame(width: 90)
+                Spacer(minLength: 12)
+                Text("You")
+                    .font(.headline.bold())
+                    .foregroundStyle(Color.burgundy)
+                    .frame(width: pillWidth)
+                
+                Spacer(minLength: 12)
+                Text("Vini")
+                    .font(.headline.bold())
+                    .foregroundStyle(Color.burgundy)
+                    .frame(width: pillWidth)
+            }
+            
+            // data rows
+            compRow("Acidity",   input.acidity,   aiProfile.acidity)
+            compRow("Alcohol",   input.alcohol,   aiProfile.alcohol)
+            
+            // ← only show Tannin if hasTannin == true
+            if aiProfile.hasTannin {
+                compRow("Tannin", input.tannin, aiProfile.tannin)
+            }
+            
+            compRow("Body",      input.body,      aiProfile.body)
+            compRow("Sweetness", input.sweetness, aiProfile.sweetness)
+        }
+    }
+    
+    
     private func compRow<E: RawRepresentable>(
         _ title: String, _ you: E, _ classic: E
     ) -> some View where E.RawValue == String {
-
+        
         let youTxt  = pretty(you.rawValue)
         let viniTxt = pretty(classic.rawValue)
         let isMatch = youTxt == viniTxt          // both sides picked the same option?
-
+        
         return HStack {
             Text(title)
                 .frame(width: 90, alignment: .leading)
-
+            
             Spacer(minLength: 12)
-
+            
             // when they match, outline both pills in green
             pill(youTxt,  matched: isMatch)
-
+            
             Spacer(minLength: 12)                // keeps the columns aligned
-
+            
             pill(viniTxt, matched: isMatch)
         }
     }
-
-// MARK: – New grouped comparison section
-@ViewBuilder
-private func pillColumnsSection(title: String,
-                                you: [String],
-                                somm: [String]) -> some View {
     
-    let shared     = Set(you).intersection(somm)
-    let youOnly    = you.filter { !shared.contains($0) }
-    let sommOnly   = somm.filter { !shared.contains($0) }
-    
-    VStack(alignment: .leading, spacing: 12) {
+    // MARK: – New grouped comparison section
+    @ViewBuilder
+    private func pillColumnsSection(title: String,
+                                    you: [String],
+                                    somm: [String]) -> some View {
         
-        Text(title).font(.headline)
+        let shared     = Set(you).intersection(somm)
+        let youOnly    = you.filter { !shared.contains($0) }
+        let sommOnly   = somm.filter { !shared.contains($0) }
         
-        HStack(alignment: .top, spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
             
-            // ── Left column: You Detected ──────────────
-            VStack(alignment: .center, spacing: 8) {
-                Text("You Detected")
-                    .font(.headline.bold())
-                    .foregroundStyle(classicFG)
-                ForEach(shared.sorted(),  id: \.self) {
-                    pill(pretty($0), matched: true)
-                }
-                ForEach(youOnly.sorted(), id: \.self) {
-                    pill(pretty($0))                     // no border
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text(title).font(.headline)
             
-            // ── Right column: Somm Detected ───────────
-            VStack(alignment: .center, spacing: 8) {
-                Text("Vini Detected")
-                    .font(.headline.bold())
-                    .foregroundStyle(classicFG)
-                ForEach(shared.sorted(),  id: \.self) {
-                    pill(pretty($0), matched: true)
+            HStack(alignment: .top, spacing: 12) {
+                
+                // ── Left column: You Detected ──────────────
+                VStack(alignment: .center, spacing: 8) {
+                    Text("You Detected")
+                        .font(.headline.bold())
+                        .foregroundStyle(classicFG)
+                    ForEach(shared.sorted(),  id: \.self) {
+                        pill(pretty($0), matched: true)
+                    }
+                    ForEach(youOnly.sorted(), id: \.self) {
+                        pill(pretty($0))                     // no border
+                    }
                 }
-                ForEach(sommOnly.sorted(), id: \.self) {
-                    pill(pretty($0))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // ── Right column: Somm Detected ───────────
+                VStack(alignment: .center, spacing: 8) {
+                    Text("Vini Detected")
+                        .font(.headline.bold())
+                        .foregroundStyle(classicFG)
+                    ForEach(shared.sorted(),  id: \.self) {
+                        pill(pretty($0), matched: true)
+                    }
+                    ForEach(sommOnly.sorted(), id: \.self) {
+                        pill(pretty($0))
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center) // ✅ key fix here
         }
-        .frame(maxWidth: .infinity, alignment: .center) // ✅ key fix here
     }
-}
-
-// MARK: – Card wrapper
-@ViewBuilder
-private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-    content()
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("Latte").opacity(0.15))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-}
-}
-
-#if DEBUG
-// ---------- Quick Preview ----------
-
-/// Quick mock enums so the preview compiles in isolation
-private enum MockIntensity: String, CaseIterable {
-    case low, mediumMinus = "medium-", medium, mediumPlus = "medium+", high, unknown
-}
-private enum MockBody: String, CaseIterable { case light, medium, full, unknown }
-private enum MockSweet: String, CaseIterable {
-    case boneDry = "bone-dry", dry, offDry = "off-dry", sweet, verySweet, unknown
-}
-
-/// Dummy input & AI profile
-private var sampleInput: TastingInput {
-    var inpt = TastingInput()
-    inpt.acidity   = .mediumPlus
-    inpt.alcohol   = .medium
-    inpt.tannin    = .low
-    inpt.body      = .medium
-    inpt.sweetness = .dry
-    inpt.aromas    = ["Cherry", "Vanilla"]
-    inpt.flavors   = ["Cherry", "Vanilla"]
-    inpt.notes     = "Bright and balanced, subtle oak."
-    return inpt
-}
-
-private let sampleAI = AITastingProfile(
-    acidity:   .medium,
-    alcohol:   .low,
-    tannin:    .low,
-    body:      .medium,
-    sweetness: .dry,
-    aromas:    ["Cherry", "Rose", "Earth"],
-    flavors:    ["Cherry", "Rose", "Earth"],
-    tips:      ["Focus on the crisp acidity — think green apple."],
-    hasTannin: true
-)
-
-struct TastingSummaryView_Previews: PreviewProvider {
-    @State static var input = sampleInput   // binding for live editing
     
-    static var previews: some View {
-        TastingSummaryView(
-            input: $input,
-            aiProfile: sampleAI,
-            wineName: "Château Preview 2020"
-        )
-        .preferredColorScheme(.light)
-        .previewLayout(.sizeThatFits)
+    // MARK: – Card wrapper
+    @ViewBuilder
+    private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color("Latte").opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
-#endif

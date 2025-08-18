@@ -15,7 +15,7 @@ struct WineData: Codable {
     let subregion: String?
     let appellation: String?
     let grapes: [String]?
-    let vintage: String?            // always a String in your model
+    let vintage: String?
     let classification: String?
     let tastingNotes: String?
     let pairings: [String]?
@@ -83,7 +83,7 @@ extension WineData: Identifiable {
     }
 }
 
-// reuse your existing Vinobytes response structs
+
 struct OpenAIResponse: Codable {
     struct Choice: Codable {
         struct Message: Codable {

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// MARK: - NotesStep with focus‑aware placeholder
+// MARK: - NotesStep inside TastingSummaryView
 struct NotesStep: View {
     @Binding var notes: String
     @FocusState private var isEditing: Bool

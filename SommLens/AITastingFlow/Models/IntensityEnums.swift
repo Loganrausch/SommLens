@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 enum Intensity5: String, Codable, CaseIterable {
     case low, mediumMinus = "medium-", medium, mediumPlus = "medium+", high, unknown
     

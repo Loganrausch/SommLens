@@ -5,10 +5,12 @@
 
 // Refactored by Logan Rausch on July 15th, 2025
 
+// Network calls still happen off-main despite @MainActor. We ensure that before touching any UI state we hop back on the main.
+
 import Foundation
 import UIKit
 
-// MARK: - Top‑level API manager
+// MARK: - Top‑level API manager for both AI calls in SommLens
 @MainActor
 final class OpenAIManager: ObservableObject {
     
@@ -16,13 +18,13 @@ final class OpenAIManager: ObservableObject {
     
     private let chatEndpoint  = URL(string: "https://vinobytes-afe480cea091.herokuapp.com/api/chat")!
     private let imageEndpoint = URL(string: "https://vinobytes-afe480cea091.herokuapp.com/api/chat/image")!
-    
-    /// If you call OpenAI directly, store your key in the environment and read it here
+  
     private let openAIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
     
-    // ---------- PUBLIC  OCR → WineData ----------
     
-    // MARK: - OCR: UIImage → WineData
+    
+    
+    // MARK: - UIImage → WineData - MainScanFlow
     func extractWineInfo(
         from image: UIImage,
         completion: @escaping (Result<WineData, Error>) -> Void
@@ -54,7 +56,7 @@ final class OpenAIManager: ObservableObject {
             )
         }
 
-        // 3️⃣ Build multipart/form-data --------------------------------------------
+        // 3️⃣ Build multipart/form-data - Formatting request into correct byte sequence
         let boundary = "Boundary-\(UUID().uuidString)"
         var body = Data()
 
@@ -93,6 +95,7 @@ final class OpenAIManager: ObservableObject {
         config.timeoutIntervalForRequest = 15  // ⏱ Timeout after 15 seconds
         let session = URLSession(configuration: config)
 
+        // Sends the actual HTTP request
         session.dataTask(with: req) { data, resp, err in
             if let err = err {
                 print("❌ Network or timeout error:", err.localizedDescription)
@@ -110,35 +113,31 @@ final class OpenAIManager: ObservableObject {
                 )
             }
 
-            // 5️⃣ Log usage & cost --------------------------------------------------
-            let usage = full.usage                          // not Optional
-            let promptTokens     = Double(usage.prompt_tokens)
-            let completionTokens = Double(usage.completion_tokens)
-            let imageTokens      = Double(usage.image_tokens ?? 0)   // property is Optional
+            // 5️⃣ Debug token counts
+            #if DEBUG
+            let u = full.usage
+            print("🧮 Tokens: prompt=\(u.prompt_tokens), completion=\(u.completion_tokens), image=\(u.image_tokens ?? 0), total=\(u.total_tokens)")
+            #endif
 
-            let inCost    = promptTokens     / 1000 * 0.005          // text in
-            let outCost   = completionTokens / 1000 * 0.015          // text out
-            let imageCost = usage.image_tokens != nil
-                ? Double(usage.image_tokens!) / 1000 * 0.005
-                : estimateVisionCost(for: resized)        // fallback
-
-            print("🧮 Tokens: prompt=\(Int(promptTokens)), completion=\(Int(completionTokens)), image=\(Int(imageTokens)), total=\(usage.total_tokens))")
-            print(String(format: "💵 Estimated cost: In=$%.5f, Out=$%.5f, Image=$%.5f → Total=$%.5f",
-                         inCost, outCost, imageCost, inCost + outCost + imageCost))
-
-            // 6️⃣ Decode into WineData ---------------------------------------------
-           decodeJSON(content, as: WineData.self, completion: completion)
+            // 6️⃣ Decode into WineData w/ thread safety
+            do {
+                let wine: WineData = try decodeJSON(content)
+                DispatchQueue.main.async { completion(.success(wine)) }
+            } catch {
+                DispatchQueue.main.async { completion(.failure(error)) }
+            
+            }
         }
         .resume()
     }
 
     
-    // ---------- NEW  WineData → AITastingProfile (async) ----------
     
-    // MARK: - WineData ➜ AITastingProfile  (uses explicit category)
+    // MARK: - WineData ➜ AITastingProfile - ForAITastingFeature
+    
     func tastingProfile(for wine: WineData) async throws -> AITastingProfile {
 
-        // 1️⃣  Pull the 10 × 10 descriptor pools straight from the enum
+        // 1️⃣  Pulling the 10 × 10 descriptor pools straight from the enum - same descriptors the user will have.
         let aromaPool    = wine.category.aromaPool
         let flavourPool  = wine.category.flavourPool
         let aromasCSV    = aromaPool.joined(separator: ", ")
@@ -186,9 +185,9 @@ final class OpenAIManager: ObservableObject {
         body["max_tokens"] = 350        // ★ tighter cap
         body["response_format"] = ["type":"json_object"]  // ★ forces compact JSON
         
-        // Use async/await variant of `postJSON`
+        // Using async/await variant of `postJSON`
         let content = try await postJSON(body, to: chatEndpoint)
-        var profile = try decodeJSON(content, as: AITastingProfile.self)
+        var profile: AITastingProfile = try decodeJSON(content)
 
           // LOCAL FALLBACK  – decide if the style itself implies tannin
           let styleImpliesTannin = wine.category.tanninExists
@@ -199,7 +198,7 @@ final class OpenAIManager: ObservableObject {
           return profile
        }
     
-    // MARK: - PRIVATE helpers
+    // MARK: - PRIVATE helpers for AITastingFlow
     
     // Build the standard chat body
     private func chatBody(model: String,
@@ -219,52 +218,8 @@ final class OpenAIManager: ObservableObject {
     
     // MARK: – Networking
     
-    /// *Completion‐handler* POST (used by extractWineInfo)
-    private func postJSON(
-      _ json: [String: Any],
-      to url: URL,
-      completion: @escaping (Result<String, Error>) -> Void
-    ) {
-      guard let httpBody = try? JSONSerialization.data(withJSONObject: json) else {
-        completion(.failure(NSError(domain: "", code: -11,
-          userInfo: [NSLocalizedDescriptionKey: "Bad JSON body"])))
-        return
-      }
-      var req = URLRequest(url: url)
-      req.httpMethod = "POST"
-      req.httpBody = httpBody
-      req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-      if let key = openAIKey {
-        req.addValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
-      }
-
-      URLSession.shared.dataTask(with: req) { data, resp, err in
-        if let err = err {
-          completion(.failure(err)); return
-        }
-        guard let data = data,
-              let full = try? JSONDecoder().decode(OpenAIResponse.self, from: data)
-        else {
-          completion(.failure(NSError(domain: "", code: -12,
-            userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
-          return
-        }
-
-        // ── 1) Log token usage & cost estimate ──
-        let u = full.usage
-        let inCost  = Double(u.prompt_tokens)     / 1000 * 0.0015
-        let outCost = Double(u.completion_tokens) / 1000 * 0.0020
-        print("🧮 Tokens (callback): prompt=\(u.prompt_tokens) completion=\(u.completion_tokens) total=\(u.total_tokens)")
-        print(String(format: "💵 Cost (callback): $%.6f in / $%.6f out = $%.6f total", inCost, outCost, inCost+outCost))
-
-        // ── 2) Pass only the content string forward ──
-        completion(.success(full.choices.first!.message.content))
-      }
-      .resume()
-    }
-    
-    
-    /// *Async/await* POST (used by tastingProfile)
+   
+    // Async/await POST (used by tastingProfile) - // Sends the actual HTTP request
     private func postJSON(_ json: [String: Any], to url: URL) async throws -> String {
       let data = try JSONSerialization.data(withJSONObject: json)
       var req = URLRequest(url: url)
@@ -280,16 +235,16 @@ final class OpenAIManager: ObservableObject {
         throw URLError(.badServerResponse)
       }
 
-      let full = try JSONDecoder().decode(OpenAIResponse.self, from: respData)
+        let full = try JSONDecoder().decode(OpenAIResponse.self, from: respData)
 
-      // ── 1) Log token usage & cost estimate ──
-      let u = full.usage
-      let inCost  = Double(u.prompt_tokens)     / 1000 * 0.0015
-      let outCost = Double(u.completion_tokens) / 1000 * 0.0020
-      print("🧮 Tokens (async): prompt=\(u.prompt_tokens) completion=\(u.completion_tokens) total=\(u.total_tokens)")
-      print(String(format: "💵 Cost (async): $%.6f in / $%.6f out = $%.6f total", inCost, outCost, inCost+outCost))
+        #if DEBUG
+        let u = full.usage
+        print("🧮 Tokens (async): prompt=\(u.prompt_tokens) completion=\(u.completion_tokens) total=\(u.total_tokens)")
+        #endif
 
-      // ── 2) Return only the content ──
-      return full.choices.first!.message.content
+        guard let content = full.choices.first?.message.content else {
+            throw URLError(.cannotDecodeRawData)
+        }
+        return content
     }
 }

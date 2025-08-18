@@ -10,6 +10,8 @@ import CoreData
 // MARK: – DTO bridge
 extension TastingSessionEntity {
 
+// MARK: – Core Data to Swift Struct
+    
     // ⇢ Convert Core-Data row -> Swift struct
     var dto: TastingSession {
         TastingSession(
@@ -25,6 +27,8 @@ extension TastingSessionEntity {
         )
     }
 
+// MARK: – Swift Struct to Core Data
+    
     // ⇢ Create / update Core-Data row from Swift struct
     convenience init(from dto: TastingSession,
                      bottle: BottleScan,
@@ -34,15 +38,20 @@ extension TastingSessionEntity {
         date          = dto.date
         userInputData = try JSONEncoder().encode(dto.userInput) as NSData
         aiProfileData = try JSONEncoder().encode(dto.aiProfile) as NSData
-        self.bottle   = bottle
+        self.bottle   = bottle // attach to correct bottle
     }
 
     // ---------- private helpers ----------
-    private var decodedInput: TastingInput {
+    
+    // MARK: – User Input Data JSON to usable TastingInput Struct
+    
+    private var decodedInput: UserTastingInput {
         guard let data = userInputData as? Data else { return .init() }
-        return (try? JSONDecoder().decode(TastingInput.self, from: data)) ?? .init()
+        return (try? JSONDecoder().decode(UserTastingInput.self, from: data)) ?? .init()
     }
 
+    // MARK: – AI Profile Data JSON to usable AITastingProfile Struct
+    
     private var decodedAI: AITastingProfile {
         guard let data = aiProfileData as? Data else {
             // minimal fallback so UI never crashes
@@ -69,7 +78,9 @@ extension TastingSessionEntity {
     }
 }
 
-// MARK: – Bottle convenience
+
+// MARK: – Sort bottles from newest first
+
 extension BottleScan {
     /// Sorted newest-first
     var tastingsArray: [TastingSessionEntity] {
