@@ -16,7 +16,7 @@ let imageSystemPrompt: String =
         Use the label image to identify key facts. If any detail is not visible on the label but you can reliably infer it from your vast wine knowledge (based on producer, region, classification, vineyard, vintage), then you should include it.
 
         Leave a field `null` or `""` only if it cannot be found on the label AND cannot be inferred reliably.
-
+        
         ──────────────────────── RETURN JSON IN THIS KEY ORDER:
         {
                 "producer": "",

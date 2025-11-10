@@ -151,14 +151,6 @@ struct WineDetailView: View {
                         InfoTile(label: "Food Pairings", value: wineData.pairings?.joined(separator: ", "))
                     }
                     
-                    CardBlock(title: "Tasting Notes") {
-                        if let notes = wineData.tastingNotes?.trimmingCharacters(in: .whitespacesAndNewlines), !notes.isEmpty {
-                            Text(notes)
-                                .font(.body)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
-                    
                     CardBlock(title: "Terroir") {
                         InfoTile(label: "Climate", value: wineData.climate)
                         InfoTile(label: "Soil", value: wineData.soilType)

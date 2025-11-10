@@ -38,6 +38,9 @@ struct TastingFormView: View {
   
     var body: some View {
         ZStack(alignment: .topTrailing) {
+            
+            Color(.systemBackground).ignoresSafeArea()
+            
             VStack(spacing: 0) {
                 // ── 1) Pinned Header ──
                 HStack(alignment: .top, spacing: 12) {
