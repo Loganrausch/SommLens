@@ -75,6 +75,10 @@
 		CED9D0A32DE75B1800C217AE /* SommLens.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06A2DE75B1800C217AE /* SommLens.xcdatamodeld */; };
 		CED9D0A42DE75B1800C217AE /* TastingFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D06D2DE75B1800C217AE /* TastingFormView.swift */; };
 		CED9D0A52DE75B1800C217AE /* TastingSessionEntity+DTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0702DE75B1800C217AE /* TastingSessionEntity+DTO.swift */; };
+		CEDD95552EC2C20700428024 /* AIRatingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDD95542EC2C20400428024 /* AIRatingModel.swift */; };
+		CEDD95572EC2C33400428024 /* BottleScan+AIRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDD95562EC2C32D00428024 /* BottleScan+AIRating.swift */; };
+		CEDD955D2EC2C47900428024 /* AIRatingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDD955C2EC2C47400428024 /* AIRatingSheet.swift */; };
+		CEDD955F2EC2C5E600428024 /* AIRatingCornerChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDD955E2EC2C5CF00428024 /* AIRatingCornerChip.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -167,6 +171,10 @@
 		CED9D07A2DE75B1800C217AE /* WineGlassLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WineGlassLoadingView.swift; sourceTree = "<group>"; };
 		CED9D07C2DE75B1800C217AE /* SommLensREAL.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SommLensREAL.xcdatamodel; sourceTree = "<group>"; };
 		CED9D0AF2DE761D000C217AE /* SommLens.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SommLens.entitlements; sourceTree = "<group>"; };
+		CEDD95542EC2C20400428024 /* AIRatingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIRatingModel.swift; sourceTree = "<group>"; };
+		CEDD95562EC2C32D00428024 /* BottleScan+AIRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BottleScan+AIRating.swift"; sourceTree = "<group>"; };
+		CEDD955C2EC2C47400428024 /* AIRatingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIRatingSheet.swift; sourceTree = "<group>"; };
+		CEDD955E2EC2C5CF00428024 /* AIRatingCornerChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIRatingCornerChip.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -484,6 +492,7 @@
 		CED9D07B2DE75B1800C217AE /* SommLens */ = {
 			isa = PBXGroup;
 			children = (
+				CEDD95532EC2C1FC00428024 /* AIRating */,
 				CED9D0A62DE75B7100C217AE /* AccountSettings */,
 				CED9D0A72DE75C3200C217AE /* AITastingFlow */,
 				CED9D0AD2DE75DB400C217AE /* AppStartup */,
@@ -583,6 +592,17 @@
 				CE4EF4532DF1FE19006AD0FA /* Services */,
 			);
 			path = AppStartup;
+			sourceTree = "<group>";
+		};
+		CEDD95532EC2C1FC00428024 /* AIRating */ = {
+			isa = PBXGroup;
+			children = (
+				CEDD955E2EC2C5CF00428024 /* AIRatingCornerChip.swift */,
+				CEDD955C2EC2C47400428024 /* AIRatingSheet.swift */,
+				CEDD95562EC2C32D00428024 /* BottleScan+AIRating.swift */,
+				CEDD95542EC2C20400428024 /* AIRatingModel.swift */,
+			);
+			path = AIRating;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -738,6 +758,7 @@
 				CE4D080E2E27424200DAF1BE /* ImageSystemPrompt.swift in Sources */,
 				CEA0F6602DE773EE0082F76F /* AuthViewModel.swift in Sources */,
 				CEA401012DE8A63F00B498CC /* UnifiedOnboardingOverlayView.swift in Sources */,
+				CEDD955D2EC2C47900428024 /* AIRatingSheet.swift in Sources */,
 				CED9D0852DE75B1800C217AE /* VerticalTubeStep.swift in Sources */,
 				CED9D0862DE75B1800C217AE /* ScanPrompts.swift in Sources */,
 				CEA401072DE93FB800B498CC /* BottleScanIdentity.swift in Sources */,
@@ -753,6 +774,7 @@
 				CED9D08C2DE75B1800C217AE /* SelectionStepView.swift in Sources */,
 				CE4EF4622DF20CB7006AD0FA /* WineDetailViewModel.swift in Sources */,
 				CE4EF4692DF21F41006AD0FA /* QuickCard.swift in Sources */,
+				CEDD95552EC2C20700428024 /* AIRatingModel.swift in Sources */,
 				CED9D08D2DE75B1800C217AE /* DashboardView.swift in Sources */,
 				CED9D08E2DE75B1800C217AE /* OpenAIManager.swift in Sources */,
 				CED9D08F2DE75B1800C217AE /* WineData.swift in Sources */,
@@ -781,11 +803,13 @@
 				CE4EF42A2DEFDBA3006AD0FA /* EngagementMilestones.swift in Sources */,
 				CE2CCF962E1339CC007D75CA /* UIImage+Resize.swift in Sources */,
 				CED9D09F2DE75B1800C217AE /* ContactFormView.swift in Sources */,
+				CEDD955F2EC2C5E600428024 /* AIRatingCornerChip.swift in Sources */,
 				CEA099532E43B66800535C84 /* SaveScan.swift in Sources */,
 				CED9D0A02DE75B1800C217AE /* ShareSheet.swift in Sources */,
 				CED9D0A12DE75B1800C217AE /* TastingSession.swift in Sources */,
 				CE2416AC2DEFA7F100BBF387 /* AppDelegate.swift in Sources */,
 				CED9D0A22DE75B1800C217AE /* WineGlassLoadingView.swift in Sources */,
+				CEDD95572EC2C33400428024 /* BottleScan+AIRating.swift in Sources */,
 				CED9D0A32DE75B1800C217AE /* SommLens.xcdatamodeld in Sources */,
 				CEA099512E43B5EF00535C84 /* FreezeOverlay.swift in Sources */,
 				CED9D0A42DE75B1800C217AE /* TastingFormView.swift in Sources */,
@@ -831,7 +855,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -851,7 +875,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vinobytes.SommLens;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -873,7 +897,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -893,7 +917,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vinobytes.SommLens;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

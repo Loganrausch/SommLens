@@ -18,7 +18,6 @@ import SwiftUI
 import CoreData
 import UIKit   // for UIImage
 
-
 struct MyScansView: View {
     @Environment(\.managedObjectContext) private var ctx
     @EnvironmentObject private var openAIManager: OpenAIManager
@@ -27,7 +26,7 @@ struct MyScansView: View {
     @State private var editMode: EditMode = .inactive
     
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \BottleScan.timestamp, ascending: false)],
+        fetchRequest: BottleScan.scansFetchRequest(),
         animation: .default
     )
     private var scans: FetchedResults<BottleScan>
@@ -37,7 +36,7 @@ struct MyScansView: View {
     // Multi-select delete
     @State private var selectedScanIDs = Set<UUID>()
     
-    // 🔹 NEW – search & filter state
+    // Search & filter state
     @State private var searchText = ""
     @State private var filter: ScanFilter = .all
     
@@ -56,75 +55,66 @@ struct MyScansView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    
-                    
                     List(selection: $selectedScanIDs) {
-                        // a Section with an empty, fixed‐height header
-                        Section(header:
-                            Color.clear
-                        .frame(height: 10)           // ← how much space you want
-                            .listRowInsets(.init())      // zero out the default insets
+                        // small top spacer section
+                        Section(
+                            header: Color.clear
+                                .frame(height: 10)
+                                .listRowInsets(.init())
                         ) {
                             ForEach(filteredScans, id: \.identity) { scan in
-                                /* ───── Row with thumbnail & badge ───── */
-                                if let rawJSON = scan.rawJSON,
-                                   let data    = rawJSON.data(using: .utf8),
-                                   let wine    = try? JSONDecoder().decode(WineData.self, from: data) {
-                                    scanRow(scan, wine: wine)           // ① show the row
-                                    
-                                    // ② decide what a tap means
-                                        .onTapGesture {
-                                            if editMode == .active {    // ── multi-select
-                                                if selectedScanIDs.contains(scan.id!) {
-                                                    selectedScanIDs.remove(scan.id!)
+                                scanRow(scan)   // ✅ no JSON decode here
+
+                                    .onTapGesture {
+                                        if editMode == .active {
+                                            // multi-select toggle
+                                            if let id = scan.id {
+                                                if selectedScanIDs.contains(id) {
+                                                    selectedScanIDs.remove(id)
                                                 } else {
-                                                    selectedScanIDs.insert(scan.id!)
+                                                    selectedScanIDs.insert(id)
                                                 }
-                                            } else {                    // ── normal navigation
-                                                selectedScan = scan
                                             }
+                                        } else {
+                                            // normal navigation → open detail sheet
+                                            selectedScan = scan
                                         }
-                                    
-                                    // ③ keep swipe-to-delete unchanged
-                                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                            Button(role: .destructive) {
-                                                // find index in your filtered array, then delete that one
-                                                if let idx = filteredScans.firstIndex(where: { $0.id == scan.id }) {
-                                                    deleteScans(at: IndexSet(integer: idx))
-                                                }
-                                            } label: {
-                                                Label("Delete", systemImage: "trash")
-                                            }
-                                        }
-                                } else {        // invalid JSON fallback (unchanged)
-                                    VStack(alignment: .leading) {
-                                        Text("Invalid Scan").foregroundColor(.red)
-                                        Text(scan.timestamp.map { "\($0, formatter: dateFormatter)" } ?? "-")
-                                            .font(.caption).foregroundColor(.secondary)
                                     }
-                                }
+                                    
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            if let idx = filteredScans.firstIndex(where: { $0.id == scan.id }) {
+                                                deleteScans(at: IndexSet(integer: idx))
+                                            }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                             }
                         }
                     }
-                    .tint(.red)    // only this list’s selection circles become red
+                    .tint(.red)    // selection circles + swipe button accent
                     .searchable(text: $searchText, prompt: "Producer, region, grape…")
                     
-                    
-                    /* Detail sheet (unchanged) */
+                    // Detail sheet (JSON decode only happens here)
                     .sheet(item: $selectedScan) { scan in
                         if let rawJSON = scan.rawJSON,
                            let data    = rawJSON.data(using: .utf8),
                            let wine    = try? JSONDecoder().decode(WineData.self, from: data) {
+                            
                             WineDetailView(
                                 bottle:   scan,
                                 wineData: wine,
-                                snapshot: scan.screenshot.flatMap { UIImage(data: $0)},
+                                snapshot: scan.screenshot.flatMap { UIImage(data: $0) },
                                 openAIManager: openAIManager,
                                 ctx: ctx
-                              
                             )
                         } else {
-                            VStack { Text("Couldn't load details") }
+                            VStack {
+                                Text("Couldn't load details")
+                                    .font(.headline)
+                                    .padding()
+                            }
                         }
                     }
                 }
@@ -133,15 +123,16 @@ struct MyScansView: View {
             .navigationTitle("My Wines")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // Leading: Select All + EditButton
+                // Leading: EditButton
                 ToolbarItem(placement: .navigationBarLeading) {
-                    if !scans.isEmpty {                // ← added guard
+                    if !scans.isEmpty {
                         EditButton().bold()
                     }
                 }
+                
                 // Trailing: Delete Selected (in edit) or Filter menu
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if !scans.isEmpty {                // ← added guard
+                    if !scans.isEmpty {
                         if editMode == .active {
                             Button("Delete Selected", role: .destructive) {
                                 deleteSelectedScans()
@@ -157,10 +148,10 @@ struct MyScansView: View {
                                         Label {
                                             Text(f.label)
                                         } icon: {
-                                            if f == filter {                // ✅ only inject the icon when selected
+                                            if f == filter {
                                                 Image(systemName: "checkmark")
                                             } else {
-                                                EmptyView()                 // keeps the text aligned
+                                                EmptyView()
                                             }
                                         }
                                     }
@@ -173,17 +164,20 @@ struct MyScansView: View {
                 }
             }
         }
-        // **This** is the critical line: attach the binding at the NavigationStack root
+        // attach editMode binding at the NavigationStack root
         .environment(\.editMode, $editMode)
     }
     
-    /* 🔹 Computed list after search + filter */
+    // MARK: - Filtered list (search + colour filter)
     private var filteredScans: [BottleScan] {
         scans.filter { scan in
             // 1) Colour bucket
             if filter != .all,
                let catRaw = scan.category,
-               !filter.matchingRawValues.contains(catRaw) { return false }
+               !filter.matchingRawValues.contains(catRaw) {
+                return false
+            }
+            
             // 2) Text search
             guard !searchText.isEmpty else { return true }
             let needle = searchText.lowercased()
@@ -192,27 +186,30 @@ struct MyScansView: View {
                 scan.region,
                 scan.grapes
             ].compactMap { $0?.lowercased() }
+            
             return haystack.contains { $0.contains(needle) }
         }
     }
     
-    /* ───────── Wine row extracted for clarity ───────── */
-    private func scanRow(_ scan: BottleScan, wine: WineData) -> some View {
+    // MARK: - Row view (no JSON decode)
+    private func scanRow(_ scan: BottleScan) -> some View {
         HStack(spacing: 12) {
-            
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(scan.timestamp.map { "\($0, formatter: dateFormatter)" } ?? "-")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
                 HStack(spacing: 4) {
-                    if let vintage = wine.vintage, !vintage.isEmpty {
+                    // If you have a vintage property on BottleScan, use it:
+                    if let vintage = scan.vintage, !vintage.isEmpty {
                         Text(vintage)
+                            .font(.subheadline.weight(.medium))
                     }
-                    Text(wine.producer?.isEmpty == false ? wine.producer! : "Unknown Producer")
+                    
+                    Text(scan.producer?.isEmpty == false ? scan.producer! : "Unknown Producer")
                         .lineLimit(1)
                         .font(.body)
-                        .foregroundColor(wine.producer == nil ? .secondary : .primary)
+                        .foregroundColor(scan.producer == nil ? .secondary : .primary)
                 }
             }
             
@@ -232,24 +229,34 @@ struct MyScansView: View {
             Image(systemName: "chevron.right")
                 .foregroundColor(.secondary)
         }
-        .contentShape(Rectangle())          // make the whole row tappable
+        .contentShape(Rectangle())    // whole row is tappable
     }
     
-    // MARK: – Delete helpers (unchanged)
+    // MARK: – Delete helpers
     private func deleteScans(at offsets: IndexSet) {
         offsets.map { filteredScans[$0] }.forEach(ctx.delete)
         saveContext()
     }
+    
     private func deleteSelectedScans() {
         selectedScanIDs.forEach { id in
-            if let s = scans.first(where: { $0.id == id }) { ctx.delete(s) }
+            if let s = scans.first(where: { $0.id == id }) {
+                ctx.delete(s)
+            }
         }
-        saveContext(); selectedScanIDs.removeAll()
+        saveContext()
+        selectedScanIDs.removeAll()
     }
-    private func saveContext() { try? ctx.save() }
+    
+    private func saveContext() {
+        try? ctx.save()
+    }
 }
 
-/* Shared date formatter (unchanged) */
+// Shared date formatter
 private let dateFormatter: DateFormatter = {
-    let f = DateFormatter(); f.dateStyle = .short; f.timeStyle = .short; return f
+    let f = DateFormatter()
+    f.dateStyle = .short
+    f.timeStyle = .short
+    return f
 }()

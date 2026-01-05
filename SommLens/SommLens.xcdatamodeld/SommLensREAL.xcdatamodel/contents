@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23507" systemVersion="24D5034f" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24299" systemVersion="25B5072a" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
     <entity name="BottleScan" representedClassName="BottleScan" syncable="YES" codeGenerationType="class">
         <attribute name="abv" optional="YES" attributeType="String"/>
+        <attribute name="aiBreakdownJSON" optional="YES" attributeType="String"/>
+        <attribute name="aiConfidence" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="aiModelVersion" optional="YES" attributeType="String"/>
+        <attribute name="aiReason" optional="YES" attributeType="String"/>
+        <attribute name="aiScore" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="appellation" optional="YES" attributeType="String"/>
         <attribute name="category" optional="YES" attributeType="String"/>
         <attribute name="classification" optional="YES" attributeType="String"/>

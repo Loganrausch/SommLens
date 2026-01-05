@@ -136,6 +136,31 @@ struct ScanResultView: View {
         }
         
         .navigationBarBackButtonHidden(true)
+        
+        .task {
+            await vm.fetchAIRatingIfNeeded()
+        }
+        
+        // Top-leading rating chip
+        .overlay(alignment: .topLeading) {
+            let state: AIRatingChipState = {
+                if vm.isLoadingRating { return .loading }
+                if let r = vm.aiRating { return .score(r.viniScore) }
+                return .empty
+            }()
+
+            AIRatingCornerChip(state: state) {
+                if vm.aiRating != nil {
+                    vm.showRatingSheet = true
+                } else {
+                    Task { await vm.fetchAIRatingIfNeeded() }
+                }
+            }
+            .padding(.top, 30)
+            .padding(.leading, 20)
+            .disabled(vm.isLoadingRating)
+        }
+        
         .overlay(alignment: .topTrailing) {
             Button {
                 onDismiss()     // ← clean state first
@@ -152,6 +177,13 @@ struct ScanResultView: View {
         }
         
         /* ───── Sheets ───── */
+        
+        .sheet(isPresented: $vm.showRatingSheet) {
+            if let r = vm.aiRating {
+                AIRatingSheet(rating: r)
+                    .presentationDetents([.medium, .large])
+            }
+        }
         
         // Wine‑detail sheet
         .sheet(isPresented: $vm.showDetailSheet) {
