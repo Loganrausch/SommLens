@@ -32,8 +32,8 @@ struct MainScanView: View {
     // MARK: - Dependencies
     
     @EnvironmentObject var openAIManager: OpenAIManager
-    @EnvironmentObject var auth: AuthViewModel  
     @EnvironmentObject var engagementState: EngagementState
+    @EnvironmentObject var auth: AuthViewModel
     @Environment(\.managedObjectContext) private var ctx
     
     // MARK: - Bindings from Parent
@@ -55,17 +55,8 @@ struct MainScanView: View {
     
     // MARK: - Scan State
     @State private var highResImage: UIImage? = nil
-    @State private var reachedProLimit = false
-    @State private var reachedFreeLimit = false
     @State private var showScanError = false
     @State private var showShareSheet = false
-    
-    
-    // MARK: - Computed Properties
-    
-    private var canScan: Bool {
-        auth.canScan(currentCount: auth.getScanCount())
-    }
     
     
     var body: some View {
@@ -138,28 +129,13 @@ struct MainScanView: View {
             Text("Something went wrong analyzing the label. Please try again.")
         }
        
-        
-        .alert("Scan Limit Reached",
-               isPresented: $reachedProLimit) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("Wow, you scanned 200 wines this month! Your scan limit resets on the first of each month. Thank you for being a SommLens Pro user.")
-        }
-        .alert("Scan Limit Reached", isPresented: $reachedFreeLimit) {
-            Button("Upgrade to Pro") {
-                auth.isPaywallPresented = true
-            }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Free users get 10 free scans. Upgrade to SommLens Pro to unlock 200 scans every month!")
-        }
       
-               .alert("Love SommLens?", isPresented: $engagementState.showSharePrompt) {
-                   Button("Not Now", role: .cancel) {}
-                   Button("Share") {
-                       // Defering toggling of the system share sheet so the alert has time to dismiss:
-                       DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                           showShareSheet = true
+        .alert("Love SommLens?", isPresented: $engagementState.showSharePrompt) {
+            Button("Not Now", role: .cancel) {}
+            Button("Share") {
+                // Defering toggling of the system share sheet so the alert has time to dismiss:
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        showShareSheet = true
                        }
                    }
                } message: {
@@ -224,17 +200,7 @@ struct MainScanView: View {
     
     
     private func takePhoto() {
-        
-        // IMPORTANT quota check
-        guard canScan else {
-            if auth.hasActiveSubscription {
-                reachedProLimit = true            // 200 reached
-            } else {
-                reachedFreeLimit = true    // show alert
-            }
-            return
-        }
-        
+     
         // Re-install the one-shot handler on each tap
         bufferDelegate.onFrame = { image in
             DispatchQueue.main.async {
@@ -258,7 +224,16 @@ struct MainScanView: View {
         
         let del = PhotoDelegate { img in
             Task { @MainActor in
-                guard let hiRes = img else { return }
+                guard let hiRes = img else {
+                    frozenImage   = nil
+                    highResImage  = nil
+                    isProcessing  = false
+                    showOverlay   = false
+                    hasExtracted  = false
+                    showScanError = true
+                    UINotificationFeedbackGenerator().notificationOccurred(.error)
+                    return
+                }
                 
                 // show the shimmer
                 highResImage = hiRes
@@ -274,14 +249,15 @@ struct MainScanView: View {
                             let rawJSON = (try? JSONEncoder().encode(wine))
                                 .flatMap { String(data: $0, encoding: .utf8) }
                             ?? "{}"
-                            let bottle = saveScan(        // returns BottleScan
-                                in:         ctx,
-                                wineData:   wine,
-                                rawJSON:    rawJSON,
-                                screenshot: hiRes
+                            let bottle = saveScan(
+                                in: ctx,
+                                wineData: wine,
+                                rawJSON: rawJSON,
+                                screenshot: hiRes,
+                                isPro: auth.hasActiveSubscription
                             )
                             
-                            auth.incrementScanCount()
+                           
                             
                             // Push navigation with that row
                             scanResult = ScanResult(

@@ -18,6 +18,7 @@ struct WineDetailView: View {
     let snapshot: UIImage?
     
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var auth: AuthViewModel
     
     @FetchRequest private var tastings: FetchedResults<TastingSessionEntity>
     
@@ -50,6 +51,8 @@ struct WineDetailView: View {
         )
     }
     
+    private var isPro: Bool { auth.hasActiveSubscription }
+    
     var body: some View {
         ZStack(alignment: .topTrailing) {
             ScrollView {
@@ -64,53 +67,69 @@ struct WineDetailView: View {
                         // Title block under the image (clean white background)
                         titleSection
                         
-                        // Tasting notes
-                        if let notes = wineData.tastingNotes?
-                            .trimmingCharacters(in: .whitespacesAndNewlines),
-                           !notes.isEmpty {
-                            Text(notes)
-                                .font(.body.italic())
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.primary)
-                                .padding(.top, 6)
-                                .padding(.horizontal)
-                        }
-                        
-                        // Tasting CTA / existing tasting
-                        tastingSection
-                        
-                        // Cards
-                        CardBlock(title: "Wine Info") {
-                            InfoTile(label: "Subregion",   value: wineData.subregion)
-                            InfoTile(label: "Appellation", value: wineData.appellation)
-                            InfoTile(label: "Vineyard",    value: wineData.vineyard)
-                            InfoTile(
-                                label: "Grapes",
-                                value: wineData.grapes?.joined(separator: ", ")
-                            )
-                            InfoTile(
-                                label: "Food Pairings",
-                                value: wineData.pairings?.joined(separator: ", ")
-                            )
-                        }
-                        
-                        CardBlock(title: "Terroir") {
-                            InfoTile(label: "Climate", value: wineData.climate)
-                            InfoTile(label: "Soil",    value: wineData.soilType)
-                        }
-                        
-                        CardBlock(title: "Extras") {
-                            InfoTile(label: "Classification", value: wineData.classification)
-                            let abv = wineData.abv?
-                                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                            InfoTile(
-                                label: "Alcohol",
-                                value: abv.isEmpty
-                                    ? "Not found. Check back label."
-                                    : abv
-                            )
-                            InfoTile(label: "Drink", value: wineData.drinkingWindow)
-                            InfoTile(label: "Style", value: wineData.winemakingStyle)
+                        if isPro {
+
+                            if let notes = wineData.tastingNotes?
+                                .trimmingCharacters(in: .whitespacesAndNewlines),
+                               !notes.isEmpty {
+
+                                Text(notes)
+                                    .font(.body.italic())
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.horizontal, 12)
+                                    .padding(.top, 4)
+                                    .padding(.bottom, 4)
+                            }
+
+                            tastingSection
+
+                            CardBlock(title: "Wine Info") {
+                                InfoTile(label: "Subregion",   value: wineData.subregion)
+                                InfoTile(label: "Appellation", value: wineData.appellation)
+                                InfoTile(label: "Vineyard",    value: wineData.vineyard)
+                                InfoTile(label: "Grapes", value: wineData.grapes?.joined(separator: ", "))
+                            }
+
+                            CardBlock(title: "Food Pairings") {
+                                let value = wineData.pairings?.joined(separator: ", ")
+                                InfoTile(
+                                    label: "Pair with",
+                                    value: (value?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false)
+                                        ? value
+                                        : "Not available for this bottle yet."
+                                )
+                            }
+
+                            CardBlock(title: "Terroir") {
+                                InfoTile(label: "Climate", value: wineData.climate)
+                                InfoTile(label: "Soil", value: wineData.soilType)
+                            }
+
+                            CardBlock(title: "Additional Info") {
+                                InfoTile(label: "Classification", value: wineData.classification)
+                                let abv = wineData.abv?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                                InfoTile(label: "Alcohol", value: abv.isEmpty ? "Not found. Check back label." : abv)
+                                InfoTile(label: "Drink", value: wineData.drinkingWindow)
+                                InfoTile(label: "Style", value: wineData.winemakingStyle)
+                            }
+
+                        } else {
+
+                            // ✅ FREE: Wine Info first
+                            CardBlock(title: "Wine Info") {
+                                InfoTile(label: "Subregion",   value: wineData.subregion)
+                                InfoTile(label: "Appellation", value: wineData.appellation)
+                                InfoTile(label: "Vineyard",    value: wineData.vineyard)
+                                InfoTile(label: "Grapes", value: wineData.grapes?.joined(separator: ", "))
+                            }
+
+                            // ✅ FREE: Taste with Vini AI locked (your tastingSection already gates)
+                            tastingSection
+
+                            // ✅ FREE: single upsell card
+                            proUpsellCard
                         }
                         
                         // Footer
@@ -167,11 +186,14 @@ struct WineDetailView: View {
             Text(vm.ratingError ?? "")
         }
         
-        // Rating breakdown sheet
         .sheet(isPresented: $vm.showRatingSheet) {
             if let r = vm.aiRating ?? bottle.toAIRating() {
-                AIRatingSheet(rating: r)
-                    .presentationDetents([.medium, .large])
+                AIRatingSheet(
+                    rating: r,
+                    isUnlocked: auth.hasActiveSubscription,
+                    unlockAction: { auth.isPaywallPresented = true }
+                )
+                .presentationDetents([.medium, .large])
             }
         }
         
@@ -338,61 +360,79 @@ private extension WineDetailView {
     
     var tastingSection: some View {
         Group {
+            // ── If tasting already exists ──
             if let tasting = tastings.first {
                 Button {
                     vm.selectedDTO = tasting.dto
                 } label: {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
                             .foregroundColor(.burgundy)
-                        Text("You tasted this wine!")
+                        
+                        Text("You tasted this wine")
                             .foregroundColor(.burgundy)
+                        
                         Image(systemName: "chevron.right")
                             .font(.subheadline.weight(.semibold))
                             .foregroundColor(.burgundy.opacity(0.9))
                     }
                     .font(.subheadline.bold())
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
                             .fill(Color.latte.opacity(0.98))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .stroke(Color.burgundy.opacity(0.35), lineWidth: 1)
+                            .stroke(Color.burgundy.opacity(0.35), lineWidth: 1.2)
                     )
                     .shadow(color: .black.opacity(0.18), radius: 10, x: 0, y: 6)
                 }
                 .buttonStyle(.plain)
-                .transition(.opacity)
+                
+                // ── No tasting yet ──
             } else {
                 Button {
-                    Task { await vm.loadAIProfileAndShowTasting() }
+                    // 🚨 Gate free users immediately
+                    guard isPro else {
+                        auth.isPaywallPresented = true
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        return
+                    }
+                    
+                    Task {
+                        await vm.loadAIProfileAndShowTasting()
+                    }
                 } label: {
-                    Group {
-                        if vm.isLoadingTaste {
-                            HStack(spacing: 6) {
-                                ProgressView()
-                                    .progressViewStyle(
-                                        CircularProgressViewStyle(tint: .burgundy)
-                                    )
-                                Text("Loading…")
-                                    .foregroundColor(.burgundy)
-                            }
+                    HStack(spacing: 10) {
+                        
+                        if !isPro {
+                            // 🔒 Locked state
+                            Image(systemName: "lock.fill")
+                            
+                            Text("Taste with Vini AI")
+                          
+                        } else if vm.isLoadingTaste {
+                            // ⏳ Loading state (Pro only)
+                            ProgressView()
+                                .progressViewStyle(
+                                    CircularProgressViewStyle(tint: .burgundy)
+                                )
+                            
+                            Text("Loading…")
+                            
                         } else {
-                            HStack(spacing: 6) {
-                                Text("Taste with Vini AI")
-                                    .foregroundColor(.burgundy)
-                                Image(systemName: "chevron.right")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(.burgundy.opacity(0.9))
-                            }
+                            // ▶️ Ready state
+                            Text("Taste with Vini AI")
+                            Image(systemName: "chevron.right")
+                                .font(.subheadline.weight(.semibold))
                         }
                     }
+                    .foregroundColor(.burgundy)
                     .font(.subheadline.bold())
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
                             .fill(Color.latte.opacity(0.98))
@@ -408,94 +448,64 @@ private extension WineDetailView {
             }
         }
     }
-}
+    // ✅ ADD THIS HERE (inside the extension)
+      var proUpsellCard: some View {
+          CardBlock(title: "Want to learn more about this wine?") {
+              VStack(alignment: .leading, spacing: 12) {
 
-import SwiftUI
-import UIKit
+                  HStack(spacing: 8) {
+                     
+                      Text("SommLens Pro includes:")
+                          .font(.subheadline.bold())
+                          .foregroundColor(.black.opacity(0.75))
+                      Spacer()
+                  }
 
-struct ZoomableScrollImage: UIViewRepresentable {
-    let image: UIImage
-    
-    func makeUIView(context: Context) -> UIScrollView {
-        let scrollView = UIScrollView()
-        scrollView.delegate = context.coordinator
-        scrollView.minimumZoomScale = 1.0
-        scrollView.maximumZoomScale = 4.0
-        scrollView.backgroundColor = .black
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.bouncesZoom = true
-        
-        let imageView = UIImageView(image: image)
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        scrollView.addSubview(imageView)
-        context.coordinator.imageView = imageView
-        
-        // Make the imageView track the scroll view’s size so it starts centered & fit
-        NSLayoutConstraint.activate([
-            imageView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            imageView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            imageView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-            imageView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor)
-        ])
-        
-        // Optional: double-tap to zoom in/out
-        let doubleTap = UITapGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(Coordinator.handleDoubleTap(_:))
-        )
-        doubleTap.numberOfTapsRequired = 2
-        scrollView.addGestureRecognizer(doubleTap)
-        
-        return scrollView
-    }
-    
-    func updateUIView(_ uiView: UIScrollView, context: Context) {
-        // Nothing to update for now
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-    
-    class Coordinator: NSObject, UIScrollViewDelegate {
-        weak var imageView: UIImageView?
-        
-        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-            imageView
-        }
-        
-        @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
-            guard let scrollView = gesture.view as? UIScrollView else { return }
-            
-            if scrollView.zoomScale > 1.01 {
-                // Reset zoom
-                scrollView.setZoomScale(1.0, animated: true)
-            } else {
-                // Zoom into where user double-tapped
-                let pointInView = gesture.location(in: imageView)
-                zoom(to: pointInView, in: scrollView)
-            }
-        }
-        
-        private func zoom(to point: CGPoint, in scrollView: UIScrollView) {
-            // Just make sure we *have* an imageView; no need to bind it
-            guard imageView != nil else { return }
+                  VStack(alignment: .leading, spacing: 8) {
+                      proBullet("Food pairings")
+                      proBullet("Terroir: climate + soil")
+                      proBullet("Additional Info: ABV, classification, drinking window, style")
+                      proBullet("Complete rating breakdown")
+                      proBullet("Full scan history")
+                  }
+                  .font(.subheadline)
+                  .foregroundColor(.black.opacity(0.75))
 
-            let newScale: CGFloat = min(scrollView.maximumZoomScale, scrollView.zoomScale * 2.0)
-            let scrollViewSize = scrollView.bounds.size
+                  Button {
+                      auth.isPaywallPresented = true
+                      UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                  } label: {
+                      HStack(spacing: 8) {
+                          Image(systemName: "arrow.up.right.circle.fill")
+                          Text("Upgrade to Pro")
+                              .fontWeight(.semibold)
+                      }
+                      .frame(maxWidth: .infinity)
+                      .padding(.vertical, 10)
+                  }
+                  .buttonStyle(.plain)
+                  .foregroundColor(.black.opacity(0.75))
+                  .background(
+                      RoundedRectangle(cornerRadius: 14, style: .continuous)
+                          .fill(Color.latte.opacity(0.95))
+                  )
+                  .overlay(
+                      RoundedRectangle(cornerRadius: 14, style: .continuous)
+                          .stroke(Color.burgundy.opacity(0.4), lineWidth: 1)
+                  )
+              }
+              .padding(.top, 5)
+          }
+      }
 
-            let width  = scrollViewSize.width  / newScale
-            let height = scrollViewSize.height / newScale
-            let x      = point.x - (width / 2.0)
-            let y      = point.y - (height / 2.0)
+      private func proBullet(_ text: String) -> some View {
+          HStack(alignment: .top, spacing: 8) {
+              Image(systemName: "checkmark.circle.fill")
+                  .foregroundColor(.burgundy.opacity(0.85))
+                  .font(.system(size: 14, weight: .semibold))
+                  .padding(.top, 2)
 
-            let zoomRect = CGRect(x: x, y: y, width: width, height: height)
-            scrollView.zoom(to: zoomRect, animated: true)
-        }
-    }
+              Text(text)
+          }
+      }
 }

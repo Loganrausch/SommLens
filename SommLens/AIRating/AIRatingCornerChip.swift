@@ -62,6 +62,14 @@ struct AIRatingCornerChip: View {
                         }
                     }
                 }
+                if case .loading = state {
+                    EmptyView()
+                } else {
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.burgundy)
+                        .opacity(0.7)
+                }
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 14)

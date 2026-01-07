@@ -5,16 +5,10 @@
 //  Created by Logan Rausch on 5/28/25.
 //
 
-// TODO: Refactor - Should move scan quota logic into a dedicated ScanQuotaManager.
-// This logic probably doesn't belong in AuthViewModel, which should focus only on auth/subscription.
-// A separate manager would improve modularity, testability, and single responsibility.
-
-
 import Foundation
-import SwiftUI
 import RevenueCat
-import os                       // Unified logging
-import CoreData
+import os
+import SwiftUI
 
 // MARK: - RevenueCat Constants
 enum RC {
@@ -28,42 +22,57 @@ final class AuthViewModel: NSObject, ObservableObject {
     // MARK: - Public, Published
     @Published var errorMessage:          String? = nil
     @Published var isLoading:             Bool    = true
-    @Published var hasActiveSubscription: Bool    = false
-    @Published var isPaywallPresented:    Bool    = false         // RC pay-wall trigger
 
-    // MARK: - Quota Scan Limits
-    private let proLimit  = 200 // MONTHLY
-    private let freeLimit = 10  // LIFETIME
-    
-    // One key that never resets for free users
-    private let freeScanKey = "freeScanCount"
-    
-    var   scanLimit: Int  { hasActiveSubscription ? proLimit : freeLimit }
+    /// ✅ What the rest of the app should use for gating.
+    @Published var hasActiveSubscription: Bool    = false
+
+    @Published var isPaywallPresented:    Bool    = false
 
     // MARK: - Private
     private let logger = Logger(subsystem: "com.sommlens.auth", category: "Auth")
-   
-    private static let iso = ISO8601DateFormatter()               // reuse
+
+    /// RevenueCat source-of-truth (never overridden)
+    private var rcHasActiveSubscription: Bool = false
+
+    // MARK: - DEBUG override (compiled out of Release)
+    #if DEBUG
+    enum DebugEntitlementOverride: Int, CaseIterable {
+        case none = 0
+        case forceFree = 1
+        case forcePro = 2
+
+        var label: String {
+            switch self {
+            case .none: return "Use RevenueCat"
+            case .forceFree: return "Force Free"
+            case .forcePro: return "Force Pro"
+            }
+        }
+    }
+
+    @AppStorage("debug_entitlement_override")
+    private var debugOverrideRaw: Int = DebugEntitlementOverride.none.rawValue
+
+    private var debugOverride: DebugEntitlementOverride {
+        get { DebugEntitlementOverride(rawValue: debugOverrideRaw) ?? .none }
+        set { debugOverrideRaw = newValue.rawValue }
+    }
+    #endif
 
     override init() {
         super.init()
 
         configureRevenueCat()
         Purchases.shared.delegate = self
-
-        // 2️⃣ RevenueCat may refine this (e.g. Pro renewal)
         refreshCustomerInfo()
     }
 
     private func configureRevenueCat() {
-        let id = ScanQuotaKeychain.loadOrCreateAppUserID()          // ← NEW
-        Purchases.configure(withAPIKey: RC.apiKey, appUserID: id)   // ← NEW
-
-        Task { try? await Purchases.shared.syncPurchases() }        // ← NEW
-        logger.debug("RevenueCat configured with ID \(id, privacy: .public)")
+        Purchases.configure(withAPIKey: RC.apiKey)
+        Task { try? await Purchases.shared.syncPurchases() }
+        logger.debug("RevenueCat configured")
     }
 
-    // MARK: - Customer status
     private func refreshCustomerInfo() {
         isLoading = true
         Purchases.shared.getCustomerInfo { [weak self] info, error in
@@ -76,7 +85,10 @@ final class AuthViewModel: NSObject, ObservableObject {
                 return
             }
 
-            self.hasActiveSubscription = info?.entitlements[RC.entitlementID]?.isActive ?? false
+            self.rcHasActiveSubscription =
+                info?.entitlements[RC.entitlementID]?.isActive ?? false
+
+            self.applyEffectiveEntitlement()
         }
     }
 
@@ -92,44 +104,52 @@ final class AuthViewModel: NSObject, ObservableObject {
                 return
             }
 
-            self.hasActiveSubscription = info?.entitlements[RC.entitlementID]?.isActive ?? false
+            self.rcHasActiveSubscription =
+                info?.entitlements[RC.entitlementID]?.isActive ?? false
+
+            self.applyEffectiveEntitlement()
         }
     }
-    
-    // MARK: - Quota Flow
-    
-    /// 1) Read current usage
-    func getScanCount() -> Int {
-           let key = hasActiveSubscription ? scanCountKey() : freeScanKey
-           return ScanQuotaKeychain.loadCount(for: key) ?? 0
-       }
 
-    /// 2) Decide if the user can scan under the current limit
-    func canScan(currentCount: Int) -> Bool {
-        currentCount < scanLimit
+    private func applyEffectiveEntitlement() {
+        #if DEBUG
+        switch debugOverride {
+        case .none:
+            hasActiveSubscription = rcHasActiveSubscription
+        case .forceFree:
+            hasActiveSubscription = false
+        case .forcePro:
+            hasActiveSubscription = true
+        }
+        #else
+        hasActiveSubscription = rcHasActiveSubscription
+        #endif
     }
-    
-    /// 3) Commit usage after a successful scan
-    func incrementScanCount() {
-           let key = hasActiveSubscription ? scanCountKey() : freeScanKey
-           let current = ScanQuotaKeychain.loadCount(for: key) ?? 0
-           ScanQuotaKeychain.saveCount(current + 1, for: key)
-       }
-    
-    /// Helper used only by Pro path (monthly bucket) - New bucket every month for reset.
-    func scanCountKey(for date: Date = Date()) -> String {
-        let comps = Calendar.current.dateComponents([.year, .month], from: date)
-        return "scanCount_\(comps.year!)_\(comps.month!)"
+
+    #if DEBUG
+    // MARK: - Debug helpers for UI
+    func debugOverrideLabel() -> String {
+        debugOverride.label
     }
+
+    func setDebugOverride(_ value: DebugEntitlementOverride) {
+        debugOverride = value
+        applyEffectiveEntitlement()
+    }
+
+    func getDebugOverride() -> DebugEntitlementOverride {
+        debugOverride
+    }
+    #endif
 }
 
 // MARK: - PurchasesDelegate
-
 extension AuthViewModel: PurchasesDelegate {
     nonisolated func purchases(_ p: Purchases, receivedUpdated info: CustomerInfo) {
         Task { @MainActor in
-            self.hasActiveSubscription = info.entitlements[RC.entitlementID]?.isActive ?? false
+            self.rcHasActiveSubscription =
+                info.entitlements[RC.entitlementID]?.isActive ?? false
+            self.applyEffectiveEntitlement()
         }
     }
 }
-

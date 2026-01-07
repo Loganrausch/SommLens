@@ -12,11 +12,6 @@ import CoreData
 final class ScanResultViewModel: ObservableObject {
     // MARK: - Sheet / UI state
     @Published var showDetailSheet = false
-    @Published var showTasteSheet  = false
-
-    // Tasting
-    @Published var aiProfile: AITastingProfile?
-    @Published var isLoadingTaste  = false
 
     // Rating
     @Published var aiRating: AIRating?
@@ -50,41 +45,6 @@ final class ScanResultViewModel: ObservableObject {
             self.aiRating = stored
         }
     }
-
-    // MARK: - Tasting
-
-    func loadAIProfileAndShowTasting() async {
-        guard !isLoadingTaste else { return }
-        isLoadingTaste = true
-        defer { isLoadingTaste = false }
-
-        do {
-            let profile = try await openAIManager.tastingProfile(for: wineData)
-            self.aiProfile       = profile
-            self.showTasteSheet  = true
-        } catch {
-            // TODO: surface to user if you want
-            print("❌ AI tasting profile failed:", error.localizedDescription)
-        }
-    }
-
-    func persistTasting(_ dto: TastingSession) throws {
-        // 1️⃣ create the tasting entity
-        _ = try TastingSessionEntity(
-            from: dto,
-            bottle: bottle,
-            context: ctx
-        )
-
-        // 2️⃣ update the bottle metadata
-        bottle.lastTasted = dto.date
-
-        // 3️⃣ commit to Core Data
-        if ctx.hasChanges {
-            try ctx.save()
-        }
-    }
-
     // MARK: - Rating
 
     /// Look for any *other* BottleScan with the same fingerprint that already has a rating.

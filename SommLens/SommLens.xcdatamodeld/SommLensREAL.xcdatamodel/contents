@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24299" systemVersion="25B5072a" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24299" systemVersion="25C5048a" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
     <entity name="BottleScan" representedClassName="BottleScan" syncable="YES" codeGenerationType="class">
         <attribute name="abv" optional="YES" attributeType="String"/>
         <attribute name="aiBreakdownJSON" optional="YES" attributeType="String"/>
@@ -22,7 +22,7 @@
         <attribute name="rawJSON" optional="YES" attributeType="String"/>
         <attribute name="rawOCR" optional="YES" attributeType="String"/>
         <attribute name="region" optional="YES" attributeType="String"/>
-        <attribute name="screenshot" optional="YES" attributeType="Binary"/>
+        <attribute name="screenshot" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <attribute name="soilType" optional="YES" attributeType="String"/>
         <attribute name="subregion" optional="YES" attributeType="String"/>
         <attribute name="tastingNotes" optional="YES" attributeType="String"/>

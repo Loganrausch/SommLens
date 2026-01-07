@@ -33,10 +33,11 @@
 		CEA0F6602DE773EE0082F76F /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */; };
 		CEA0F6632DE776FE0082F76F /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = CEA0F6622DE776FE0082F76F /* RevenueCat */; };
 		CEA0F6652DE776FE0082F76F /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = CEA0F6642DE776FE0082F76F /* RevenueCatUI */; };
-		CEA0F6672DE7DEAB0082F76F /* ScanQuotaKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA0F6662DE7DEA80082F76F /* ScanQuotaKeychain.swift */; };
 		CEA401012DE8A63F00B498CC /* UnifiedOnboardingOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA401002DE8A63900B498CC /* UnifiedOnboardingOverlayView.swift */; };
 		CEA401052DE8F33600B498CC /* EngagementPromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA401042DE8F32E00B498CC /* EngagementPromptManager.swift */; };
 		CEA401072DE93FB800B498CC /* BottleScanIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA401062DE93FA400B498CC /* BottleScanIdentity.swift */; };
+		CED1617A2F0DF5F50014BA68 /* RecentScanCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED161792F0DF5F40014BA68 /* RecentScanCard.swift */; };
+		CED1617D2F0EDABC0014BA68 /* ZoomableScrollImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED1617C2F0EDABB0014BA68 /* ZoomableScrollImage.swift */; };
 		CED9D07D2DE75B1800C217AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CED9D0562DE75B1800C217AE /* Assets.xcassets */; };
 		CED9D07E2DE75B1800C217AE /* ScanResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0542DE75B1800C217AE /* ScanResultView.swift */; };
 		CED9D07F2DE75B1800C217AE /* AccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED9D0512DE75B1800C217AE /* AccountViewModel.swift */; };
@@ -126,11 +127,12 @@
 		CEA0F6572DE762730082F76F /* SommLensTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEA0F6582DE762730082F76F /* SommLensUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SommLensUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEA0F65F2DE773E90082F76F /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
-		CEA0F6662DE7DEA80082F76F /* ScanQuotaKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQuotaKeychain.swift; sourceTree = "<group>"; };
 		CEA401002DE8A63900B498CC /* UnifiedOnboardingOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedOnboardingOverlayView.swift; sourceTree = "<group>"; };
 		CEA401042DE8F32E00B498CC /* EngagementPromptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngagementPromptManager.swift; sourceTree = "<group>"; };
 		CEA401062DE93FA400B498CC /* BottleScanIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottleScanIdentity.swift; sourceTree = "<group>"; };
 		CEC2C8152DB95BFF0043FAEB /* SommLens.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SommLens.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CED161792F0DF5F40014BA68 /* RecentScanCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentScanCard.swift; sourceTree = "<group>"; };
+		CED1617C2F0EDABB0014BA68 /* ZoomableScrollImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollImage.swift; sourceTree = "<group>"; };
 		CED9D0502DE75B1800C217AE /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		CED9D0512DE75B1800C217AE /* AccountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountViewModel.swift; sourceTree = "<group>"; };
 		CED9D0522DE75B1800C217AE /* ActiveAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveAlert.swift; sourceTree = "<group>"; };
@@ -368,7 +370,6 @@
 		CE4EF47D2DF4FE1E006AD0FA /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				CEA0F6662DE7DEA80082F76F /* ScanQuotaKeychain.swift */,
 				CE2CCF8A2E1338E9007D75CA /* OpenAIManager */,
 			);
 			path = Services;
@@ -385,6 +386,7 @@
 		CE4EF4802DF4FF91006AD0FA /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				CED1617C2F0EDABB0014BA68 /* ZoomableScrollImage.swift */,
 				CED9D0642DE75B1800C217AE /* RefreshNotifier.swift */,
 			);
 			path = Utilities;
@@ -489,6 +491,14 @@
 			);
 			sourceTree = "<group>";
 		};
+		CED1617B2F0DF6070014BA68 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				CED161792F0DF5F40014BA68 /* RecentScanCard.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		CED9D07B2DE75B1800C217AE /* SommLens */ = {
 			isa = PBXGroup;
 			children = (
@@ -554,6 +564,7 @@
 		CED9D0AA2DE75D5B00C217AE /* Global */ = {
 			isa = PBXGroup;
 			children = (
+				CED1617B2F0DF6070014BA68 /* Views */,
 				CE4EF4812DF4FFEF006AD0FA /* Engagement */,
 				CE4EF4802DF4FF91006AD0FA /* Utilities */,
 				CE4EF47E2DF4FF31006AD0FA /* ViewModels */,
@@ -761,6 +772,7 @@
 				CEDD955D2EC2C47900428024 /* AIRatingSheet.swift in Sources */,
 				CED9D0852DE75B1800C217AE /* VerticalTubeStep.swift in Sources */,
 				CED9D0862DE75B1800C217AE /* ScanPrompts.swift in Sources */,
+				CED1617D2F0EDABC0014BA68 /* ZoomableScrollImage.swift in Sources */,
 				CEA401072DE93FB800B498CC /* BottleScanIdentity.swift in Sources */,
 				CE4EF45C2DF20A28006AD0FA /* ScanFilter.swift in Sources */,
 				CED9D0872DE75B1800C217AE /* Persistence.swift in Sources */,
@@ -781,6 +793,7 @@
 				CED9D0902DE75B1800C217AE /* IntensityEnums.swift in Sources */,
 				CED9D0922DE75B1800C217AE /* AccountView.swift in Sources */,
 				CED9D0932DE75B1800C217AE /* MainScanView.swift in Sources */,
+				CED1617A2F0DF5F50014BA68 /* RecentScanCard.swift in Sources */,
 				CED9D0942DE75B1800C217AE /* ICloudSyncService.swift in Sources */,
 				CED9D0952DE75B1800C217AE /* ResetService.swift in Sources */,
 				CEA099572E43B70C00535C84 /* BufferDelegate.swift in Sources */,
@@ -792,7 +805,6 @@
 				CED9D0982DE75B1800C217AE /* MainTabView.swift in Sources */,
 				CED9D09A2DE75B1800C217AE /* ActiveAlert.swift in Sources */,
 				CED9D09B2DE75B1800C217AE /* AITastingProfile.swift in Sources */,
-				CEA0F6672DE7DEAB0082F76F /* ScanQuotaKeychain.swift in Sources */,
 				CEA401052DE8F33600B498CC /* EngagementPromptManager.swift in Sources */,
 				CED9D09C2DE75B1800C217AE /* WineDescriptors.swift in Sources */,
 				CED9D09D2DE75B1800C217AE /* HeroHomeView.swift in Sources */,
@@ -855,7 +867,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -897,7 +909,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SommLens/Supporting/SommLens.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;

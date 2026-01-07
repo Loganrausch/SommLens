@@ -141,7 +141,7 @@ struct HeroHomeView: View {
         }
         .sheet(isPresented: $showDash) {
             DashboardView(selectedTab: $selectedTab)
-                .presentationDetents([.height(700)])
+                .presentationDetents([.height(575)])
                 .presentationDragIndicator(.visible)
         }
         .onChange(of: showOverlay) { _, newValue in

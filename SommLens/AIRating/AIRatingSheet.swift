@@ -6,72 +6,88 @@
 //
 
 // AIRatingSheet.swift
-
-
-// AIRatingSheet.swift
 import SwiftUI
 
 struct AIRatingSheet: View {
     let rating: AIRating
+    var isUnlocked: Bool
+    var unlockAction: () -> Void
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
 
-                    RatingHeader(rating: rating)
+                    RatingHeader(
+                        rating: rating,
+                        isUnlocked: isUnlocked,
+                        unlockAction: unlockAction
+                    )
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Why this score").font(.headline)
-                        Text(rating.ratingExplanation).foregroundStyle(.black.opacity(0.6))
-                    }
+                    // ✅ Gate everything below the header
+                    if isUnlocked {
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("What Vini considered").font(.headline)
-                        if let _ = rating.weightedTotal {
-                            Text(String(format: "Vini Score (weighted): %.1f / 10", rating.viniScore))
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Why this score").font(.headline)
+                            Text(rating.ratingExplanation)
                                 .foregroundStyle(.black.opacity(0.6))
                         }
-                        VStack(spacing: 10) {
-                            ForEach(rating.factors, id: \.name) { f in
-                                let tenPoint = rating.tenPoint(for: f)   // 0–10
 
-                                VStack(alignment: .leading, spacing: 6) {
-                                    HStack {
-                                        Text(f.name.capitalized)
-                                            .font(.subheadline.weight(.semibold))
-                                        Spacer()
-                                        Text(String(format: "%.1f / 10", tenPoint))
-                                            .font(.subheadline.monospacedDigit())
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("What Vini considered").font(.headline)
+                            
+                            if let _ = rating.weightedTotal {
+                                Text(String(format: "Vini Score (weighted): %.1f / 10", rating.viniScore))
+                                    .foregroundStyle(.black.opacity(0.6))
+                            }
+                            
+                            VStack(spacing: 10) {
+                                ForEach(rating.factors, id: \.name) { f in
+                                    let tenPoint = rating.tenPoint(for: f)   // 0–10
+                                    
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        HStack {
+                                            Text(f.name.capitalized)
+                                                .font(.subheadline.weight(.semibold))
+                                            Spacer()
+                                            Text(String(format: "%.1f / 10", tenPoint))
+                                                .font(.subheadline.monospacedDigit())
+                                        }
+                                        
+                                        ProgressView(value: tenPoint, total: 10)
+                                            .progressViewStyle(.linear)
+                                            .tint(.burgundy)
+                                        
+                                        Text(f.reason)
+                                            .font(.footnote)
+                                            .foregroundStyle(.black.opacity(0.6))
                                     }
-
-                                    ProgressView(value: tenPoint, total: 10)
-                                        .progressViewStyle(.linear)
-                                        .tint(.burgundy)
-
-                                    Text(f.reason)
-                                        .font(.footnote)
-                                        .foregroundStyle(.black.opacity(0.6))
+                                    .padding()
+                                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
                                 }
-                                .padding()
-                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
                             }
                         }
-                    }
 
-                    // 🔻 DISCLAIMER AT THE BOTTOM 🔻
+                    } else {
+
+                        LockedRatingBody(
+                            unlockAction: unlockAction
+                        )
+                    }
+                    
+                    // Disclaimer (your call — I’m leaving it inside Pro)
                     VStack(spacing: 4) {
                         Text("Disclaimer")
                             .font(.caption2.bold())
-                        Text("AI ratings are generated automatically from label information and general wine knowledge using OpenAI. The ratings are intended for educational use only and should not replace your own judgment. ")
+                        Text("AI ratings are generated automatically from label information and general wine knowledge using OpenAI. The ratings are intended for educational use only and should not replace your own judgment.")
                             .font(.caption2)
                     }
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 24)
-                    
-                    // Footer
+
+                    // Footer (fine for everyone)
                     VStack(spacing: 4) {
                         Text("SommLens")
                             .font(.caption2)
@@ -92,9 +108,11 @@ struct AIRatingSheet: View {
     }
 }
 
-// MARK: - Header with circular score + banded confidence
+// MARK: - Header with circular score + gated label
 private struct RatingHeader: View {
     let rating: AIRating
+    let isUnlocked: Bool
+    let unlockAction: () -> Void
 
     var body: some View {
         let score = rating.viniScore
@@ -105,12 +123,19 @@ private struct RatingHeader: View {
             Spacer(minLength: 12)
 
             VStack(alignment: .center, spacing: 6) {
-                Text(descriptor(for: score))
-                    .font(.title3.weight(.semibold))
-                    .multilineTextAlignment(.center)
 
-                HStack(spacing: 8) {
+                if isUnlocked {
+                    Text(descriptor(for: score))
+                        .font(.title3.weight(.semibold))
+                        .multilineTextAlignment(.center)
+
                     ConfidenceTag(confidence: rating.confidence)
+
+                } else {
+                    // ✅ Replace descriptor text w/ upgrade note
+                    Text("Upgrade for details")
+                        .font(.headline.weight(.semibold))
+                        .multilineTextAlignment(.center)
                 }
             }
 
@@ -118,6 +143,51 @@ private struct RatingHeader: View {
         }
         .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+// MARK: - Locked body (everything except score)
+private struct LockedRatingBody: View {
+    let unlockAction: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+
+            HStack(spacing: 8) {
+                Image(systemName: "lock.fill")
+                    .foregroundColor(.burgundy)
+                Text("Rating breakdown is Pro")
+                    .font(.headline)
+                Spacer()
+            }
+
+            Text("Unlock the explanation and the factors behind Vini’s score.")
+                .font(.subheadline)
+                .foregroundStyle(.black.opacity(0.7))
+
+            Button {
+                unlockAction()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.up.right.circle.fill")
+                    Text("Upgrade to Pro")
+                        .fontWeight(.semibold)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+            }
+            .buttonStyle(.plain)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.latte.opacity(0.95))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Color.burgundy.opacity(0.8), lineWidth: 1)
+            )
+        }
+        .padding()
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -202,39 +272,3 @@ private struct ConfidenceTag: View {
         Tag(text: label)
     }
 }
-
-#if DEBUG
-struct AIRatingSheet_Previews: PreviewProvider {
-
-    static var mock: AIRating = {
-        let factors: [AIRating.Factor] = [
-            .init(name: "style match", score: 92, weight: 0.35, reason: "Classic for the appellation."),
-            .init(name: "producer", score: 90, weight: 0.25, reason: "Strong, consistent house style."),
-            .init(name: "vintage",  score: 88, weight: 0.20, reason: "Warm year; generous fruit."),
-            .init(name: "terroir",  score: 94, weight: 0.20, reason: "Prime slope; limestone-clay.")
-        ]
-        let sumW = factors.reduce(0.0) { $0 + $1.weight }
-        let total = sumW > 0
-            ? factors.reduce(0.0) { $0 + Double($1.score) * $1.weight } / sumW
-            : 0
-        return AIRating(
-            aiRating: Int(total.rounded()),
-            ratingExplanation: "Elevated style match and site expression; small deduction for vintage warmth.",
-            factors: factors,
-            weightedTotal: total,
-            confidence: 0.84
-        )
-    }()
-
-    static var previews: some View {
-        Group {
-            NavigationStack { AIRatingSheet(rating: mock) }
-                .previewDisplayName("Light")
-
-            NavigationStack { AIRatingSheet(rating: mock) }
-                .preferredColorScheme(.dark)
-                .previewDisplayName("Dark")
-        }
-    }
-}
-#endif

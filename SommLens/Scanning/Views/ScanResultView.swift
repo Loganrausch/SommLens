@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import StoreKit
 import CoreData
 
 struct ScanResultView: View {
@@ -15,6 +14,7 @@ struct ScanResultView: View {
     @StateObject private var vm: ScanResultViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var engagementState: EngagementState
+    @EnvironmentObject var auth: AuthViewModel
     
     @Binding var selectedTab: MainTab
     
@@ -103,27 +103,6 @@ struct ScanResultView: View {
                         .padding(.horizontal, 16)
                     }
                     .frame(height: 90)
-                    
-                    /* Taste‑this‑wine button */
-                    Button {
-                        Task { await vm.loadAIProfileAndShowTasting() }
-                    } label: {
-                        if vm.isLoadingTaste {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                        } else {
-                            Label("Taste with Vini AI", systemImage: "wineglass")
-                                .font(.headline)
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity)
-                        }
-                    }
-                    .background(.thinMaterial, in: Capsule())
-                    .disabled(vm.isLoadingTaste)
-                    .padding(.horizontal, 32)
                 }
                 .padding(.vertical, 14)
                 .frame(maxWidth: .infinity)
@@ -180,8 +159,12 @@ struct ScanResultView: View {
         
         .sheet(isPresented: $vm.showRatingSheet) {
             if let r = vm.aiRating {
-                AIRatingSheet(rating: r)
-                    .presentationDetents([.medium, .large])
+                AIRatingSheet(
+                    rating: r,
+                    isUnlocked: auth.hasActiveSubscription,
+                    unlockAction: { auth.isPaywallPresented = true }
+                )
+                .presentationDetents([.medium, .large])
             }
         }
         
@@ -196,29 +179,7 @@ struct ScanResultView: View {
             )
             .presentationDetents([.large])
         }
-        
-        // Tasting flow sheet
-        .fullScreenCover(isPresented: $vm.showTasteSheet) {
-            if let profile = vm.aiProfile {
-                TastingFormView(
-                    aiProfile: profile,
-                    wineData:  vm.wineData,
-                    snapshot:  vm.capturedImage
-                ) { dto in
-                    try? vm.persistTasting(dto)    // ✅ here
-                    vm.showTasteSheet = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                        onDismiss()
-                        dismiss()
-                        selectedTab = .home
-                    }
-                }
-                .interactiveDismissDisabled()
-            } else {
-                ProgressView()
-            }
-        }
-        // ← add these two at the very end:
+    
         .onChange(of: selectedTab) { _, newTab in
             if newTab == .scan {
                 print("🔁 Tab re-tap detected in ScanResultView")

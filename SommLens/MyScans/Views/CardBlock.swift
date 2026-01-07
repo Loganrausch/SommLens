@@ -32,8 +32,8 @@ struct CardBlock<Content: View>: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Color.black.opacity(0.04), lineWidth: 1) // subtle edge
+                .stroke(Color.black.opacity(0.05), lineWidth: 1.2) // subtle edge
         )
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4) // softer than before
+        .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4) // softer than before
     }
 }

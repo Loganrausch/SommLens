@@ -1,18 +1,14 @@
-//
-//  SaveScan.swift
-//  SommLens
-//
-//  Created by Logan Rausch on 8/6/25.
-
-
 import UIKit
 import CoreData
 
-func saveScan(in ctx: NSManagedObjectContext,
-                      wineData: WineData,
-                      rawJSON: String,
-                      screenshot: UIImage?
+func saveScan(
+    in ctx: NSManagedObjectContext,
+    wineData: WineData,
+    rawJSON: String,
+    screenshot: UIImage?,
+    isPro: Bool
 ) -> BottleScan {
+
     let scan = BottleScan(context: ctx)
     scan.id              = UUID()
     scan.fingerprint     = wineData.id
@@ -37,8 +33,14 @@ func saveScan(in ctx: NSManagedObjectContext,
     scan.category        = wineData.category.rawValue
     scan.rawJSON         = rawJSON
     scan.screenshot      = screenshot?.jpegData(compressionQuality: 0.8)
-    try? ctx.save()
-    
+
+    do {
+        try ctx.save()
+    } catch {
+        #if DEBUG
+        print("❌ saveScan failed:", error.localizedDescription)
+        #endif
+    }
+
     return scan
 }
-
