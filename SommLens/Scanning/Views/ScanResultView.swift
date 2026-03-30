@@ -114,17 +114,18 @@ struct ScanResultView: View {
             }
         }
         
+        .tint(.burgundy)
+        
         .navigationBarBackButtonHidden(true)
         
         .task {
             await vm.fetchAIRatingIfNeeded()
         }
         
-        // Top-leading rating chip
         .overlay(alignment: .topLeading) {
             let state: AIRatingChipState = {
                 if vm.isLoadingRating { return .loading }
-                if let r = vm.aiRating { return .score(r.viniScore) }
+                if let r = vm.aiRating { return .impression(r.overallImpression) }
                 return .empty
             }()
 
@@ -151,6 +152,7 @@ struct ScanResultView: View {
                     .background(.ultraThinMaterial, in: Circle())
                     .shadow(radius: 3)
             }
+            .tint(.burgundy)
             .padding(.top, 30)
             .padding(.trailing, 20)
         }
@@ -169,7 +171,7 @@ struct ScanResultView: View {
         }
         
         // Wine‑detail sheet
-        .sheet(isPresented: $vm.showDetailSheet) {
+        .fullScreenCover(isPresented: $vm.showDetailSheet) {
             WineDetailView(
                 bottle:   vm.bottle,           // 👈 NEW
                 wineData: vm.wineData,

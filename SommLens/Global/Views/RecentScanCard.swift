@@ -12,7 +12,6 @@ import UIKit
 struct RecentScanCard: View {
     let wine: WineData?
     let image: UIImage?
-    let isTasted: Bool   // ✅ NEW
     
     var body: some View {
         VStack(spacing: 6) {
@@ -38,17 +37,6 @@ struct RecentScanCard: View {
                             Text("No Image")
                                 .foregroundColor(.secondary)
                         )
-                }
-
-                if isTasted {
-                    Text("Tasted")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.burgundy.opacity(0.95))
-                        .clipShape(Capsule())
-                        .padding(8)
                 }
             }
             

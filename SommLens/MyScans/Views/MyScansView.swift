@@ -66,7 +66,6 @@ struct MyScansView: View {
                                     RecentScanCard(
                                         wine: wine,
                                         image: image,
-                                        isTasted: !scan.tastingsArray.isEmpty
                                     )
                                 }
                                 .buttonStyle(.plain)

@@ -26,7 +26,7 @@ struct UnifiedOnboardingOverlayView: View {
                             .foregroundColor(.latte)
                             .multilineTextAlignment(.center)
 
-                        Text("Tap the Scan Bottle button to get expert-level wine insights using AI.")
+                        Text("Tap the Scan Bottle button to instantly identify a wine and explore expert-level insights.")
                             .font(.body)
                             .foregroundColor(.latte.opacity(0.9))
                             .multilineTextAlignment(.center)
@@ -78,21 +78,15 @@ struct UnifiedOnboardingOverlayView: View {
                         TabView(selection: $currentPage) {
                             learnCard(
                                 title: "Scan Any Wine",
-                                subtitle: "Just point your camera at a label and tap the shutter. SommLens instantly reads the bottle and returns expert-level insights using AI.",
+                                subtitle: "Just point your camera at a label and tap the shutter. SommLens reads the bottle and delivers clear, reliable wine insights in seconds.",
                                 systemImage: "viewfinder"
                             )
                             .tag(0)
 
+    
                             learnCard(
-                                title: "Taste With Vini AI",
-                                subtitle: "After scanning a label, explore a guided tasting. Record your impressions, then reveal Vini’s notes to compare — perfect for beginners and pros alike.",
-                                systemImage: "wineglass"
-                            )
-                            .tag(1)
-
-                            learnCard(
-                                title: "All Scans Saved",
-                                subtitle: "Every scan and tasting builds your profile. Track the wines you love—and the ones you don’t.",
+                                title: "Your Scan History",
+                                subtitle: "Your recent scans are saved automatically.",
                                 systemImage: "heart.text.square"
                             )
                             .tag(2)

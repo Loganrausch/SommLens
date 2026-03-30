@@ -17,7 +17,7 @@ extension BottleScan {
     func applyAIRating(from rating: AIRating,
                        ctx: NSManagedObjectContext,
                        modelVersion: String = "rating-v1") throws {
-        self.aiScore = Int16(rating.aiRating) // store true underlying score; UI uses rating.displayScore
+        self.aiScore = Int16(rating.aiRating) // store underlying 0–100 score; UI shows overallImpression
         self.aiReason       = rating.ratingExplanation
         self.aiConfidence   = rating.confidence
         self.aiModelVersion = modelVersion

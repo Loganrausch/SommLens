@@ -24,9 +24,7 @@ extension BottleScan {
         
         // 🔹 Key line: only load a chunk at a time
         request.fetchBatchSize = 25   // tweak (20, 50, etc.) if you like
-        
-        // Optional: if you truly want a hard cap like “first 200 ever”
-        // request.fetchLimit = 200
+
         
         return request
     }

@@ -74,6 +74,48 @@ struct WineData: Codable {
     }
 }
 
+extension WineData {
+    init(
+        producer: String?,
+        region: String?,
+        country: String?,
+        subregion: String?,
+        appellation: String?,
+        grapes: [String]?,
+        vintage: String?,
+        classification: String?,
+        tastingNotes: String?,
+        pairings: [String]?,
+        vibeTag: String?,
+        vineyard: String?,
+        soilType: String?,
+        climate: String?,
+        drinkingWindow: String?,
+        abv: String?,
+        winemakingStyle: String?,
+        category: WineCategory
+    ) {
+        self.producer = producer
+        self.region = region
+        self.country = country
+        self.subregion = subregion
+        self.appellation = appellation
+        self.grapes = grapes
+        self.vintage = vintage
+        self.classification = classification
+        self.tastingNotes = tastingNotes
+        self.pairings = pairings
+        self.vibeTag = vibeTag
+        self.vineyard = vineyard
+        self.soilType = soilType
+        self.climate = climate
+        self.drinkingWindow = drinkingWindow
+        self.abv = abv
+        self.winemakingStyle = winemakingStyle
+        self.category = category
+    }
+}
+
 extension WineData: Identifiable {
     public var id: String {
         // can combine fields, but producer+timestamp is unique enough here
@@ -154,44 +196,6 @@ extension WineCategory {
         case .unknown:      return "Unknown"
         case .rosé:         return "Rosé Wine"      // restore accent for display
         default:            return rawValue.capitalized + " Wine"
-        }
-    }
-}
-
-// ──────────────────────────────────────────────────────────────
-// MARK: – Descriptor pools (1-to-1 mapping)
-// ──────────────────────────────────────────────────────────────
-extension WineCategory {
-    var aromaPool:   [String] { descriptorPair.aromas }
-    var flavourPool: [String] { descriptorPair.flavours }
-
-    private var descriptorPair: (aromas: [String], flavours: [String]) {
-        switch self {
-        case .red:            return (Descriptors.redAromas,          Descriptors.redFlavours)
-        case .white:          return (Descriptors.whiteAromas,        Descriptors.whiteFlavours)
-        case .rosé:           return (Descriptors.roséAromas,         Descriptors.roséFlavours)
-        case .orange:         return (Descriptors.orangeAromas,       Descriptors.orangeFlavours)
-        case .redSparkling:   return (Descriptors.redSparklingAromas, Descriptors.redSparklingFlavours)
-        case .whiteSparkling: return (Descriptors.whiteSparklingAromas,Descriptors.whiteSparklingFlavours)
-        case .redDessert:     return (Descriptors.redDessertAromas,   Descriptors.redDessertFlavours)
-        case .whiteDessert:   return (Descriptors.whiteDessertAromas, Descriptors.whiteDessertFlavours)
-        case .redFortified:   return (Descriptors.redFortifiedAromas, Descriptors.redFortifiedFlavours)
-        case .whiteFortified: return (Descriptors.whiteFortifiedAromas,Descriptors.whiteFortifiedFlavours)
-        case .unknown:        // broad fallback
-            return (Descriptors.whiteAromas + Descriptors.redAromas,
-                    Descriptors.whiteFlavours + Descriptors.redFlavours)
-        }
-    }
-}
-
-extension WineCategory {
-    /// Returns true if this wine style typically has tannin
-    var tanninExists: Bool {
-        switch self {
-        case .red, .redSparkling, .redFortified, .redDessert, .orange:
-            return true
-        default:
-            return false
         }
     }
 }

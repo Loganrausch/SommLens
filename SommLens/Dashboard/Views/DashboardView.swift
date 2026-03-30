@@ -192,13 +192,12 @@ Picker("Debug Entitlement", selection: Binding(
                             } label: {
                                 RecentScanCard(
                                     wine: wine,
-                                    image: image,
-                                    isTasted: !scan.tastingsArray.isEmpty
+                                    image: image
                                 )
                             }
                             .frame(width: 140)
                         } else {
-                            RecentScanCard(wine: nil, image: nil, isTasted: false)
+                            RecentScanCard(wine: nil, image: nil)
                                 .frame(width: 140)
                         }
                     }

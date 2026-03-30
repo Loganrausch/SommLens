@@ -28,7 +28,7 @@ struct AIRatingSheet: View {
                     if isUnlocked {
 
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Why this score").font(.headline)
+                            Text("Why this impression").font(.headline)
                             Text(rating.ratingExplanation)
                                 .foregroundStyle(.black.opacity(0.6))
                         }
@@ -36,10 +36,6 @@ struct AIRatingSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("What Vini considered").font(.headline)
                             
-                            if let _ = rating.weightedTotal {
-                                Text(String(format: "Vini Score (weighted): %.1f / 10", rating.viniScore))
-                                    .foregroundStyle(.black.opacity(0.6))
-                            }
                             
                             VStack(spacing: 10) {
                                 ForEach(rating.factors, id: \.name) { f in
@@ -51,7 +47,8 @@ struct AIRatingSheet: View {
                                                 .font(.subheadline.weight(.semibold))
                                             Spacer()
                                             Text(String(format: "%.1f / 10", tenPoint))
-                                                .font(.subheadline.monospacedDigit())
+                                                .font(.caption.monospacedDigit())
+                                                .foregroundStyle(.secondary)
                                         }
                                         
                                         ProgressView(value: tenPoint, total: 10)
@@ -79,7 +76,7 @@ struct AIRatingSheet: View {
                     VStack(spacing: 4) {
                         Text("Disclaimer")
                             .font(.caption2.bold())
-                        Text("AI ratings are generated automatically from label information and general wine knowledge using OpenAI. The ratings are intended for educational use only and should not replace your own judgment.")
+                        Text("AI impressions are generated automatically from label information and general wine knowledge using OpenAI. The impressions are intended for educational use only and should not replace your own judgment.")
                             .font(.caption2)
                     }
                     .foregroundStyle(.secondary)
@@ -102,46 +99,37 @@ struct AIRatingSheet: View {
                 }
                 .padding(16)
             }
-            .navigationTitle("Vini's Rating")
+            .navigationTitle("Vini's Take")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
 
-// MARK: - Header with circular score + gated label
 private struct RatingHeader: View {
     let rating: AIRating
     let isUnlocked: Bool
     let unlockAction: () -> Void
 
     var body: some View {
-        let score = rating.viniScore
+        VStack(alignment: .leading, spacing: 10) {
 
-        HStack(spacing: 16) {
-            CircularScoreView(score: score)
+            // little accent bar
+            RoundedRectangle(cornerRadius: 2)
+                .foregroundStyle(.burgundy.opacity(0.75))
+                .frame(width: 45, height: 2)
 
-            Spacer(minLength: 12)
-
-            VStack(alignment: .center, spacing: 6) {
-
-                if isUnlocked {
-                    Text(descriptor(for: score))
-                        .font(.title3.weight(.semibold))
-                        .multilineTextAlignment(.center)
-
-                    ConfidenceTag(confidence: rating.confidence)
-
-                } else {
-                    // ✅ Replace descriptor text w/ upgrade note
-                    Text("Upgrade for details")
-                        .font(.headline.weight(.semibold))
-                        .multilineTextAlignment(.center)
-                }
+            if isUnlocked {
+                Text(rating.overallImpression)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.black.opacity(0.9))
+            } else {
+                Text("Upgrade for details")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.burgundy)
             }
-
-            Spacer(minLength: 0)
         }
         .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -156,12 +144,12 @@ private struct LockedRatingBody: View {
             HStack(spacing: 8) {
                 Image(systemName: "lock.fill")
                     .foregroundColor(.burgundy)
-                Text("Rating breakdown is Pro")
+                Text("Impression breakdown is Pro")
                     .font(.headline)
                 Spacer()
             }
 
-            Text("Unlock the explanation and the factors behind Vini’s score.")
+            Text("Unlock the explanation and the factors behind Vini’s take.")
                 .font(.subheadline)
                 .foregroundStyle(.black.opacity(0.7))
 
@@ -191,58 +179,6 @@ private struct LockedRatingBody: View {
     }
 }
 
-// MARK: - Circular score ring
-private struct CircularScoreView: View {
-    let score: Double          // 0–10
-    var progress: CGFloat { CGFloat(max(0, min(score, 10))) / 10 }
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(.secondary.opacity(0.25), lineWidth: 7)
-
-            Circle()
-                .trim(from: 0, to: progress)
-                .stroke(
-                    .burgundy,
-                    style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .animation(.easeInOut(duration: 0.8), value: score)
-
-            VStack(spacing: -2) {
-                Text(String(format: "%.1f", score))
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-            }
-            .frame(width: 60, alignment: .center)
-        }
-        .frame(width: 110, height: 110)
-    }
-}
-
-// MARK: - Confidence band + descriptor helpers
-private enum ConfidenceBand { case low, medium, high }
-
-private func band(for c: Double) -> ConfidenceBand {
-    switch c {
-    case ..<0.60: return .low
-    case ..<0.80: return .medium
-    default:      return .high
-    }
-}
-
-private func descriptor(for score: Double) -> String {
-    switch score {
-    case 9.5...10.0: return "Truly Special"
-    case 9.0..<9.5:  return "Exceptional"
-    case 8.5..<9.0:  return "High Quality"
-    case 8.0..<8.5:  return "Very Good"
-    case 7.5..<8.0:  return "Good Everyday Wine"
-    case 7.0..<7.5:  return "Simple, Easy-Drinking"
-    default:         return "Very Basic / Limited Complexity"
-    }
-}
 
 // Simple pill tags used for confidence
 private struct Tag: View {
@@ -253,22 +189,5 @@ private struct Tag: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(.thinMaterial, in: Capsule())
-    }
-}
-
-private struct ConfidenceTag: View {
-    let confidence: Double
-    var bandVal: ConfidenceBand { band(for: confidence) }
-
-    var label: String {
-        switch bandVal {
-        case .high:   return "High Confidence"
-        case .medium: return "Medium Confidence"
-        case .low:    return "Low Confidence"
-        }
-    }
-
-    var body: some View {
-        Tag(text: label)
     }
 }

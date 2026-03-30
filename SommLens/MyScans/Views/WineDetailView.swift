@@ -20,7 +20,6 @@ struct WineDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var auth: AuthViewModel
     
-    @FetchRequest private var tastings: FetchedResults<TastingSessionEntity>
     
     @State private var showImageFullScreen = false
     
@@ -43,12 +42,6 @@ struct WineDetailView: View {
                 bottle: bottle
             )
         )
-        
-        _tastings = FetchRequest(
-            sortDescriptors: [NSSortDescriptor(keyPath: \TastingSessionEntity.date, ascending: false)],
-            predicate: NSPredicate(format: "bottle == %@", bottle),
-            animation: .default
-        )
     }
     
     private var isPro: Bool { auth.hasActiveSubscription }
@@ -67,12 +60,26 @@ struct WineDetailView: View {
                         // Title block under the image (clean white background)
                         titleSection
                         
+                        // 👇 FREE ONLY vibeTag
+                        if !isPro,
+                           let vibe = wineData.vibeTag?
+                            .trimmingCharacters(in: .whitespacesAndNewlines),
+                           !vibe.isEmpty {
+                            
+                            Text(vibe)
+                                .font(.body.italic())
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.primary.opacity(0.85))
+                                .padding(.horizontal, 16)
+                                .padding(.top, 6)
+                        }
+                        
                         if isPro {
-
+                            
                             if let notes = wineData.tastingNotes?
                                 .trimmingCharacters(in: .whitespacesAndNewlines),
                                !notes.isEmpty {
-
+                                
                                 Text(notes)
                                     .font(.body.italic())
                                     .multilineTextAlignment(.center)
@@ -82,31 +89,39 @@ struct WineDetailView: View {
                                     .padding(.top, 4)
                                     .padding(.bottom, 4)
                             }
-
-                            tastingSection
-
+                            
+                            viniTakeCard
+                            
                             CardBlock(title: "Wine Info") {
+                                
+                                // ✅ Repeat header fields here (labeled)
+                                InfoTile(label: "Producer", value: wineData.producer)
+                                InfoTile(label: "Vintage", value: wineData.vintage)
+                                InfoTile(label: "Region", value: wineData.region)
+                                InfoTile(label: "Country", value: wineData.country)
+                                InfoTile(label: "Category", value: wineData.category.displayName)
+                                
                                 InfoTile(label: "Subregion",   value: wineData.subregion)
                                 InfoTile(label: "Appellation", value: wineData.appellation)
                                 InfoTile(label: "Vineyard",    value: wineData.vineyard)
                                 InfoTile(label: "Grapes", value: wineData.grapes?.joined(separator: ", "))
                             }
-
+                            
                             CardBlock(title: "Food Pairings") {
                                 let value = wineData.pairings?.joined(separator: ", ")
                                 InfoTile(
                                     label: "Pair with",
                                     value: (value?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false)
-                                        ? value
-                                        : "Not available for this bottle yet."
+                                    ? value
+                                    : "Not available for this bottle yet."
                                 )
                             }
-
+                            
                             CardBlock(title: "Terroir") {
                                 InfoTile(label: "Climate", value: wineData.climate)
                                 InfoTile(label: "Soil", value: wineData.soilType)
                             }
-
+                            
                             CardBlock(title: "Additional Info") {
                                 InfoTile(label: "Classification", value: wineData.classification)
                                 let abv = wineData.abv?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -114,20 +129,22 @@ struct WineDetailView: View {
                                 InfoTile(label: "Drink", value: wineData.drinkingWindow)
                                 InfoTile(label: "Style", value: wineData.winemakingStyle)
                             }
-
+                            
                         } else {
-
+                            
                             // ✅ FREE: Wine Info first
                             CardBlock(title: "Wine Info") {
+                                
+                                // ✅ Repeat header fields here (labeled)
+                                InfoTile(label: "Producer", value: wineData.producer)
+                                InfoTile(label: "Vintage", value: wineData.vintage)
+                                InfoTile(label: "Region", value: wineData.region)
+                                InfoTile(label: "Country", value: wineData.country)
+                                InfoTile(label: "Category", value: wineData.category.displayName)
                                 InfoTile(label: "Subregion",   value: wineData.subregion)
-                                InfoTile(label: "Appellation", value: wineData.appellation)
-                                InfoTile(label: "Vineyard",    value: wineData.vineyard)
                                 InfoTile(label: "Grapes", value: wineData.grapes?.joined(separator: ", "))
                             }
-
-                            // ✅ FREE: Taste with Vini AI locked (your tastingSection already gates)
-                            tastingSection
-
+                            
                             // ✅ FREE: single upsell card
                             proUpsellCard
                         }
@@ -169,7 +186,7 @@ struct WineDetailView: View {
         }
         
         .alert(
-            "Rating unavailable",
+            "Impression unavailable",
             isPresented: Binding(
                 get: { vm.ratingError != nil },
                 set: { newValue in
@@ -194,34 +211,6 @@ struct WineDetailView: View {
                     unlockAction: { auth.isPaywallPresented = true }
                 )
                 .presentationDetents([.medium, .large])
-            }
-        }
-        
-        // Tasting summary sheet
-        .sheet(item: $vm.selectedDTO) { dto in
-            TastingSummaryView(
-                input: .constant(dto.userInput),
-                aiProfile: dto.aiProfile,
-                wineName: dto.wineName
-            )
-            .padding(.horizontal, 16)
-            .presentationDetents([.medium])
-        }
-        
-        // Full tasting form
-        .fullScreenCover(isPresented: $vm.showTasteSheet) {
-            if let profile = vm.aiProfile {
-                TastingFormView(
-                    aiProfile: profile,
-                    wineData:  wineData,
-                    snapshot:  snapshot
-                ) { dto in
-                    vm.persistTasting(dto, for: bottle)
-                    vm.showTasteSheet = false
-                }
-                .interactiveDismissDisabled()
-            } else {
-                ProgressView()
             }
         }
         
@@ -283,10 +272,6 @@ private extension WineDetailView {
                                 .easeOut(duration: 0.3),
                                 value: vm.animate
                             )
-                        
-                        ratingChip
-                            .padding(.trailing, 16)
-                            .padding(.bottom, 16)
                     }
                 }
                 .buttonStyle(.plain)
@@ -296,31 +281,33 @@ private extension WineDetailView {
         }
     }
     
-    // Clean title block below the header
     var titleSection: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
+            
             Text(wineData.producer ?? "Unknown Producer")
                 .font(.title.weight(.bold))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
             
-            if let vintage = wineData.vintage?
-                .trimmingCharacters(in: .whitespacesAndNewlines),
+            // Combined line
+            if let vintage = wineData.vintage?.trimmingCharacters(in: .whitespacesAndNewlines),
                !vintage.isEmpty {
-                Text(vintage)
+                
+                Text("\(vintage) · \(wineData.region ?? "–"), \(wineData.country ?? "–")")
                     .font(.subheadline.weight(.medium))
                     .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text("\(wineData.region ?? "–"), \(wineData.country ?? "–")")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
             }
-            
-            Text("\(wineData.region ?? "–") · \(wineData.country ?? "–")")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
             
             if !wineData.category.displayName.isEmpty {
                 Text(wineData.category.displayName)
-                    .font(.subheadline)
+                    .font(.subheadline.weight(.medium))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
@@ -328,15 +315,14 @@ private extension WineDetailView {
         .frame(maxWidth: .infinity, alignment: .center)
     }
     
-    var ratingChip: some View {
+    var viniTakeCard: some View {
         let rating = vm.aiRating ?? bottle.toAIRating()
-        let scoreValue = rating?.viniScore
         
         let state: AIRatingChipState = {
             if vm.isLoadingRating {
                 return .loading
-            } else if let val = scoreValue {
-                return .score(val)
+            } else if let r = rating {
+                return .impression(r.overallImpression)
             } else {
                 return .empty
             }
@@ -358,154 +344,66 @@ private extension WineDetailView {
         )
     }
     
-    var tastingSection: some View {
-        Group {
-            // ── If tasting already exists ──
-            if let tasting = tastings.first {
+    
+    
+    var proUpsellCard: some View {
+        CardBlock(title: "Want to learn more about this wine?") {
+            VStack(alignment: .leading, spacing: 12) {
+                
+                HStack(spacing: 8) {
+                    
+                    Text("SommLens Pro includes:")
+                        .font(.subheadline.bold())
+                        .foregroundColor(.black.opacity(0.75))
+                    Spacer()
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    proBullet("Full tasting notes")
+                    proBullet("Food pairings")
+                    proBullet("Terroir: climate + soil")
+                    proBullet("Additional Info: ABV, classification, drinking window, style")
+                    proBullet("Complete impression breakdown")
+                    proBullet("Full scan history")
+                }
+                .font(.subheadline)
+                .foregroundColor(.black.opacity(0.75))
+                
                 Button {
-                    vm.selectedDTO = tasting.dto
+                    auth.isPaywallPresented = true
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
                     HStack(spacing: 8) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.burgundy)
-                        
-                        Text("You tasted this wine")
-                            .foregroundColor(.burgundy)
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.burgundy.opacity(0.9))
+                        Image(systemName: "arrow.up.right.circle.fill")
+                        Text("Upgrade to Pro")
+                            .fontWeight(.semibold)
                     }
-                    .font(.subheadline.bold())
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .fill(Color.latte.opacity(0.98))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .stroke(Color.burgundy.opacity(0.35), lineWidth: 1.2)
-                    )
-                    .shadow(color: .black.opacity(0.18), radius: 10, x: 0, y: 6)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
                 }
                 .buttonStyle(.plain)
-                
-                // ── No tasting yet ──
-            } else {
-                Button {
-                    // 🚨 Gate free users immediately
-                    guard isPro else {
-                        auth.isPaywallPresented = true
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        return
-                    }
-                    
-                    Task {
-                        await vm.loadAIProfileAndShowTasting()
-                    }
-                } label: {
-                    HStack(spacing: 10) {
-                        
-                        if !isPro {
-                            // 🔒 Locked state
-                            Image(systemName: "lock.fill")
-                            
-                            Text("Taste with Vini AI")
-                          
-                        } else if vm.isLoadingTaste {
-                            // ⏳ Loading state (Pro only)
-                            ProgressView()
-                                .progressViewStyle(
-                                    CircularProgressViewStyle(tint: .burgundy)
-                                )
-                            
-                            Text("Loading…")
-                            
-                        } else {
-                            // ▶️ Ready state
-                            Text("Taste with Vini AI")
-                            Image(systemName: "chevron.right")
-                                .font(.subheadline.weight(.semibold))
-                        }
-                    }
-                    .foregroundColor(.burgundy)
-                    .font(.subheadline.bold())
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .fill(Color.latte.opacity(0.98))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .stroke(Color.burgundy.opacity(0.35), lineWidth: 1)
-                    )
-                    .shadow(color: .black.opacity(0.18), radius: 10, x: 0, y: 6)
-                }
-                .buttonStyle(.plain)
-                .disabled(vm.isLoadingTaste)
+                .foregroundColor(.black.opacity(0.75))
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.latte.opacity(0.95))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.burgundy.opacity(0.4), lineWidth: 1)
+                )
             }
+            .padding(.top, 5)
         }
     }
-    // ✅ ADD THIS HERE (inside the extension)
-      var proUpsellCard: some View {
-          CardBlock(title: "Want to learn more about this wine?") {
-              VStack(alignment: .leading, spacing: 12) {
-
-                  HStack(spacing: 8) {
-                     
-                      Text("SommLens Pro includes:")
-                          .font(.subheadline.bold())
-                          .foregroundColor(.black.opacity(0.75))
-                      Spacer()
-                  }
-
-                  VStack(alignment: .leading, spacing: 8) {
-                      proBullet("Food pairings")
-                      proBullet("Terroir: climate + soil")
-                      proBullet("Additional Info: ABV, classification, drinking window, style")
-                      proBullet("Complete rating breakdown")
-                      proBullet("Full scan history")
-                  }
-                  .font(.subheadline)
-                  .foregroundColor(.black.opacity(0.75))
-
-                  Button {
-                      auth.isPaywallPresented = true
-                      UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                  } label: {
-                      HStack(spacing: 8) {
-                          Image(systemName: "arrow.up.right.circle.fill")
-                          Text("Upgrade to Pro")
-                              .fontWeight(.semibold)
-                      }
-                      .frame(maxWidth: .infinity)
-                      .padding(.vertical, 10)
-                  }
-                  .buttonStyle(.plain)
-                  .foregroundColor(.black.opacity(0.75))
-                  .background(
-                      RoundedRectangle(cornerRadius: 14, style: .continuous)
-                          .fill(Color.latte.opacity(0.95))
-                  )
-                  .overlay(
-                      RoundedRectangle(cornerRadius: 14, style: .continuous)
-                          .stroke(Color.burgundy.opacity(0.4), lineWidth: 1)
-                  )
-              }
-              .padding(.top, 5)
-          }
-      }
-
-      private func proBullet(_ text: String) -> some View {
-          HStack(alignment: .top, spacing: 8) {
-              Image(systemName: "checkmark.circle.fill")
-                  .foregroundColor(.burgundy.opacity(0.85))
-                  .font(.system(size: 14, weight: .semibold))
-                  .padding(.top, 2)
-
-              Text(text)
-          }
-      }
+    
+    private func proBullet(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.burgundy.opacity(0.85))
+                .font(.system(size: 14, weight: .semibold))
+                .padding(.top, 2)
+            
+            Text(text)
+        }
+    }
 }

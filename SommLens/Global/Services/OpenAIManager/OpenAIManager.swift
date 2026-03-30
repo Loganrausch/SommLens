@@ -7,6 +7,8 @@
 
 // Network calls still happen off-main despite @MainActor. We ensure that before touching any UI state we hop back on the main.
 
+
+
 import Foundation
 import UIKit
 
@@ -33,23 +35,23 @@ final class OpenAIManager: ObservableObject {
         let url          = imageEndpoint
 
         // 1️⃣ Build messages payload ------------------------------------------------
-        let messagesArray: [[String: String]] = [
-            ["role": "system", "content": systemPrompt],
-            ["role": "user",
-             "content":
-                "This is a photo of a wine label. Extract all structured wine information you can — including producer, region, vintage, grapes, classification, and any other known facts. Use your own vast knowledge of the wine world to complete missing details if they are not clearly printed on the label."]
-        ]
+               let messagesArray: [[String: String]] = [
+                   ["role": "system", "content": systemPrompt],
+                   ["role": "user",
+                    "content":
+                       "This is a photo of a wine label. Extract all structured wine information you can — including producer, region, vintage, grapes, classification, and any other known facts. Use your own vast knowledge of the wine world to complete missing details if they are not clearly printed on the label."]
+               ]
 
-        guard let jsonMessages = try? JSONSerialization.data(withJSONObject: messagesArray) else {
-            return completion(.failure(
-                NSError(domain: "OpenAIManager", code: -2,
-                        userInfo: [NSLocalizedDescriptionKey: "Failed to serialize messages"]))
-            )
-        }
+               guard let jsonMessages = try? JSONSerialization.data(withJSONObject: messagesArray) else {
+                   return completion(.failure(
+                       NSError(domain: "OpenAIManager", code: -2,
+                               userInfo: [NSLocalizedDescriptionKey: "Failed to serialize messages"]))
+                   )
+               }
 
         // 2️⃣ Resize + JPEG-encode image (576 px, Q 0.7) ----------------------------
         let resized  = image.resized(maxEdge: 576)
-        guard let jpeg = resized.jpegData(compressionQuality: 0.7) else {
+        guard let jpeg = resized.jpegData(compressionQuality: 0.9) else {
             return completion(.failure(
                 NSError(domain: "OpenAIManager", code: -1,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to encode JPEG"]))
@@ -131,75 +133,6 @@ final class OpenAIManager: ObservableObject {
         .resume()
     }
 
-    
-    
-    // MARK: - WineData ➜ AITastingProfile - ForAITastingFeature
-    
-    func tastingProfile(for wine: WineData) async throws -> AITastingProfile {
-
-        // 1️⃣  Pulling the 10 × 10 descriptor pools straight from the enum - same descriptors the user will have.
-        let aromaPool    = wine.category.aromaPool
-        let flavourPool  = wine.category.flavourPool
-        let aromasCSV    = aromaPool.joined(separator: ", ")
-        let flavoursCSV  = flavourPool.joined(separator: ", ")
-
-        // 2️⃣  Minimal system message
-        let system = "You are a sommelier AI that returns ONLY valid JSON, no prose."
-        
-        let userPrompt = """
-           Provide a concise CLASSIC tasting profile JSON for this wine:
-           
-           Producer: \(wine.producer ?? "Unknown")
-           Region:   \(wine.region   ?? "Unknown")
-           Grapes:   \(wine.grapes?.joined(separator: ", ") ?? "N/A")
-           Vintage:  \(wine.vintage  ?? "NV")
-           
-           Choose exactly four aromas and exactly four flavours from the lists below.
-           Pick the appropriate boolean for hasTannin. Use true if there’s noticeable grip, otherwise use false. 
-           
-           AllowedAromas:  \(aromasCSV)
-           AllowedFlavors: \(flavoursCSV)
-
-           Respond with exactly:
-           {
-             "acidity":"Low|Medium-|Medium|Medium+|High",
-             "alcohol":"Low|Medium-|Medium|Medium+|High",
-             "body":"Light|Medium-|Medium|Medium+|Full",
-             "tannin":"Low|Medium-|Medium|Medium+|High",
-             "sweetness":"Bone-Dry|Dry|Off-Dry|Sweet|Very Sweet",
-             "aromas":[/* 4 from AllowedAromas */],
-             "flavors":[/* 4 from AllowedFlavors */],
-             "tips":["One short palate-training tip"],
-             "hasTannin":<true|false>
-           }
-           """
-        
-        var body = chatBody(
-               model:  "gpt-4o",
-               system: system,
-               user:   userPrompt,
-               temp:   0.3
-           )
-
-           // ← And here:
-        body["max_tokens"] = 350        // ★ tighter cap
-        body["response_format"] = ["type":"json_object"]  // ★ forces compact JSON
-        
-        // Using async/await variant of `postJSON`
-        let content = try await postJSON(body, to: chatEndpoint)
-        var profile: AITastingProfile = try decodeJSON(content)
-
-          // LOCAL FALLBACK  – decide if the style itself implies tannin
-          let styleImpliesTannin = wine.category.tanninExists
-       
-          // MERGE LOGIC  – keep GPT’s answer, but force ‘true’ for red/orange styles
-          profile.hasTannin = profile.hasTannin || styleImpliesTannin
-       
-          return profile
-       }
-    
-    // MARK: - PRIVATE helpers for AITastingFlow
-    
     // Build the standard chat body
     private func chatBody(model: String,
                           system: String,
@@ -219,7 +152,7 @@ final class OpenAIManager: ObservableObject {
     // MARK: – Networking
     
    
-    // Async/await POST (used by tastingProfile) - // Sends the actual HTTP request
+    // Async/await POST- // Sends the actual HTTP request
     private func postJSON(_ json: [String: Any], to url: URL) async throws -> String {
       let data = try JSONSerialization.data(withJSONObject: json)
       var req = URLRequest(url: url)
@@ -304,22 +237,22 @@ extension OpenAIManager {
         • You MAY set the "weight" fields for your own internal math, but the client may re-weight them.
         • "weightedTotal" ≈ your internal Σ(score * weight), but the client may recompute.
         • "ratingExplanation": 2–4 sentences summarizing the why (mention vintage, value, ageworthiness here if relevant).
-        • You may lower confidence if WINE_OBJECT is incomplete in core identity fields (producer, region, style),   // 🔹
-          but you MUST NOT lower confidence purely because the vintage is missing or the wine is non-vintage (NV).  // 🔹
+        • You may lower confidence if WINE_OBJECT is incomplete in core identity fields (producer, region, style),  
+          but you MUST NOT lower confidence purely because the vintage is missing or the wine is non-vintage (NV). 
 
         Vintage & Non-Vintage:
         • NEVER penalize a wine solely for being non-vintage (NV) or missing a vintage field.
         • For explicitly non-vintage wines (e.g. "NV", "Non-Vintage", "N/V",
           or blank for styles commonly released as NV like Champagne and many sparkling wines):
           – Focus on house style, recent releases, style match, and craft.
-          – Treat NV as normal for the category, not a quality concern.                                     // 🔹
+          – Treat NV as normal for the category, not a quality concern.                                     
         • For wines with a specific vintage year:
           – You MAY mention vintage quality in the explanation, but it should be only one part of the reasoning, not the main driver.
-        • You MUST NOT write phrases like "vintage is missing so reliability is lower";                       // 🔹
-          treat missing or NV vintage as neutral for the reliability / quality of the rating itself.         // 🔹
+        • You MUST NOT write phrases like "vintage is missing so reliability is lower";                       
+          treat missing or NV vintage as neutral for the reliability / quality of the rating itself.         
         
         • Mass-market, high-volume, value brands (e.g. Barefoot, Yellow Tail,
-          Sutter Home, Carlo Rossi, Cupcake, Apothic, etc.) can NEVER exceed 6.0 overall.
+          Sutter Home, Carlo Rossi, Cupcake, Apothic, etc.) can NEVER exceed 60.0 overall.
           Their style match may be high, but their craft, terroir, and complexity are limited.
         
         """

@@ -8,9 +8,9 @@
 import SwiftUI
 
 enum AIRatingChipState {
-    case empty            // "Get rating"
-    case loading          // spinner
-    case score(Double)       // e.g. 93
+    case empty
+    case loading
+    case impression(String)   // e.g. "Classic Expression"
 }
 
 struct AIRatingCornerChip: View {
@@ -30,10 +30,10 @@ struct AIRatingCornerChip: View {
 
                 case .empty:
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Rating")
+                        Text("Vini's Impression")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.primary)
-                        Text("Get rating")
+                        Text("Get Take")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -44,22 +44,16 @@ struct AIRatingCornerChip: View {
                         .tint(.burgundy)
                         .scaleEffect(0.95)
 
-                case .score(let val):
+                case .impression(let text):
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Vini's Rating")
+                        Text("Vini's Take")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
-                        HStack(alignment: .firstTextBaseline, spacing: 2) {
-                            Text(String(format: "%.1f", val))
-                                .font(.title3.weight(.bold))
-                                .monospacedDigit()
-                                .foregroundStyle(.primary)
-                                .minimumScaleFactor(0.85)
-                            Text("/10")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                                .monospacedDigit()
-                        }
+                        Text(text)
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.85)
                     }
                 }
                 if case .loading = state {
@@ -75,7 +69,7 @@ struct AIRatingCornerChip: View {
             .padding(.horizontal, 14)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(.systemBackground).opacity(0.96))   // light chip
+                    .fill(Color(.latte).opacity(0.95))   // light latte chip
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -91,18 +85,18 @@ struct AIRatingCornerChip: View {
     private var iconName: String {
         switch state {
         case .empty, .loading: return "sparkles"
-        case .score:           return "star.fill"
+        case .impression:      return "checkmark.seal.fill"
         }
     }
 
     private var accessibilityLabel: String {
         switch state {
         case .empty:
-            return "AI Rating. Get rating."
+            return "AI Impression. Get take."
         case .loading:
-            return "AI Rating. Loading."
-        case .score(let val):
-            return "AI Rating \(String(format: "%.1f", val)) out of 10. Tap for details."
+            return "AI Impression. Loading."
+        case .impression(let text):
+            return "AI impression: \(text). Tap for details."
         }
     }
 }

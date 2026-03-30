@@ -21,14 +21,4 @@ struct ResetService {
         ctx.refreshAllObjects()          // flush caches
         return items.count
     }
-
-    /// Deletes every TastingSessionEntity (if you’re persisting them) and returns the count.
-    @discardableResult
-    func deleteAllTastingSessions() throws -> Int {
-        let req: NSFetchRequest<TastingSessionEntity> = TastingSessionEntity.fetchRequest()
-        let items = try ctx.fetch(req)
-        items.forEach(ctx.delete)
-        try ctx.save()
-        return items.count
-    }
 }

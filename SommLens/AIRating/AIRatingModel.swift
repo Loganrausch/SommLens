@@ -15,7 +15,7 @@ struct AIRating: Codable, Equatable {
         let reason: String
     }
 
-    let aiRating: Int           // 0–100 overall (what you show in the ring)
+    let aiRating: Int // 0–100 overall (stored/internal); UI uses viniScore (0–10)
     let ratingExplanation: String
     let factors: [Factor]       // detailed breakdown
     let weightedTotal: Double?  // Σ(score * weight) before normalization
@@ -143,6 +143,31 @@ extension AIRating {
 }
 
 extension AIRating {
+    
+    /// Internal 0–100 value we already compute/store.
+       /// (Falls back safely if weightedTotal is missing.)
+       var internalScore100: Double {
+           let base = weightedTotal ?? Double(aiRating)   // 0–100
+           return max(0, min(100, base))
+       }
+
+    var overallImpression: String {
+        switch internalScore100 {
+        case 0..<70:   return "Easy and Simple"
+        case 70..<78:  return "Solid Go-To"
+        case 78..<84:  return "Classic Style"
+        case 84..<89:  return "Thoughtful and Distinct"
+        case 89..<93:  return "Serious Wine"
+        case 93..<96:  return "Standout Bottle"
+        default:       return "Iconic Bottle"
+        }
+    }
+
+       /// Optional: for factor chips if you ever want a short phrase
+       var impressionShort: String {
+           overallImpression
+       }
+    
     /// 0–10 score for overall UI, derived from the weighted math.
     var viniScore: Double {
         let base = weightedTotal ?? Double(aiRating)   // 0–100
