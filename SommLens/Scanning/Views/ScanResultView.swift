@@ -67,13 +67,19 @@ struct ScanResultView: View {
                 
                 VStack(spacing: 14) {
                     
-                    /* drag‑handle → open WineDetailView */
-                    Button { vm.showDetailSheet = true } label: {
-                        Image(systemName: "chevron.up")
-                            .font(.title2.weight(.medium))
-                            .padding(10)
-                            .background(.ultraThinMaterial, in: Circle())
+                    Button {
+                        vm.showDetailSheet = true
+                    } label: {
+                        VStack(spacing: 6) {
+                            Image(systemName: "chevron.up")
+                                .font(.title2.weight(.medium))
+                                .foregroundColor(Color.burgundy)
+                                .padding(10)
+                                .background(.ultraThinMaterial, in: Circle())
+                        }
+                        .padding(.top, 2)
                     }
+                    .buttonStyle(.plain)
                     
                     /* quick cards */
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -164,7 +170,6 @@ struct ScanResultView: View {
                 AIRatingSheet(
                     rating: r,
                     isUnlocked: auth.hasActiveSubscription,
-                    unlockAction: { auth.isPaywallPresented = true }
                 )
                 .presentationDetents([.medium, .large])
             }

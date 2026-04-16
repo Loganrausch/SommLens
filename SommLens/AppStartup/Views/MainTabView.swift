@@ -43,9 +43,9 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: selectedTabBinding) {
             // ── Home Tab ──
-            NavigationStack {
-                HeroHomeView(selectedTab: selectedTabBinding)
-            }
+          
+                HomeView(selectedTab: selectedTabBinding)
+    
             .tabItem {
                 Label("Home", systemImage: "house")
             }
@@ -80,10 +80,9 @@ struct MainTabView: View {
         .toolbarBackground(Color("Latte"), for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
         
-        // 📍 SINGLE place the paywall is presented
-              .sheet(isPresented: $auth.isPaywallPresented) {
-                  PaywallView()          // <- your RevenueCatUI view
-              }
+        .fullScreenCover(isPresented: $auth.isPaywallPresented) {
+            PaywallView()
+        }
     }
 
     // 🔹 Resets scan state when Scan tab is tapped again

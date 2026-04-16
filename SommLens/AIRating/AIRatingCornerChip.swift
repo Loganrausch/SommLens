@@ -10,72 +10,97 @@ import SwiftUI
 enum AIRatingChipState {
     case empty
     case loading
-    case impression(String)   // e.g. "Classic Expression"
+    case impression(String)
 }
 
 struct AIRatingCornerChip: View {
     let state: AIRatingChipState
     let action: () -> Void
 
+    private let copper = Color(hex: "#C8816A")
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Color.burgundy.opacity(0.28))
+                        .frame(width: 30, height: 30)
 
-                Image(systemName: iconName)
-                    .font(.callout.weight(.bold))
-                    .foregroundStyle(Color.burgundy)
-                    .imageScale(.medium)
+                    if case .loading = state {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(copper)
+                            .scaleEffect(0.72)
+                    } else {
+                        Image(systemName: iconName)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(copper)
+                    }
+                }
 
                 switch state {
-
                 case .empty:
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Vini's Impression")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.primary)
+                            .font(.system(size: 10, weight: .medium))
+                            .kerning(0.8)
+                            .textCase(.uppercase)
+                            .foregroundStyle(.white.opacity(0.82))
+
                         Text("Get Take")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white)
                     }
 
                 case .loading:
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(.burgundy)
-                        .scaleEffect(0.95)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Vini's Impression")
+                            .font(.system(size: 10, weight: .medium))
+                            .kerning(0.8)
+                            .textCase(.uppercase)
+                            .foregroundStyle(.white.opacity(0.82))
+
+                        Text("Getting impression...")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white)
+                    }
 
                 case .impression(let text):
-                    VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text("Vini's Take")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 10, weight: .medium))
+                            .kerning(0.8)
+                            .textCase(.uppercase)
+                            .foregroundStyle(.white.opacity(0.82))
+
                         Text(text)
-                            .font(.subheadline.weight(.bold))
-                            .foregroundStyle(.primary)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white)
                             .lineLimit(2)
                             .minimumScaleFactor(0.85)
                     }
                 }
+
                 if case .loading = state {
                     EmptyView()
                 } else {
                     Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.burgundy)
-                        .opacity(0.7)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(copper)
                 }
             }
-            .padding(.vertical, 10)
+            .padding(.vertical, 12)
             .padding(.horizontal, 14)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(.latte).opacity(0.95))   // light latte chip
+                    .fill(Color.black.opacity(0.80))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(Color.burgundy.opacity(0.25), lineWidth: 1)
+                    .stroke(copper.opacity(0.18), lineWidth: 0.8)
             )
-            .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
+            .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
         }
         .buttonStyle(.plain)
         .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -84,8 +109,10 @@ struct AIRatingCornerChip: View {
 
     private var iconName: String {
         switch state {
-        case .empty, .loading: return "sparkles"
-        case .impression:      return "checkmark.seal.fill"
+        case .empty, .loading:
+            return "sparkles"
+        case .impression:
+            return "checkmark.seal.fill"
         }
     }
 

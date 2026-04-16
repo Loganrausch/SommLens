@@ -153,10 +153,10 @@ extension AIRating {
 
     var overallImpression: String {
         switch internalScore100 {
-        case 0..<70:   return "Easy and Simple"
+        case 0..<70:   return "Easy and Simple Wine"
         case 70..<78:  return "Solid Go-To"
         case 78..<84:  return "Classic Style"
-        case 84..<89:  return "Thoughtful and Distinct"
+        case 84..<89:  return "Distinct Bottle"
         case 89..<93:  return "Serious Wine"
         case 93..<96:  return "Standout Bottle"
         default:       return "Iconic Bottle"

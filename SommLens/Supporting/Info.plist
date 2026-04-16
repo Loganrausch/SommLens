@@ -6,5 +6,13 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>CormorantGaramond-Italic.ttf</string>
+		<string>CormorantGaramond-Regular.ttf</string>
+		<string>CormorantGaramond-SemiBoldItalic.ttf</string>
+		<string>CormorantGaramond-Medium.ttf</string>
+		<string>CormorantGaramond-SemiBold.ttf</string>
+	</array>
 </dict>
 </plist>

@@ -8,68 +8,96 @@
 import SwiftUI
 
 struct LaunchAnimationView: View {
+    @State private var glowOpacity: Double = 0
+    @State private var scanOffset: CGFloat = -60
+    @State private var scanOpacity: Double = 0
     @State private var pulse = false
+
+    private let scanDuration: Double = 2.2
 
     var body: some View {
         ZStack {
-            Color.latte.ignoresSafeArea()
+            Color(hex: "#F5EDE7")
+                .ignoresSafeArea()
 
-            Image("GlassOnly")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 165)
-                // Soft ambient shadow (subtle outer glow)
-                .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
-                // Lift shadow to create floating effect
-                .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 5)
-                // Tight drop shadow for grounding
-                .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
-                .scaleEffect(pulse ? 1 : 0.97)
-                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: pulse)
-            
-            
-            ForEach(0..<4) { i in
-                scanCorner(at: i)
+            Group {
+                Image("GlassOnly")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 165)
+                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
+                    .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 5)
+                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                    .opacity(glowOpacity)
+
+                ZStack {
+                    //glow
+                    Ellipse()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(hex: "#C07A5C").opacity(0),
+                                    Color(hex: "#C07A5C").opacity(0.9),
+                                    Color(hex: "#C07A5C").opacity(0)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: 145, height: 10)
+
+                    //hard line
+                    Ellipse()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(hex: "#C07A5C").opacity(0),
+                                    Color(hex: "#C07A5C").opacity(0.6),
+                                    Color(hex: "#C07A5C").opacity(0)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: 120, height: 2)
+                }
+                .offset(y: scanOffset)
+                .opacity(scanOpacity)
             }
+            .scaleEffect(pulse ? 1.02 : 0.97)
+            .animation(
+                pulse ? .easeInOut(duration: 1.0).repeatForever(autoreverses: true) : .default,
+                value: pulse
+            )
         }
         .onAppear {
-            pulse = true
+            // Glass fades in
+            withAnimation(.easeIn(duration: 0.5)) {
+                glowOpacity = 1
+            }
+
+            // Scan sweeps once after glass appears
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                scanOpacity = 1
+                withAnimation(.easeInOut(duration: scanDuration)) {
+                    scanOffset = 60
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + scanDuration - 0.2) {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        scanOpacity = 0
+                    }
+                }
+            }
+
+            // Pulse holds after scan completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6 + scanDuration + 0.2) {
+                pulse = true
+            }
         }
-    }
-
-    private func scanCorner(at index: Int) -> some View {
-        let size: CGFloat = 28
-        let offset: CGFloat = 75
-
-        return Path { path in
-            path.move(to: .zero)
-            path.addLine(to: CGPoint(x: size, y: 0))
-            path.move(to: .zero)
-            path.addLine(to: CGPoint(x: 0, y: size))
-        }
-        .stroke(Color.burgundy, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-        // ✨ Subtle floating shadow that pulses with animation
-        .shadow(color: .black.opacity(pulse ? 0.2 : 0.05), radius: pulse ? 6 : 2, x: 0, y: 3)
-        .opacity(pulse ? 1 : 0.25)
-        .scaleEffect(pulse ? 1.1 : 0.95)
-        .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: pulse)
-        .frame(width: size, height: size, alignment: .topLeading)
-        .rotationEffect(.degrees(cornerRotation(index)))
-        .offset(x: cornerOffset(index).x * offset,
-                y: cornerOffset(index).y * offset)
-    }
-
-    private func cornerRotation(_ index: Int) -> Double {
-        [0, 90, 180, 270][index]
-    }
-
-    private func cornerOffset(_ index: Int) -> CGPoint {
-        [CGPoint(x: -1, y: -1), CGPoint(x: 1, y: -1),
-         CGPoint(x: 1, y: 1), CGPoint(x: -1, y: 1)][index]
     }
 }
 
-// MARK: - Preview
 #Preview {
     LaunchAnimationView()
 }
+

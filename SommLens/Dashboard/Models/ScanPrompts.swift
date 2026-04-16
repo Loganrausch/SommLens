@@ -7,9 +7,9 @@
 
 enum ScanPrompts {
     static let all: [String] = [
-        "Scan a Northern Rhône Syrah for peppery, savory vibes.",
-        "Scan a German Riesling—zesty, often dry to off-dry.",
-        "Feeling bold? Scan an Amarone for rich, dried-fruit depth.",
+        "Try scanning a Northern Rhône Syrah for peppery, savory vibes.",
+        "Try scanning a German Riesling—zesty, often dry to off-dry.",
+        "Feeling bold? Try scanning an Amarone for rich, dried-fruit depth.",
         "Scan a Crémant for elegant traditional-method bubbles—often great value.",
         "Scan a chilled Provence rosé for dry, light refreshment.",
         "Scan a Malbec from Mendoza for dark fruit and floral notes.",
@@ -23,7 +23,7 @@ enum ScanPrompts {
         "Scan a creamy Chardonnay from Sonoma for ripe fruit and oak influence.",
         "Scan a Beaujolais for a fruity, chillable red.",
         "Scan a Tempranillo from Rioja—structured with smooth tannins.",
-        "Explore value: scan a Portuguese red from Dão.",
+        "Exploring value wines? Scan a Portuguese red from Dão.",
         "Scan a Grüner Veltliner for citrus and white pepper notes.",
         "Scan an Argentine Torrontés—highly aromatic and lively.",
         "Scan a Gamay—juicy, fresh, and fun.",
