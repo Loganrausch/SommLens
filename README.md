@@ -9,11 +9,11 @@ Crafted by a Certified Sommelier and built with SwiftUI, Core Data, and the Open
 ---
 ## ✨ Screenshots
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/9a152074-87cd-42ce-9ec7-f65d94262f6a" width="150"/>
-  <img src="https://github.com/user-attachments/assets/710dc324-6e2a-4271-b0db-61aeaf12d794" width="150"/>
-  <img src="https://github.com/user-attachments/assets/eaca821f-2408-47d7-98e7-1d17df1a84e0" width="150"/>
-  <img src="https://github.com/user-attachments/assets/23542e76-c400-4887-86a1-481017796630" width="150"/>
-  <img src="https://github.com/user-attachments/assets/a8bd0133-2555-44a9-94dc-d83b767680a2" width="150"/>
+  <img src="https://github.com/user-attachments/assets/20cb3e1e-d643-44d2-a847-2d94209cac8b" width="150"/>
+  <img src="https://github.com/user-attachments/assets/0b45bca7-6356-4889-b27e-41c67ff1a80b" width="150"/>
+  <img src="https://github.com/user-attachments/assets/d05ccb8b-0cd4-4dfd-9f65-1adbe8547c43" width="150"/>
+  <img src="https://github.com/user-attachments/assets/69ff3ff3-87c3-487e-91dc-29d6b2e5657c" width="150"/>
+  <img src="https://github.com/user-attachments/assets/cd3b0282-e087-461c-a191-5357d9783a49" width="150"/>
 </p>
 
 ## 📸 Features
