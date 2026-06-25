@@ -4,6 +4,7 @@ const { systemPrompt, userText } = require("./prompt");
 const { wineDataSchema } = require("./wineDataSchema");
 const { validateRequest } = require("./validateRequest");
 const { normalizeWineData } = require("./normalizeWineData");
+const { storeScanRecord } = require("./scanRecordStore");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -134,6 +135,12 @@ exports.handler = async (event) => {
     const content = extractOpenAIContent(openAIData);
     const parsedWine = JSON.parse(content);
     const wineData = normalizeWineData(parsedWine);
+
+    try {
+      await storeScanRecord(wineData);
+    } catch (storeError) {
+      console.warn("DynamoDB scan record write failed:", storeError.message);
+    }
 
     return jsonResponse(200, wineData);
   } catch (error) {

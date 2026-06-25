@@ -8,6 +8,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "check": "node --check src/handler.js && node --check src/prompt.js && node --check src/wineDataSchema.js && node --check src/validateRequest.js && node --check src/normalizeWineData.js"
+    "check": "node --check src/handler.js && node --check src/prompt.js && node --check src/wineDataSchema.js && node --check src/validateRequest.js && node --check src/normalizeWineData.js && node --check src/scanRecordStore.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0"
   }
 }
