@@ -1,0 +1,13 @@
+{
+  "name": "sommlens-lambda-scan-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AWS Lambda backend for SommLens wine label scanning.",
+  "main": "src/handler.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check src/handler.js && node --check src/prompt.js && node --check src/wineDataSchema.js && node --check src/validateRequest.js && node --check src/normalizeWineData.js"
+  }
+}

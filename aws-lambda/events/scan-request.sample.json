@@ -1,0 +1,12 @@
+{
+  "body": "{\"imageBase64\":\"REPLACE_WITH_BASE64_JPEG\",\"detail\":\"low\"}",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "http": {
+      "method": "POST"
+    }
+  },
+  "isBase64Encoded": false
+}
