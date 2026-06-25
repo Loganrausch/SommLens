@@ -34,12 +34,7 @@ struct WineDetailView: View {
         self.snapshot = snapshot
         
         self._vm = StateObject(
-            wrappedValue: WineDetailViewModel(
-                openAIManager: openAIManager,
-                ctx: ctx,
-                wineData: wineData,
-                bottle: bottle
-            )
+            wrappedValue: WineDetailViewModel()
         )
     }
     

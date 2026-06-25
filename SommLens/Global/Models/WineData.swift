@@ -125,25 +125,6 @@ extension WineData: Identifiable {
     }
 }
 
-
-struct OpenAIResponse: Codable {
-    struct Choice: Codable {
-        struct Message: Codable {
-            let role: String
-            let content: String
-        }
-        let message: Message
-    }
-    struct Usage: Codable {
-       let prompt_tokens: Int
-       let completion_tokens: Int
-       let total_tokens: Int
-       let image_tokens: Int?
-     }
-     let choices: [Choice]
-     let usage: Usage
-   }
-
 extension WineData {
     /// Something like “Produttori del Barbaresco 2019”
     var displayName: String {

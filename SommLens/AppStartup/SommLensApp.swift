@@ -11,12 +11,10 @@ import CoreData          // keep if you still use PersistenceController
 @main
 struct SommLensApp: App {
     @StateObject private var engagementState = EngagementState()
-    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     
     let persistenceController = PersistenceController.shared
     @StateObject private var auth = AuthViewModel()
     @StateObject private var openAIManager = OpenAIManager()
-    @Environment(\.scenePhase) private var scenePhase
     
     
     // 3) App appearance setup
@@ -36,11 +34,6 @@ struct SommLensApp: App {
                 .onAppear {
                     EngagementPromptManager.engagementState = engagementState
                 }
-        }
-        .onChange(of: scenePhase) { oldPhase, newPhase in
-            if newPhase == .active {
-                UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
-            }
         }
     }
     
