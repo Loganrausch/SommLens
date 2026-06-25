@@ -42,7 +42,13 @@ function cleanString(value) {
 
 function cleanStringArray(value) {
   if (!Array.isArray(value)) {
-    if (typeof value === "string" && value.trim() !== "") return [value.trim()];
+    if (typeof value === "string" && value.trim() !== "") {
+      const separator = value.includes(";") ? ";" : ",";
+      return value
+        .split(separator)
+        .map((item) => cleanString(item))
+        .filter((item) => item != null);
+    }
     return [];
   }
 
@@ -75,12 +81,19 @@ function normalizeCategory(value) {
     .trim();
 
   const aliases = {
+    "red wine": "red",
+    "white wine": "white",
+    "orange wine": "orange",
     "sparkling red": "red sparkling",
     "sparkling white": "white sparkling",
+    "sparkling wine": "white sparkling",
+    "sparkling": "white sparkling",
     "dessert red": "red dessert",
     "dessert white": "white dessert",
+    "dessert wine": "white dessert",
     "fortified red": "red fortified",
     "fortified white": "white fortified",
+    "fortified wine": "red fortified",
     "rose wine": "rose",
     "rose": "rose",
     "rosé": "rose"
