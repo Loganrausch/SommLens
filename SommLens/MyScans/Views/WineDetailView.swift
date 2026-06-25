@@ -20,7 +20,6 @@ struct WineDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var auth: AuthViewModel
     
-    
     @State private var showImageFullScreen = false
     
     init(
@@ -53,10 +52,8 @@ struct WineDetailView: View {
                     
                     heroSection
 
-                    // ── Main content
                     VStack(spacing: 22) {
                         
-                        // 👇 FREE ONLY vibeTag
                         if !isPro,
                            let vibe = wineData.vibeTag?
                             .trimmingCharacters(in: .whitespacesAndNewlines),
@@ -68,8 +65,6 @@ struct WineDetailView: View {
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 20)
                                 .padding(.top, 6)
-                            
-                            viniTakeCard
                         }
                         
                         if isPro {
@@ -81,10 +76,7 @@ struct WineDetailView: View {
                                     .font(.custom("CormorantGaramond-Medium", size: 19.5))
                                     .foregroundColor(.primary)
                                     .multilineTextAlignment(.center)
-                                    
                             }
-                            
-                            viniTakeCard
                             
                             detailsSection
                             
@@ -103,7 +95,6 @@ struct WineDetailView: View {
                                     .foregroundColor(.black.opacity(0.55))
                                     .foregroundColor(.secondary)
 
-
                                 detailRow(label: "Subregion",   value: wineData.subregion)
                                 detailRow(label: "Appellation", value: wineData.appellation)
                                 detailRow(label: "Grapes",      value: wineData.grapes?.joined(separator: ", "))
@@ -112,7 +103,6 @@ struct WineDetailView: View {
                             lockedContentPreview
                         }
                         
-                        // Footer
                         VStack(spacing: 4) {
                             Text("SommLens")
                                 .font(.caption2)
@@ -129,7 +119,6 @@ struct WineDetailView: View {
                 }
             }
             
-            // Close button
             Button {
                 dismiss()
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -148,34 +137,6 @@ struct WineDetailView: View {
             .padding()
         }
         
-        .alert(
-            "Impression unavailable",
-            isPresented: Binding(
-                get: { vm.ratingError != nil },
-                set: { newValue in
-                    if !newValue {
-                        vm.ratingError = nil
-                    }
-                }
-            )
-        ) {
-            Button("OK", role: .cancel) {
-                vm.ratingError = nil
-            }
-        } message: {
-            Text(vm.ratingError ?? "")
-        }
-        
-        .fullScreenCover(isPresented: $vm.showRatingSheet) {
-            if let r = vm.aiRating ?? bottle.toAIRating() {
-                AIRatingSheet(
-                    rating: r,
-                    isUnlocked: auth.hasActiveSubscription,
-                )
-            }
-        }
-        
-        // Full-screen zoomable image viewer (UIScrollView-backed)
         .fullScreenCover(isPresented: $showImageFullScreen) {
             ZStack(alignment: .topTrailing) {
                 Color.black.ignoresSafeArea()
@@ -200,10 +161,6 @@ struct WineDetailView: View {
         
         .onAppear {
             vm.animate = true
-        }
-        .task {
-            // Preload rating but don't pop the sheet
-            await vm.fetchAIRatingIfNeeded(openSheet: false)
         }
         .navigationBarHidden(true)
     }
@@ -280,81 +237,6 @@ private extension WineDetailView {
         }
     }
     
-    var viniTakeCard: some View {
-        let rating = vm.aiRating ?? bottle.toAIRating()
-
-        return Button {
-            guard !vm.isLoadingRating else { return }
-            if rating != nil {
-                vm.showRatingSheet = true
-            } else {
-                Task { await vm.fetchAIRatingIfNeeded(openSheet: true) }
-            }
-        } label: {
-            HStack(spacing: 14) {
-
-                // Icon circle
-                ZStack {
-                    Circle()
-                        .fill(Color.burgundy.opacity(0.3))
-                        .frame(width: 38, height: 38)
-
-                    Image(systemName: rating != nil ? "checkmark.seal.fill" : "sparkles")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(Color(hex: "#c8816a"))
-                }
-
-                // Text
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Vini's Take")
-                        .font(.system(size: 11, weight: .medium))
-                        .kerning(0.8)
-                        .textCase(.uppercase)
-                        .foregroundColor(.white.opacity(0.8))
-
-                    if vm.isLoadingRating {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .tint(.white)
-                            .scaleEffect(0.8)
-                    } else if let impression = rating?.overallImpression {
-                        Text(impression)
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .lineLimit(2)
-                            
-                        Text("Tap to see why")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.8))
-                            .lineLimit(2)
-                            
-                    } else {
-                        Text("Tap to get Vini’s take")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.75))
-                    }
-                }
-                .frame(height: 40)
-
-                Spacer()
-
-                if !vm.isLoadingRating {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(Color(hex: "#c8816a"))
-                }
-            }
-            .padding(.vertical, 25)
-            .padding(.horizontal, 18)
-            .background(Color.black.opacity(0.8))
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .padding(.top, 10)
-        .padding(.bottom, 10)
-    }
-    
-    
     var detailsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Details")
@@ -374,7 +256,6 @@ private extension WineDetailView {
         }
     }
 
-    // Single label/value row — no card, just a hairline separator
     private func detailRow(label: String, value: String?) -> some View {
         Group {
             if let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -552,8 +433,6 @@ extension Color {
 }
 
 extension WineDetailView {
- 
-    /// Replaces `proUpsellCard` — shows blurred previews of pro sections
 
     var lockedContentPreview: some View {
         VStack(spacing: 0) {
@@ -594,8 +473,7 @@ extension WineDetailView {
                  }
              }
     }
- 
-    /// Compact upgrade prompt — matches detail view's visual language
+
     private var upgradePrompt: some View {
         VStack(spacing: 14) {
             Image(systemName: "lock.fill")
@@ -620,7 +498,6 @@ extension WineDetailView {
                         .foregroundColor(Color(hex: "#c8816a"))
                     Text("Upgrade to Pro")
                         .fontWeight(.semibold)
-                       
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
@@ -634,12 +511,10 @@ extension WineDetailView {
     }
 }
 
-
 // MARK: - Preview
 
 #Preview {
     let auth = AuthViewModel()
-    // auth.hasActiveSubscription is whatever your default is
     
     return WineDetailView(
         bottle: PreviewBottleScan(),
@@ -650,8 +525,6 @@ extension WineDetailView {
     )
     .environmentObject(auth)
 }
-
-// ── Helpers ──────────────────────────────────────────────
 
 private func sampleImage() -> UIImage {
     let renderer = UIGraphicsImageRenderer(size: CGSize(width: 400, height: 400))
@@ -673,7 +546,7 @@ private func PreviewWineData() -> WineData {
         classification:  "Premier Grand Cru Classé",
         tastingNotes:    "Layers of cassis and violet over a spine of iron and cedar — effortlessly precise, with a finish that lingers long past the last sip.",
         pairings:        ["Lamb rack", "Duck confit", "Aged cheddar", "Beef tenderloin", "Truffle dishes"],
-        vibeTag:         "Structured and contemplative. A good wine with winey flav",
+        vibeTag:         "Structured and contemplative.",
         vineyard:        "Château Margaux Estate",
         soilType:        "Deep gravel over clay and limestone",
         climate:         "Maritime — temperate with warm, dry summers",
@@ -687,8 +560,5 @@ private func PreviewWineData() -> WineData {
 private func PreviewBottleScan() -> BottleScan {
     let ctx = PersistenceController.preview.container.viewContext
     let bottle = BottleScan(context: ctx)
-    // set any required fields your BottleScan needs
     return bottle
 }
-
-

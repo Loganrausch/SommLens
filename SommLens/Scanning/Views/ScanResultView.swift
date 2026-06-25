@@ -18,7 +18,7 @@ struct ScanResultView: View {
     
     @Binding var selectedTab: MainTab
     
-    let onDismiss: () -> Void    // ← new callback
+    let onDismiss: () -> Void
     
     init(
            bottle: BottleScan,
@@ -43,25 +43,20 @@ struct ScanResultView: View {
     var body: some View {
         ZStack {
             
-            
-            /* ───── Bottle photo ───── */
             GeometryReader { geo in
                 Image(uiImage: vm.capturedImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: geo.size.width, height: geo.size.height)
                     .clipped()
-                
             }
-            .ignoresSafeArea()           // ← ADD THIS
+            .ignoresSafeArea()
             
-            /* ───── Gradient for legibility ───── */
             LinearGradient(colors: [.clear, .black.opacity(0.45)],
                            startPoint: .center, endPoint: .bottom)
             .allowsHitTesting(false)
-            .ignoresSafeArea()    // ← also stretch into the inset
+            .ignoresSafeArea()
             
-            /* ───── Bottom info tray ───── */
             VStack(spacing: 0) {
                 Spacer()
                 
@@ -81,7 +76,6 @@ struct ScanResultView: View {
                     }
                     .buttonStyle(.plain)
                     
-                    /* quick cards */
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             if let vintage = vm.wineData.vintage?.trimmingCharacters(in: .whitespacesAndNewlines), !vintage.isEmpty {
@@ -124,33 +118,10 @@ struct ScanResultView: View {
         
         .navigationBarBackButtonHidden(true)
         
-        .task {
-            await vm.fetchAIRatingIfNeeded()
-        }
-        
-        .overlay(alignment: .topLeading) {
-            let state: AIRatingChipState = {
-                if vm.isLoadingRating { return .loading }
-                if let r = vm.aiRating { return .impression(r.overallImpression) }
-                return .empty
-            }()
-
-            AIRatingCornerChip(state: state) {
-                if vm.aiRating != nil {
-                    vm.showRatingSheet = true
-                } else {
-                    Task { await vm.fetchAIRatingIfNeeded() }
-                }
-            }
-            .padding(.top, 30)
-            .padding(.leading, 20)
-            .disabled(vm.isLoadingRating)
-        }
-        
         .overlay(alignment: .topTrailing) {
             Button {
-                onDismiss()     // ← clean state first
-                dismiss()       // ← then dismiss
+                onDismiss()
+                dismiss()
             } label: {
                 Image(systemName: "xmark")
                     .font(.body.weight(.semibold))
@@ -163,22 +134,9 @@ struct ScanResultView: View {
             .padding(.trailing, 20)
         }
         
-        /* ───── Sheets ───── */
-        
-        .sheet(isPresented: $vm.showRatingSheet) {
-            if let r = vm.aiRating {
-                AIRatingSheet(
-                    rating: r,
-                    isUnlocked: auth.hasActiveSubscription,
-                )
-                .presentationDetents([.medium, .large])
-            }
-        }
-        
-        // Wine‑detail sheet
         .fullScreenCover(isPresented: $vm.showDetailSheet) {
             WineDetailView(
-                bottle:   vm.bottle,           // 👈 NEW
+                bottle:   vm.bottle,
                 wineData: vm.wineData,
                 snapshot: vm.capturedImage,
                 openAIManager: vm.openAIManager,
@@ -189,11 +147,9 @@ struct ScanResultView: View {
     
         .onChange(of: selectedTab) { _, newTab in
             if newTab == .scan {
-                print("🔁 Tab re-tap detected in ScanResultView")
-                onDismiss()  // <- clears vm.scanResult
-                dismiss()    // <- exits the screen
+                onDismiss()
+                dismiss()
             }
         }
-        
     }
 }

@@ -115,7 +115,17 @@ struct MyScansView: View {
             .overlay {
                 if isLoading && scans.isEmpty { ProgressView() }
             }
+            .navigationDestination(for: NSManagedObjectID.self) { scanID in
+                let _ = print("🔵 NAV DESTINATION received scanID: \(scanID)")
+                WineDetailLoader(
+                    scanID: scanID,
+                    openAIManager: openAIManager,
+                    ctx: ctx
+                )
+                .id(scanID)
+            }
             .task { await loadPage(reset: true) }
+
             .onChange(of: auth.hasActiveSubscription) { _, _ in
                 Task { await loadPage(reset: true) }
             }
@@ -133,19 +143,9 @@ struct MyScansView: View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(scans, id: \.objectID) { scan in
                 let wine = decodeWine(scan)
+                let _ = print("🟢 GRID card: \(wine?.producer ?? "?") → objectID: \(scan.objectID)")
 
-                NavigationLink {
-                    if let wine {
-                        WineDetailLoader(
-                            scanID: scan.objectID,
-                            wineData: wine,
-                            openAIManager: openAIManager,
-                            ctx: ctx
-                        )
-                    } else {
-                        Text("Couldn't load this scan.")
-                    }
-                } label: {
+                NavigationLink(value: scan.objectID) {
                     MyScansCard(scan: scan, wine: wine)
                 }
                 .buttonStyle(.plain)
@@ -300,7 +300,10 @@ struct MyScansView: View {
         totalCount = (try? ctx.count(for: countReq)) ?? 0
 
         let req: NSFetchRequest<BottleScan> = BottleScan.fetchRequest()
-        req.sortDescriptors = [NSSortDescriptor(keyPath: \BottleScan.timestamp, ascending: false)]
+        req.sortDescriptors = [
+            NSSortDescriptor(keyPath: \BottleScan.timestamp, ascending: false),
+            NSSortDescriptor(keyPath: \BottleScan.id, ascending: false)
+        ]
         req.fetchLimit = pageSize
         req.fetchOffset = isPro ? page * pageSize : 0
 
@@ -369,6 +372,7 @@ private struct MyScansCard: View {
         }
         .background(Color(hex: "#FFFBF8"))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .contentShape(Rectangle())  // ← constrains hit target to visible bounds
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(Color.burgundy.opacity(0.06), lineWidth: 0.5)
@@ -383,8 +387,6 @@ private struct MyScansCard: View {
             }
 
             guard let data = scan.screenshot else { return }
-            scan.managedObjectContext?.refresh(scan, mergeChanges: false)
-
             let img = await ThumbnailCache.decode(data: data, key: key)
 
             if !Task.isCancelled {
@@ -401,16 +403,16 @@ private struct MyScansCard: View {
 
 private struct WineDetailLoader: View {
     let scanID: NSManagedObjectID
-    let wineData: WineData
     let openAIManager: OpenAIManager
     let ctx: NSManagedObjectContext
 
     @State private var snapshot: UIImage?
     @State private var scan: BottleScan?
+    @State private var wineData: WineData?
 
     var body: some View {
         Group {
-            if let scan, let snapshot {
+            if let scan, let snapshot, let wineData {
                 WineDetailView(
                     bottle: scan,
                     wineData: wineData,
@@ -418,14 +420,30 @@ private struct WineDetailLoader: View {
                     openAIManager: openAIManager,
                     ctx: ctx
                 )
+                .id(scanID)
             } else {
-                ProgressView().task {
-                    guard let obj = try? ctx.existingObject(with: scanID) as? BottleScan else { return }
-                    scan = obj
-                    if let data = obj.screenshot {
-                        snapshot = UIImage(data: data)
+                ProgressView()
+                    .task(id: scanID) {
+                        print("🟡 LOADER fetching scanID: \(scanID)")
+                        guard let obj = try? ctx.existingObject(with: scanID) as? BottleScan else {
+                            print("🔴 LOADER failed to fetch object for scanID: \(scanID)")
+                            return
+                        }
+                        scan = obj
+
+                        if let data = obj.screenshot {
+                            snapshot = UIImage(data: data)
+                        }
+
+                        if let raw = obj.rawJSON,
+                           let data = raw.data(using: .utf8),
+                           let decoded = try? JSONDecoder().decode(WineData.self, from: data) {
+                            wineData = decoded
+                            print("🟡 LOADER decoded: \(decoded.producer ?? "?") for scanID: \(scanID)")
+                        } else {
+                            print("🔴 LOADER failed to decode wineData for scanID: \(scanID)")
+                        }
                     }
-                }
             }
         }
     }

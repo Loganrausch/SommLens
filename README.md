@@ -32,21 +32,13 @@ Crafted by a Certified Sommelier and built with SwiftUI, Core Data, and the Open
   - Food pairings
   - Terroir insights (climate & soil)
   - Additional wine details (ABV, classification, style, drinking window)
-  - Complete Vini’s Take impression breakdown
 - RevenueCat integration handles subscriptions, paywalls, and entitlement syncing across devices.
 
 ### 3. Scan Library (My Wines)
 - Scan now, save for later. Wines appear in “My Wines” for quick reference.
 - Review past scans anytime with stored label snapshots and extracted wine data.
 
-### 4. Vini’s Take — AI Wine Impressions
-- A concise, word-based impression that captures a wine’s overall character and quality.
-- Uses calibrated descriptors (e.g. *Classic Expression*, *Serious & Structured*) instead of numeric scores.
-- Generated from grape variety, region, producer context, typicity, and classic wine benchmarks.
-- Designed to guide exploration and learning without replacing personal taste or critic ratings.
-- Pro users can unlock a detailed breakdown explaining what Vini considered.
-
-### 5. Thoughtful UI & Experience
+### 4. Thoughtful UI & Experience
 - Large central bottle-scan button welcomes users upon launch.
 - Elegant shadows, custom color palette, and smooth transitions throughout.
 - Filter wines by category (red, white, rosé, orange, and more).

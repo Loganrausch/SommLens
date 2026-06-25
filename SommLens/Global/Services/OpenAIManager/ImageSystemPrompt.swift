@@ -93,11 +93,19 @@ let imageSystemPrompt: String =
         • "vintage": four-digit year if shown or known.
         • "tastingNotes":
           - Must always be filled out (20–35 words).
-          - Focus on structure first (body, acidity, tannin, style), then flavor profile.
-          - Base descriptions on:
+          - Give a broad, high-level summary only.
+          - Focus on structure first: body, acidity, tannin, sweetness/dryness, and overall style.
+          - Mention flavor profile only in general terms after structure.
+          - Base the note on:
             • confirmed grapes if explicitly known, OR
-            • regional and stylistic typicity if grapes are not confirmed.
-          - DO NOT generate tasting notes based on guessed grape compositions.
+            • regional/stylistic typicity if grapes are not confirmed.
+          - If using typicity, describe what is typical of the style/region in broad terms only.
+          - DO NOT generate tasting notes from guessed grape compositions.
+          - DO NOT make producer-specific, vineyard-specific, or vintage-specific tasting claims unless explicitly confirmed.
+          - DO NOT use highly detailed or overly precise descriptors.
+          - DO NOT imply that the tasting note reflects the exact bottle if details are unconfirmed.
+          - Keep wording neutral, concise, and educational.
+          - Prefer generic fruit/style terms such as red fruit, dark fruit, citrus, orchard fruit, stone fruit, floral, herbal, spice, earth, or oak influence.
         • "pairings": 3 specific food pairings (not broad cuisines) e.g., Grilled chicken with lemon butter sauce.
         • "vibeTag": 6–10 words, concise, consumer-friendly tasting summary.
           - Focus on mouthfeel and flavor, not technical terms.
